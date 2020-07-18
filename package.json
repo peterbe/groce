@@ -23,34 +23,35 @@
     "build/*"
   ],
   "dependencies": {
-    "preact": "^10.3.1",
+    "firebase": "7.16.1",
+    "preact": "^10.4.6",
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.0.0",
-    "preact-render-to-string": "^5.1.4",
+    "preact-render-to-string": "^5.1.10",
     "preact-router": "^3.2.1"
   },
   "devDependencies": {
     "@teamsupercell/typings-for-css-modules-loader": "^2.2.0",
     "@types/enzyme": "^3.10.5",
-    "@types/jest": "^25.1.2",
+    "@types/jest": "^26.0.4",
     "@types/webpack-env": "^1.15.1",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
     "css-loader": "^3.5.3",
     "enzyme": "^3.11.0",
     "enzyme-adapter-preact-pure": "^2.2.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.4.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.19.0",
-    "eslint-plugin-react-hooks": "^3.0.0",
+    "eslint-plugin-react-hooks": "^4.0.8",
     "husky": "^4.2.1",
-    "jest": "^25.1.0",
-    "jest-preset-preact": "^1.0.0",
+    "jest": "^26.1.0",
+    "jest-preset-preact": "^4.0.0",
     "lint-staged": "^10.0.7",
     "preact-cli": "^3.0.0-rc.16",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.5",
     "sirv-cli": "^1.0.0-next.3",
-    "typescript": "^3.7.5"
+    "typescript": "^3.9.7"
   }
 }
