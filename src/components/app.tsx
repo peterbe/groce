@@ -43,7 +43,7 @@ const App: FunctionalComponent = () => {
   const [user, setUser] = useState<firebase.User | null>(null);
 
   function authStateChanged(user: firebase.User | null) {
-    console.log("AUTH STATE CHANGED FOR USER:", user);
+    // console.log("AUTH STATE CHANGED FOR USER:", user);
     setUser(user);
   }
 
