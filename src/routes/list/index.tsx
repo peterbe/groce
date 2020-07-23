@@ -1,4 +1,4 @@
-import { JSX, h } from "preact";
+import { FunctionalComponent, JSX, h } from "preact";
 import { Link } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
@@ -36,7 +36,8 @@ interface List extends FirestoreList {
   id: string;
 }
 
-function List({ user, db, id }: Props) {
+// function List({ user, db, id }: Props) {
+const List: FunctionalComponent<Props> = ({ user, db, id }: Props) => {
   const [items, setItems] = useState<Item[] | null>(null);
 
   const [list, setList] = useState<List | null>(null);
@@ -146,7 +147,7 @@ function List({ user, db, id }: Props) {
         listDbRef();
       }
     };
-  }, [list, user, db]);
+  }, [id, list, user, db]);
 
   async function updateItemDoneToggle(item: Item) {
     if (db) {
@@ -344,7 +345,7 @@ function List({ user, db, id }: Props) {
       )}
     </div>
   );
-}
+};
 
 export default List;
 
