@@ -23,12 +23,16 @@
     "build/*"
   ],
   "dependencies": {
+    "bootstrap": "5.0.0-alpha1",
     "firebase": "7.16.1",
+    "node-sass": "4.14.1",
     "preact": "^10.4.6",
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.0.0",
     "preact-render-to-string": "^5.1.10",
-    "preact-router": "^3.2.1"
+    "preact-router": "^3.2.1",
+    "sass-loader": "9.0.2",
+    "slugify": "1.4.4"
   },
   "devDependencies": {
     "@teamsupercell/typings-for-css-modules-loader": "^2.2.0",

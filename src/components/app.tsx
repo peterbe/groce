@@ -1,5 +1,8 @@
 import { FunctionalComponent, h } from "preact";
 import { Route, Router, RouterOnChangeArgs } from "preact-router";
+
+// import "bootstrap/scss/bootstrap";
+import "../style/custom.scss";
 // import * as firebase from "firebase/app";
 import firebase from "firebase/app";
 
@@ -7,7 +10,10 @@ import "firebase/auth";
 import "firebase/firestore";
 
 import Home from "../routes/home";
-import Profile from "../routes/profile";
+// import Profile from "../routes/profile";
+import Signin from "../routes/signin";
+import Shopping from "../routes/shopping";
+import List from "../routes/list";
 import NotFoundPage from "../routes/notfound";
 import Header from "./header";
 import { useState, useEffect } from "preact/hooks";
@@ -37,10 +43,9 @@ const App: FunctionalComponent = () => {
   //   currentUrl = e.url;
   // };
 
-  // const authRef = useRef(null);
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
-
   const [user, setUser] = useState<firebase.User | null>(null);
+  const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);
 
   function authStateChanged(user: firebase.User | null) {
     // console.log("AUTH STATE CHANGED FOR USER:", user);
@@ -51,6 +56,8 @@ const App: FunctionalComponent = () => {
     const appAuth = app.auth();
     setAuth(appAuth);
     appAuth.onAuthStateChanged(authStateChanged);
+
+    setDB(app.firestore());
     // appAuth.onAuthStateChanged(user => {
     //   console.log("AUTH STATE CHANGED FOR USER:", user);
     // });
@@ -63,12 +70,15 @@ const App: FunctionalComponent = () => {
 
   return (
     <div id="app">
-      <Header />
+      <Header auth={auth} user={user} />
       {/* <Router onChange={handleRoute}> */}
       <Router>
         <Route path="/" component={Home} user={user} auth={auth} />
-        <Route path="/profile/" component={Profile} user="me" />
-        <Route path="/profile/:user" component={Profile} />
+        <Route path="/shopping" component={Shopping} user={user} db={db} />
+        <Route path="/shopping/:id" component={List} user={user} db={db} />
+        <Route path="/signin" component={Signin} user={user} auth={auth} />
+        {/* <Route path="/profile/" component={Profile} user="me" />
+        <Route path="/profile/:user" component={Profile} /> */}
         <NotFoundPage default />
       </Router>
     </div>

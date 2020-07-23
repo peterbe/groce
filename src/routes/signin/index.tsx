@@ -1,4 +1,5 @@
 import { FunctionalComponent, h } from "preact";
+import { route } from "preact-router";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
@@ -7,11 +8,11 @@ interface Props {
   auth: firebase.auth.Auth | null;
 }
 
-const Home: FunctionalComponent<Props> = (props: Props) => {
+const Signin: FunctionalComponent<Props> = (props: Props) => {
   const { user, auth } = props;
   return (
-    <div class={style.home}>
-      <h1>Home</h1>
+    <div class={style.signin}>
+      <h2>Sign in</h2>
       {/* Not sure what the point of installing FirebaseUI is
       https://firebase.google.com/docs/auth/web/firebaseui?authuser=0#initialize_firebaseui
        */}
@@ -23,6 +24,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
             class="btn btn-secondary"
             onClick={async () => {
               await auth.signOut();
+              route("/", true);
             }}
           >
             Sign out
@@ -39,6 +41,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               const provider = new firebase.auth.GoogleAuthProvider();
               try {
                 await auth.signInWithPopup(provider);
+                route("/", true);
               } catch (error) {
                 console.log("ERROR:", error);
               }
@@ -58,6 +61,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               const provider = new firebase.auth.GoogleAuthProvider();
               try {
                 await auth.signInWithRedirect(provider);
+                route("/", true);
               } catch (error) {
                 console.log("ERROR:", error);
               }
@@ -71,4 +75,4 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
   );
 };
 
-export default Home;
+export default Signin;
