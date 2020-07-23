@@ -2,17 +2,17 @@
 
 ## CLI Commands
 
-- `npm install`: Installs dependencies
+- `yarn install`: Installs dependencies
 
-- `npm run dev`: Run a development, HMR server
+- `yarn run dev`: Run a development, HMR server
 
-- `npm run serve`: Run a production-like server
+- `yarn run serve`: Run a production-like server
 
-- `npm run build`: Production-ready build
+- `yarn run build`: Production-ready build
 
-- `npm run lint`: Pass TypeScript files using TSLint
+- `yarn run lint`: Pass TypeScript files using TSLint
 
-- `npm run test`: Run Jest and Enzyme with
+- `yarn run test`: Run Jest and Enzyme with
   [`enzyme-adapter-preact-pure`](https://github.com/preactjs/enzyme-adapter-preact-pure) for
   your tests
 
