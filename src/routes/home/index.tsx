@@ -1,34 +1,30 @@
 import { FunctionalComponent, h } from "preact";
+import { Link } from "preact-router";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
 interface Props {
+  db: firebase.firestore.Firestore | null;
   user: firebase.User | null;
   auth: firebase.auth.Auth | null;
 }
 
 const Home: FunctionalComponent<Props> = (props: Props) => {
   const { user, auth } = props;
+
   return (
     <div class={style.home}>
-      <h1>Home</h1>
-      {/* Not sure what the point of installing FirebaseUI is
-      https://firebase.google.com/docs/auth/web/firebaseui?authuser=0#initialize_firebaseui
-       */}
-      User: {user ? <b>{user.displayName}</b> : <i>No user</i>}
-      {user && auth && (
-        <p>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            onClick={async () => {
-              await auth.signOut();
-            }}
-          >
-            Sign out
-          </button>
-        </p>
+      <h2>Dashboard</h2>
+      <h3>Shopping lists</h3>
+      {user && (
+        <div>
+          <p>
+            Logged in as <b>{user.displayName}</b>{" "}
+            {user.email && <span>({user.email})</span>}
+          </p>
+        </div>
       )}
+
       {!user && auth && (
         <p>
           <button

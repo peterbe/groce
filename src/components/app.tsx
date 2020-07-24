@@ -1,5 +1,6 @@
 import { FunctionalComponent, h } from "preact";
 import { Route, Router, RouterOnChangeArgs } from "preact-router";
+import { useState, useEffect } from "preact/hooks";
 
 // import "bootstrap/scss/bootstrap";
 import "../style/custom.scss";
@@ -16,7 +17,6 @@ import Shopping from "../routes/shopping";
 import List from "../routes/list";
 import NotFoundPage from "../routes/notfound";
 import Header from "./header";
-import { useState, useEffect } from "preact/hooks";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -73,7 +73,7 @@ const App: FunctionalComponent = () => {
       <Header auth={auth} user={user} />
       {/* <Router onChange={handleRoute}> */}
       <Router>
-        <Route path="/" component={Home} user={user} auth={auth} />
+        <Route path="/" component={Home} user={user} auth={auth} db={db} />
         <Route path="/shopping" component={Shopping} user={user} db={db} />
         <Route path="/shopping/:id" component={List} user={user} db={db} />
         <Route path="/signin" component={Signin} user={user} auth={auth} />

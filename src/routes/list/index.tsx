@@ -343,6 +343,18 @@ const List: FunctionalComponent<Props> = ({ user, db, id }: Props) => {
           })}
         </ul>
       )}
+
+      {items && items.length ? (
+        <div class={style.clearitems}>
+          <button
+            type="button"
+            class="btn btn-info btn-lg btn-block"
+            disabled={!items.filter((item) => item.done).length}
+          >
+            Clear done items
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };
