@@ -2,6 +2,8 @@
 declare namespace StyleCssNamespace {
   export interface IStyleCss {
     clearitems: string;
+    editaction: string;
+    goback: string;
     list: string;
   }
 }

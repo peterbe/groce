@@ -1,5 +1,17 @@
 .home {
-	padding: 56px 20px;
-	min-height: 100%;
-	width: 100%;
+  margin-top: 100px;
+  /* padding: 56px 20px;
+  min-height: 100%;
+  width: 100%; */
+}
+
+.login {
+  margin-top: 40px;
+}
+
+.options {
+  margin-top: 40px;
+}
+.options p {
+  margin-bottom: 30px;
 }

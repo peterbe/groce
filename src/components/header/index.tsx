@@ -18,7 +18,8 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
 
   return (
     <nav
-      class="navbar navbar-expand-lg navbar-light bg-light"
+      // class="navbar navbar-expand-lg navbar-light bg-light"
+      class="navbar  fixed-bottom navbar-light bg-light"
       style={{ backgroundColor: "#e3f2fd" }}
     >
       <div class="container-fluid">

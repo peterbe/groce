@@ -5,5 +5,13 @@
 }
 
 .clearitems {
-  margin: 30px 10px;
+  margin: 30px 0px;
+}
+
+.goback {
+  margin-top: 50px;
+}
+
+.editaction {
+  float: right;
 }

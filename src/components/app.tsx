@@ -69,7 +69,7 @@ const App: FunctionalComponent = () => {
   }, []);
 
   return (
-    <div id="app">
+    <div id="app" class="container">
       <Header auth={auth} user={user} />
       {/* <Router onChange={handleRoute}> */}
       <Router>
