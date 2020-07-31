@@ -1,5 +1,4 @@
 .list {
-  padding: 10px 10px;
   min-height: 100%;
   width: 100%;
 }
@@ -14,4 +13,25 @@
 
 .editaction {
   float: right;
+}
+
+.listoptions {
+  margin-top: 40px;
+}
+
+.listoptions_section {
+  border-top: 1px solid #999;
+  margin-top: 30px;
+  padding-top: 30px;
+}
+
+.empty_list {
+  font-style: italic;
+  text-align: center;
+  margin-top: 40px;
+  color: #666;
+}
+
+.done_item {
+  color: #666;
 }

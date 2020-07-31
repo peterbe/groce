@@ -3,22 +3,24 @@ import { Link } from "preact-router";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
+import { List } from "../../types";
+import { useEffect, useState } from "preact/hooks";
+
 interface Props {
   db: firebase.firestore.Firestore | null;
   user: firebase.User | null;
   auth: firebase.auth.Auth | null;
+  lists: List[] | null;
 }
 
 const Home: FunctionalComponent<Props> = (props: Props) => {
-  const { user, auth } = props;
+  const { user, auth, lists } = props;
 
   return (
     <div class={style.home}>
       <div class="text-center">
         <h1 class="display-1">That&apos;s Groce!</h1>
         <p class="lead">Planning shopping and meals for the family.</p>
-        {/* <h2>Dashboard</h2>
-      <h3>Shopping lists</h3> */}
 
         {user && (
           <div class={style.login}>
@@ -29,11 +31,14 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
           </div>
         )}
 
+        <PendingInvite user={user} />
+
         {user && (
           <div class={style.options}>
             <p>
               <Link href="/shopping" class="btn btn-primary btn-lg btn-block">
                 Shopping lists
+                {lists && ` (${lists.length})`}
               </Link>
             </p>
             <p>
@@ -76,7 +81,6 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 type="button"
                 class="btn btn-primary"
                 onClick={async () => {
-                  // console.log(auth);
                   const provider = new firebase.auth.GoogleAuthProvider();
                   try {
                     await auth.signInWithRedirect(provider);
@@ -96,3 +100,45 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
 };
 
 export default Home;
+
+function PendingInvite({ user }: { user: firebase.User | null }) {
+  const [inviteID, setInviteID] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const id = sessionStorage.getItem("invitedID");
+      if (id) {
+        setInviteID(id);
+      }
+    } catch (error) {
+      console.error("Error trying to get sessionStorage item", error);
+    }
+  }, [user]);
+
+  if (!inviteID) {
+    return null;
+  }
+  return (
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+      You have a pending invite.{" "}
+      {user ? (
+        <Link href={`/invited/${inviteID}`}>
+          <b>See invite to accept</b>
+        </Link>
+      ) : (
+        <b>Sign in first to use the invite</b>
+      )}
+      <button
+        type="button"
+        class="close"
+        data-dismiss="alert"
+        aria-label="Close"
+        onClick={() => {
+          sessionStorage.removeItem("invitedID");
+          setInviteID(null);
+        }}
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  );
+}

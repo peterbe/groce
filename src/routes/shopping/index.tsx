@@ -4,18 +4,15 @@ import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
-import { FirestoreItem, Item, FirestoreList, List } from "../../types";
+import { FirestoreItem, Item, List } from "../../types";
 
 interface Props {
   user: firebase.User | null;
   db: firebase.firestore.Firestore | null;
+  lists: List[] | null;
 }
 
-const Shopping: FunctionalComponent<Props> = ({ user, db }: Props) => {
-  // function Shopping({ user, db }: Props) {
-
-  const [lists, setLists] = useState<List[] | null>(null);
-
+const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
 
   useEffect(() => {
@@ -25,43 +22,6 @@ const Shopping: FunctionalComponent<Props> = ({ user, db }: Props) => {
       document.title = "Shopping lists";
     }
   }, [lists]);
-
-  useEffect(() => {
-    let shoppinglistsDbRef: () => void;
-    if (db && user) {
-      shoppinglistsDbRef = db
-        .collection("shoppinglists")
-        .where("owners", "array-contains", user.uid)
-        .orderBy("order")
-        .onSnapshot((snapshot) => {
-          const newLists: List[] = [];
-          snapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
-            const data = doc.data() as FirestoreList;
-            newLists.push({
-              id: doc.id,
-              name: data.name,
-              notes: data.notes,
-              order: data.order,
-            });
-          });
-
-          // XXX What we could do is newLists.length ===0 is to forcibly
-          // create a first default one.
-          if (!newLists.length) {
-            console.log("Consider creating one!");
-          }
-
-          setLists(newLists);
-        });
-    }
-    return () => {
-      if (shoppinglistsDbRef) {
-        console.log("Detach shoppinglists db ref listener");
-        shoppinglistsDbRef();
-      }
-    };
-  }, [db, user]);
 
   async function createNewGroup(name: string, notes: string) {
     if (db && user) {
@@ -94,13 +54,17 @@ const Shopping: FunctionalComponent<Props> = ({ user, db }: Props) => {
     }
   }
 
+  function getShoppingHref(list: List) {
+    return `/shopping/${list.id}`;
+  }
+
   return (
     <div class={style.shopping}>
       <h2>
         Shopping lists{" "}
-        {lists && lists.length && (
+        {lists && lists.length ? (
           <small class="text-muted">({lists.length})</small>
-        )}
+        ) : null}
       </h2>
 
       {!lists && db && user && <div>Loading shopping lists...</div>}
@@ -115,7 +79,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db }: Props) => {
             <div key={list.id} class="card" style={{ marginTop: 30 }}>
               <div class="card-body">
                 <h5 class="card-title">
-                  <Link href={`/shopping/${list.id}`}>{list.name}</Link>
+                  <Link href={getShoppingHref(list)}>{list.name}</Link>
                 </h5>
 
                 <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
@@ -137,7 +101,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db }: Props) => {
           setShowNewGroupModal(true);
         }}
       >
-        Create new group
+        {lists && !lists.length ? "Create list" : "Create new list"}
       </button>
 
       <CreateModal
@@ -273,7 +237,7 @@ function CreateModal({
                 }
               }}
             >
-              Create group
+              Create list
             </button>
           </div>
         </div>

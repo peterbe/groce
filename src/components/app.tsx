@@ -10,11 +10,12 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 
+import Loading from "./loading";
 import Home from "../routes/home";
-// import Profile from "../routes/profile";
+import Invited from "../routes/invited";
 import Signin from "../routes/signin";
 import Shopping from "../routes/shopping";
-import List from "../routes/list";
+import ShoppingList from "../routes/list";
 import NotFoundPage from "../routes/notfound";
 import Header from "./header";
 
@@ -24,6 +25,8 @@ if ((module as any).hot) {
   // tslint:disable-next-line:no-var-requires
   require("preact/debug");
 }
+
+import { List, FirestoreList } from "../types";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBlMzrsBR_KWXDdgntBgnCThjRqr-0I8js",
@@ -48,7 +51,6 @@ const App: FunctionalComponent = () => {
   const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);
 
   function authStateChanged(user: firebase.User | null) {
-    // console.log("AUTH STATE CHANGED FOR USER:", user);
     setUser(user);
   }
 
@@ -58,29 +60,90 @@ const App: FunctionalComponent = () => {
     appAuth.onAuthStateChanged(authStateChanged);
 
     setDB(app.firestore());
-    // appAuth.onAuthStateChanged(user => {
-    //   console.log("AUTH STATE CHANGED FOR USER:", user);
-    // });
-
-    // authRef.current = app.auth();
-    // authRef.current.onAuthStateChanged(authStateChanged);
-    // const database = app.firestore();
-    // console.log(authRef.current);
   }, []);
+
+  const [lists, setLists] = useState<List[] | null>(null);
+
+  useEffect(() => {
+    let shoppinglistsDbRef: () => void;
+    if (db && user) {
+      shoppinglistsDbRef = db
+        .collection("shoppinglists")
+        .where("owners", "array-contains", user.uid)
+        .orderBy("order")
+        .onSnapshot((snapshot) => {
+          const newLists: List[] = [];
+          snapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            const data = doc.data() as FirestoreList;
+            newLists.push({
+              id: doc.id,
+              name: data.name,
+              notes: data.notes,
+              order: data.order,
+              owners: data.owners,
+            });
+          });
+
+          // XXX What we could do is newLists.length ===0 is to forcibly
+          // create a first default one.
+          if (!newLists.length) {
+            console.log("Consider creating one!");
+          }
+
+          setLists(newLists);
+        });
+    }
+    return () => {
+      if (shoppinglistsDbRef) {
+        console.log("Detach shoppinglists db ref listener");
+        shoppinglistsDbRef();
+      }
+    };
+  }, [db, user]);
 
   return (
     <div id="app" class="container">
       <Header auth={auth} user={user} />
       {/* <Router onChange={handleRoute}> */}
-      <Router>
-        <Route path="/" component={Home} user={user} auth={auth} db={db} />
-        <Route path="/shopping" component={Shopping} user={user} db={db} />
-        <Route path="/shopping/:id" component={List} user={user} db={db} />
-        <Route path="/signin" component={Signin} user={user} auth={auth} />
-        {/* <Route path="/profile/" component={Profile} user="me" />
-        <Route path="/profile/:user" component={Profile} /> */}
-        <NotFoundPage default />
-      </Router>
+      {db && auth ? (
+        <Router>
+          <Route
+            path="/"
+            component={Home}
+            user={user}
+            auth={auth}
+            db={db}
+            lists={lists}
+          />
+          <Route
+            path="/shopping"
+            component={Shopping}
+            user={user}
+            db={db}
+            lists={lists}
+          />
+          <Route
+            path="/shopping/:id"
+            component={ShoppingList}
+            lists={lists}
+            user={user}
+            db={db}
+          />
+          <Route
+            path="/invited/:id"
+            component={Invited}
+            lists={lists}
+            user={user}
+            db={db}
+            auth={auth}
+          />
+          <Route path="/signin" component={Signin} user={user} auth={auth} />
+          <NotFoundPage default />
+        </Router>
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 };

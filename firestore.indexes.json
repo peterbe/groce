@@ -1,4 +1,19 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "shoppinglists",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "owners",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
