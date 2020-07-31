@@ -4,10 +4,12 @@ import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
+import { Alert } from "../../components/alerts";
+import { GoBack } from "../../components/go-back";
 import { FirestoreItem, Item, List } from "../../types";
 
 interface Props {
-  user: firebase.User | null;
+  user: firebase.User | false | null;
   db: firebase.firestore.Firestore | null;
   lists: List[] | null;
 }
@@ -56,6 +58,18 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
 
   function getShoppingHref(list: List) {
     return `/shopping/${list.id}`;
+  }
+
+  // Auth as loaded and determined that the user is not signed in
+  if (user === false) {
+    return (
+      <div class={style.shopping}>
+        <Alert
+          heading={"You're not signed in"}
+          message={<p>Use the menu bar below to sign in first.</p>}
+        />
+      </div>
+    );
   }
 
   return (
@@ -114,11 +128,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
         }}
       />
 
-      <div class={style.goback}>
-        <Link href="/" class="btn btn-outline-primary">
-          &larr; Back to home
-        </Link>
-      </div>
+      <GoBack />
     </div>
   );
 };

@@ -5,7 +5,6 @@ declare namespace StyleCssNamespace {
     done_item: string;
     editaction: string;
     empty_list: string;
-    goback: string;
     list: string;
     listoptions: string;
     listoptions_section: string;

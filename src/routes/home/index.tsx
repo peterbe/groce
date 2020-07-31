@@ -8,7 +8,7 @@ import { useEffect, useState } from "preact/hooks";
 
 interface Props {
   db: firebase.firestore.Firestore | null;
-  user: firebase.User | null;
+  user: firebase.User | false | null;
   auth: firebase.auth.Auth | null;
   lists: List[] | null;
 }
@@ -101,7 +101,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
 
 export default Home;
 
-function PendingInvite({ user }: { user: firebase.User | null }) {
+function PendingInvite({ user }: { user: firebase.User | false | null }) {
   const [inviteID, setInviteID] = useState<string | null>(null);
   useEffect(() => {
     try {

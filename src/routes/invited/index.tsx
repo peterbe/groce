@@ -5,18 +5,18 @@ import firebase from "firebase/app";
 
 import * as style from "./style.css";
 import { Alert } from "../../components/alerts";
-import { List, Invite, FirestoreInvite, FirestoreList } from "../../types";
+import { GoBack } from "../../components/go-back";
+import { List, Invite, FirestoreInvite } from "../../types";
 
 interface Props {
   db: firebase.firestore.Firestore | null;
-  user: firebase.User | null;
-  auth: firebase.auth.Auth | null;
+  user: firebase.User | false | null;
   lists: List[] | null;
   id: string;
 }
 
 const Invited: FunctionalComponent<Props> = (props: Props) => {
-  const { auth, id, user, db, lists } = props;
+  const { id, user, db, lists } = props;
 
   useEffect(() => {
     try {
@@ -106,7 +106,20 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
       <p>Loading...</p>
     </div>
   );
-  if (inviteError) {
+  if (user === false) {
+    inner = (
+      <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">Not signed in yet</h4>
+        <p>Before you can accept this invitation, you need to sign in.</p>
+        <p>
+          <b>Use the menu bar to sign in</b> and when you&apos;re done,
+          you&apos;ll come back to this page.
+        </p>
+        <hr />
+        <p class="mb-0">Will need to verify the invitation.</p>
+      </div>
+    );
+  } else if (inviteError) {
     inner = <Alert heading="Invite error" message={inviteError.toString()} />;
   } else if (invite) {
     if (user && invite.inviter_uid === user.uid) {
@@ -148,19 +161,6 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
         </div>
       );
     }
-  } else if (auth && !user) {
-    inner = (
-      <div class="alert alert-info" role="alert">
-        <h4 class="alert-heading">Not signed in yet</h4>
-        <p>Before you can accept this invitation, you need to sign in.</p>
-        <p>
-          <b>Use the menu bar to sign in</b> and when you&apos;re done,
-          you&apos;ll come back to this page.
-        </p>
-        <hr />
-        <p class="mb-0">Will need to verify the invitation.</p>
-      </div>
-    );
   }
 
   return (
@@ -170,11 +170,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
         {inner}
       </div>
 
-      <div class={style.goback}>
-        <Link href="/" class="btn btn-outline-primary">
-          &larr; Back to home
-        </Link>
-      </div>
+      <GoBack />
     </div>
   );
 };

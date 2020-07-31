@@ -4,7 +4,10 @@ import { useState, useEffect } from "preact/hooks";
 import copy from "copy-to-clipboard";
 import * as style from "./style.css";
 import firebase from "firebase/app";
+
 import { Alert } from "../../components/alerts";
+import { GoBack } from "../../components/go-back";
+
 import {
   FirestoreItem,
   Item,
@@ -14,7 +17,7 @@ import {
 } from "../../types";
 
 interface Props {
-  user: firebase.User;
+  user: firebase.User | false | null;
   db: firebase.firestore.Firestore;
   id: string;
   lists: List[] | null;
@@ -285,6 +288,17 @@ const ShoppingList: FunctionalComponent<Props> = ({
       });
   }
 
+  if (!user) {
+    return (
+      <div class={style.list}>
+        <Alert
+          heading={"You're not signed in"}
+          message={<p>Use the menu bar below to sign in first.</p>}
+        />
+      </div>
+    );
+  }
+
   if (notYourList) {
     return (
       <div class={style.list}>
@@ -486,11 +500,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       ) : null}
 
-      <div class={style.goback}>
-        <Link href="/shopping" class="btn btn-outline-primary">
-          &larr; Back to shopping lists
-        </Link>
-      </div>
+      <GoBack />
     </div>
   );
 };

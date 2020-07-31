@@ -5,7 +5,7 @@ import { Link } from "preact-router/match";
 import firebase from "firebase/app";
 
 interface Props {
-  user: firebase.User | null;
+  user: firebase.User | false | null;
   auth: firebase.auth.Auth | null;
 }
 

@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { Route, Router, RouterOnChangeArgs } from "preact-router";
+import { Route, Router } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 
 // import "bootstrap/scss/bootstrap";
@@ -47,11 +47,11 @@ const App: FunctionalComponent = () => {
   // };
 
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
-  const [user, setUser] = useState<firebase.User | null>(null);
+  const [user, setUser] = useState<firebase.User | null | false>(null);
   const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);
 
   function authStateChanged(user: firebase.User | null) {
-    setUser(user);
+    setUser(user || false);
   }
 
   useEffect(() => {
@@ -104,9 +104,9 @@ const App: FunctionalComponent = () => {
 
   return (
     <div id="app" class="container">
-      <Header auth={auth} user={user} />
+      {db && auth && <Header auth={auth} user={user} />}
       {/* <Router onChange={handleRoute}> */}
-      {db && auth ? (
+      {db && auth && user !== null ? (
         <Router>
           <Route
             path="/"
@@ -136,7 +136,6 @@ const App: FunctionalComponent = () => {
             lists={lists}
             user={user}
             db={db}
-            auth={auth}
           />
           <Route path="/signin" component={Signin} user={user} auth={auth} />
           <NotFoundPage default />

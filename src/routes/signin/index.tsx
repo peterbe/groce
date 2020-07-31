@@ -3,16 +3,19 @@ import { route } from "preact-router";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
+import { GoBack } from "../../components/go-back";
+
 interface Props {
-  user: firebase.User | null;
+  user: firebase.User | false | null;
   auth: firebase.auth.Auth | null;
 }
 
 const Signin: FunctionalComponent<Props> = (props: Props) => {
   const { user, auth } = props;
+
   return (
     <div class={style.signin}>
-      <h2>Sign in</h2>
+      <h2>{user ? "You are signed in" : "Sign in"}</h2>
       {/* Not sure what the point of installing FirebaseUI is
       https://firebase.google.com/docs/auth/web/firebaseui?authuser=0#initialize_firebaseui
        */}
@@ -71,6 +74,7 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
           </button>
         </p>
       )}
+      <GoBack />
     </div>
   );
 };
