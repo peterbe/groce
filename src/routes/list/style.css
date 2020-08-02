@@ -1,4 +1,5 @@
 .list {
+  padding-top: 10px;
   min-height: 100%;
   width: 100%;
 }
@@ -30,4 +31,20 @@
 
 .done_item {
   color: #666;
+}
+
+.loading_list_items {
+  margin: 100px 0;
+}
+
+.item_description {
+  color: #888;
+}
+
+.done_items {
+  margin-top: 20px;
+}
+
+.search_suggestions {
+  margin-top: 10px;
 }

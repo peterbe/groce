@@ -1,5 +1,5 @@
 import { FunctionalComponent, h, JSX } from "preact";
-import { Link } from "preact-router";
+import { route } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
@@ -90,12 +90,16 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
       {lists &&
         lists.map((list) => {
           return (
-            <div key={list.id} class="card" style={{ marginTop: 30 }}>
+            <div
+              key={list.id}
+              class="card"
+              style={{ marginTop: 30, cursor: "pointer" }}
+              onClick={() => {
+                route(getShoppingHref(list), true);
+              }}
+            >
               <div class="card-body">
-                <h5 class="card-title">
-                  <Link href={getShoppingHref(list)}>{list.name}</Link>
-                </h5>
-
+                <h5 class="card-title">{list.name}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
                 <p class="card-text">
                   {db && <PreviewList list={list} db={db} />}
@@ -314,9 +318,14 @@ function PreviewList({
 
   return (
     <ul>
-      {items.map((item) => {
+      {items.slice(0, 5).map((item) => {
         return <li key={item.id}>{item.text}</li>;
       })}
+      {items.length > 5 && (
+        <li>
+          <i>and {items.length - 5} more items...</i>
+        </li>
+      )}
     </ul>
   );
 }

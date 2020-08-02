@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { Link, route } from "preact-router";
+import { Link } from "preact-router";
 import { useEffect, useState } from "preact/hooks";
 import firebase from "firebase/app";
 
@@ -67,7 +67,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
           setInviteError(error);
         });
     }
-  }, [id, user, lists]);
+  }, [db, id, user, lists]);
 
   // console.log({
   //   db: !!db,

@@ -3,11 +3,15 @@ declare namespace StyleCssNamespace {
   export interface IStyleCss {
     clearitems: string;
     done_item: string;
+    done_items: string;
     editaction: string;
     empty_list: string;
+    item_description: string;
     list: string;
     listoptions: string;
     listoptions_section: string;
+    loading_list_items: string;
+    search_suggestions: string;
   }
 }
 
