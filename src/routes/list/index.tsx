@@ -5,6 +5,7 @@ import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
+import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { ListItem } from "./list-item";
 import { FirestoreItem, Item, List } from "../../types";
@@ -68,11 +69,24 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
   }, [list, listNotFound, listError]);
 
+  const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
+
   useEffect(() => {
     let listDbRef: () => void;
     if (list) {
       listDbRef = db.collection(`shoppinglists/${id}/items`).onSnapshot(
+        { includeMetadataChanges: true },
         (snapshot) => {
+          // console.log("LIST SNAPSHOT", JSON.stringify(snapshot.metadata));
+          if (
+            snapshot.metadata.fromCache &&
+            snapshot.metadata.hasPendingWrites
+          ) {
+            toggleSnapshotsOffline(true);
+          } else {
+            toggleSnapshotsOffline(false);
+          }
+
           const newItems: Item[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as FirestoreItem;
@@ -178,8 +192,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
                 ...previousItem.added,
               ],
             });
-          setNewText("");
-          setNewDescription("");
         } catch (error) {
           // XXX deal with this better
           console.error("Unable to update:", error);
@@ -199,14 +211,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
             removed: false,
             added: [firebase.firestore.Timestamp.fromDate(new Date())],
           });
-          // console.log(newDocRef);
-          setNewText("");
-          setNewDescription("");
         } catch (error) {
-          console.error("Unable to add:", error);
+          console.error("UNABLE TO ADD:", error);
           throw error;
         }
       }
+      setNewText("");
+      setNewDescription("");
     } else {
       console.warn("DB not available");
     }
@@ -218,9 +229,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
       .update({
         done: !item.done,
       })
-      .then(() => {
-        console.log("Updated", item.id);
-      })
+      // .then(() => {
+      //   console.log("Updated", item.id);
+      // })
       .catch((error) => {
         // XXX Deal with this better.
         console.error(`Error trying to update item ${item.id}:`, error);
@@ -324,6 +335,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   return (
     <div class={style.list}>
+      {snapshotsOffline && <OfflineWarning />}
+
       <p class="float-right">
         <button
           type="button"

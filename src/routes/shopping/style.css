@@ -1,5 +1,7 @@
 .shopping {
-  padding: 10px 10px;
-  min-height: 100%;
+  padding-top: 10px;
+  /*
+  This makes it so the whole screen is expanded
+  min-height: 100%; */
   width: 100%;
 }

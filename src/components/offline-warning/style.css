@@ -1,0 +1,9 @@
+.offline_warning {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff3cd;
+  font-size: 80%;
+  text-align: center;
+}
