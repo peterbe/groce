@@ -27,6 +27,13 @@ export const ListItem: FunctionalComponent<Props> = ({
   const [description, setDescription] = useState(item.description);
   const [group, setGroup] = useState(item.group.text);
   const [editMode, setEditMode] = useState(false);
+  const [updated, setUpdated] = useState(0);
+  const [ignoreUpdatedWarning, toggleIgnoreUpdatedWarning] = useState(false);
+
+  useEffect(() => {
+    setUpdated((before) => before + 1);
+  }, [item]);
+  const hasChanged = updated > 1;
 
   const textInputRef = createRef();
   useEffect(() => {
@@ -34,6 +41,8 @@ export const ListItem: FunctionalComponent<Props> = ({
       (textInputRef.current as HTMLInputElement).focus();
     }
   }, [editMode]);
+
+  console.log("RENDERING ITEM", { updated, text: item.text });
 
   if (editMode) {
     return (
@@ -114,9 +123,45 @@ export const ListItem: FunctionalComponent<Props> = ({
             </button>
           </div>
         </form>
+        {hasChanged && !ignoreUpdatedWarning && (
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Watch out!</h4>
+            <p>This item has changed since you started editing.</p>
+            <hr />
+            <p class="mb-0">
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                onClick={() => {
+                  setText(item.text);
+                  setDescription(item.description);
+                  setGroup(item.group.text);
+                  setUpdated(1);
+                }}
+              >
+                Reload
+              </button>{" "}
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                onClick={() => {
+                  toggleIgnoreUpdatedWarning(true);
+                }}
+              >
+                Ignore
+              </button>
+            </p>
+          </div>
+        )}
       </li>
     );
   }
+
+  function recentlyAdded(item: Item) {
+    const age = new Date().getTime() / 1000 - item.added[0].seconds;
+    return age < 2;
+  }
+
   return (
     <li class="list-group-item d-flex justify-content-between align-items-center">
       <span>
@@ -132,7 +177,13 @@ export const ListItem: FunctionalComponent<Props> = ({
         />{" "}
         {/* <label htmlFor={`checkbox${item.id}`}>{item.text}</label> */}
         <span
-          class={item.done ? style.done_item : undefined}
+          class={
+            item.done
+              ? style.done_item
+              : recentlyAdded(item)
+              ? style.rainbow_text_animated
+              : undefined
+          }
           onClick={() => {
             setEditMode(true);
           }}

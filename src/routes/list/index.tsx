@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import { FunctionalComponent, h, createRef } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
@@ -75,7 +75,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     let listDbRef: () => void;
     if (list) {
       listDbRef = db.collection(`shoppinglists/${id}/items`).onSnapshot(
-        { includeMetadataChanges: true },
+        // { includeMetadataChanges: true },
         (snapshot) => {
           // console.log("LIST SNAPSHOT", JSON.stringify(snapshot.metadata));
           if (
@@ -100,19 +100,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
               added: data.added,
             });
           });
-
-          // XXX COULD do something intersting with this, like highligting
-          // snapshot.docChanges().forEach((change) => {
-          //   if (change.type === "added") {
-          //     console.log("Added: ", change.doc.data());
-          //   }
-          //   if (change.type === "modified") {
-          //     console.log("Modified city: ", change.doc.data());
-          //   }
-          //   if (change.type === "removed") {
-          //     console.log("Removed city: ", change.doc.data());
-          //   }
-          // });
 
           newItems.sort((a, b) => {
             if (a.done && !b.done) {
@@ -141,17 +128,37 @@ const ShoppingList: FunctionalComponent<Props> = ({
     };
   }, [id, list, user, db]);
 
+  const [clearedItems, setClearedItems] = useState<Item[]>([]);
+
+  const clearTimerRef = createRef();
+
+  useEffect(() => {
+    if (clearedItems.length) {
+      clearTimerRef.current = setTimeout(() => {
+        if (clearTimerRef.current) {
+          setClearedItems([]);
+        }
+      }, 10000);
+    }
+    return () => {
+      clearTimerRef.current = null;
+    };
+  }, [clearedItems]);
+
   function clearDoneItems() {
     if (items) {
+      const cleared: Item[] = [];
       const collectionRef = db.collection(`shoppinglists/${id}/items`);
       const batch = db.batch();
       items
-        .filter((item) => item.done)
+        .filter((item) => item.done && !item.removed)
         .forEach((item) => {
           const itemDoc = collectionRef.doc(item.id);
+          // console.log(item);
           batch.update(itemDoc, {
             removed: true,
           });
+          cleared.push(item);
         });
 
       batch
@@ -163,6 +170,32 @@ const ShoppingList: FunctionalComponent<Props> = ({
           console.error("Error doing batch operation", error);
           // XXX Deal with this!
         });
+      setClearedItems(cleared);
+    }
+  }
+
+  function undoClearDoneItems() {
+    if (items) {
+      const collectionRef = db.collection(`shoppinglists/${id}/items`);
+      const batch = db.batch();
+      clearedItems.forEach((item) => {
+        const itemDoc = collectionRef.doc(item.id);
+        console.log(item);
+        batch.update(itemDoc, {
+          removed: false,
+        });
+      });
+
+      batch
+        .commit()
+        .then(() => {
+          console.log("All items cleared");
+        })
+        .catch((error) => {
+          console.error("Error doing batch operation", error);
+          // XXX Deal with this!
+        });
+      setClearedItems([]);
     }
   }
 
@@ -511,6 +544,24 @@ const ShoppingList: FunctionalComponent<Props> = ({
           </button>
         </div>
       ) : null}
+
+      {!editAction && !!clearedItems.length && (
+        <div class={style.clearitems}>
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm btn-block"
+            onClick={(event) => {
+              event.preventDefault();
+              undoClearDoneItems();
+            }}
+          >
+            Undo cleared{" "}
+            {clearedItems.length === 1
+              ? "item"
+              : `${clearedItems.length} items`}
+          </button>
+        </div>
+      )}
 
       <GoBack url="/shopping" name="all lists" />
     </div>

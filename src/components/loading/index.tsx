@@ -25,19 +25,6 @@ const Loading: FunctionalComponent = () => {
     };
   }, [color, colors]);
 
-  const [progress, setProgress] = useState(1);
-  useEffect(() => {
-    let mounted = true;
-    setTimeout(() => {
-      if (!mounted) return;
-      if (progress >= 100) return;
-      setProgress((before) => before + 5);
-    }, 500);
-    return () => {
-      mounted = false;
-    };
-  }, [progress]);
-
   return (
     <div class={style.loading}>
       <div class="text-center">
@@ -51,20 +38,6 @@ const Loading: FunctionalComponent = () => {
       </div>
       <div class="text-center">
         <strong>Loading app...</strong>
-      </div>
-      <div class="text-center">
-        <div class="progress">
-          <div
-            class={`progress-bar progress-bar-striped progress-bar-animated ${
-              progress > 90 ? "bg-warning" : "bg-info"
-            }`}
-            role="progressbar"
-            aria-valuenow={`${progress}`}
-            aria-valuemin="0"
-            aria-valuemax="100"
-            style={`width: ${Math.ceil(progress)}%`}
-          ></div>
-        </div>
       </div>
     </div>
   );

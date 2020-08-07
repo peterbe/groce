@@ -48,3 +48,28 @@
 .search_suggestions {
   margin-top: 10px;
 }
+
+.rainbow_text_animated {
+  background: linear-gradient(
+    to right,
+    #6666ff,
+    #0099ff,
+    #00ff00,
+    #ff3399,
+    #6666ff
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  /*     color: black; */
+  animation: rainbow_animation 6s ease-in-out 1;
+  background-size: 400% 100%;
+  background-position: 0 0;
+}
+@keyframes rainbow_animation {
+  0% {
+    color: transparent;
+  }
+  50% {
+    background-position: 100% 0;
+  }
+}

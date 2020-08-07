@@ -60,14 +60,14 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
             type="button"
             class="btn btn-primary"
             onClick={async () => {
-              // console.log(auth);
               const provider = new firebase.auth.GoogleAuthProvider();
               try {
                 await auth.signInWithRedirect(provider);
-                route("/", true);
               } catch (error) {
                 console.log("ERROR:", error);
+                return;
               }
+              route("/", true);
             }}
           >
             Sign in (redirect)

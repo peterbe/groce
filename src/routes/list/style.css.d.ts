@@ -11,6 +11,8 @@ declare namespace StyleCssNamespace {
     listoptions: string;
     listoptions_section: string;
     loading_list_items: string;
+    rainbow_animation: string;
+    rainbow_text_animated: string;
     search_suggestions: string;
   }
 }
