@@ -8,7 +8,7 @@ import { GoBack } from "../../components/go-back";
 import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { ListItem } from "./list-item";
-import { FirestoreItem, Item, List } from "../../types";
+import { FirestoreItem, Item, List, PastItem } from "../../types";
 
 interface Props {
   user: firebase.User | false | null;
@@ -32,28 +32,28 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   const [itemsError, setItemsError] = useState<Error | null>(null);
 
-  const [newText, setNewText] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  // const [newText, setNewText] = useState("");
+  // const [newDescription, setNewDescription] = useState("");
+  // const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 
   const [editAction, toggleEditAction] = useState(false);
 
-  useEffect(() => {
-    if (!newText.trim()) {
-      setSearchSuggestions([]);
-    } else if (items) {
-      const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const rex = new RegExp(`\\b${escaped}`, "i");
-      setSearchSuggestions(
-        items
-          .filter(
-            (item) =>
-              item.removed && rex.test(item.text) && item.text !== newText
-          )
-          .map((item) => item.text)
-      );
-    }
-  }, [newText, items]);
+  // useEffect(() => {
+  //   if (!newText.trim()) {
+  //     setSearchSuggestions([]);
+  //   } else if (items) {
+  //     const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  //     const rex = new RegExp(`\\b${escaped}`, "i");
+  //     setSearchSuggestions(
+  //       items
+  //         .filter(
+  //           (item) =>
+  //             item.removed && rex.test(item.text) && item.text !== newText
+  //         )
+  //         .map((item) => item.text)
+  //     );
+  //   }
+  // }, [newText, items]);
 
   useEffect(() => {
     if (listNotFound) {
@@ -143,7 +143,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     return () => {
       clearTimerRef.current = null;
     };
-  }, [clearedItems]);
+  }, [clearedItems, clearTimerRef]);
 
   function clearDoneItems() {
     if (items) {
@@ -154,7 +154,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
         .filter((item) => item.done && !item.removed)
         .forEach((item) => {
           const itemDoc = collectionRef.doc(item.id);
-          // console.log(item);
           batch.update(itemDoc, {
             removed: true,
           });
@@ -199,60 +198,56 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
   }
 
-  async function addNewText(text: string) {
+  function addNewText(text: string) {
     if (!text.trim()) {
       throw new Error("new text empty");
     }
-    if (items) {
-      // If the exact same text has been used before, reuse it
-      const previousItem = items.find(
-        (item) => item.text.toLowerCase() === text.toLowerCase()
-      );
-      if (previousItem) {
-        // Update it as not removed and not done
-        try {
-          await db
-            .collection(`shoppinglists/${id}/items`)
-            .doc(previousItem.id)
-            .set({
-              text: text.trim(),
-              description: previousItem.description,
-              group: previousItem.group,
-              done: false,
-              removed: false,
-              added: [
-                firebase.firestore.Timestamp.fromDate(new Date()),
-                ...previousItem.added,
-              ],
-            });
-        } catch (error) {
+    if (!items) {
+      console.warn("DB not available");
+      return;
+    }
+    // If the exact same text has been used before, reuse it
+    const previousItem = items.find(
+      (item) => item.text.toLowerCase() === text.toLowerCase()
+    );
+    if (previousItem) {
+      // Update it as not removed and not done
+      db.collection(`shoppinglists/${id}/items`)
+        .doc(previousItem.id)
+        .set({
+          text: previousItem.text,
+          description: previousItem.description,
+          group: previousItem.group,
+          done: false,
+          removed: false,
+          added: [
+            firebase.firestore.Timestamp.fromDate(new Date()),
+            ...previousItem.added,
+          ],
+        })
+        .catch((error) => {
           // XXX deal with this better
           console.error("Unable to update:", error);
           throw error;
-        }
-      } else {
-        // A fresh add
-        try {
-          await db.collection(`shoppinglists/${id}/items`).add({
-            text: text.trim(),
-            description: newDescription.trim(),
-            group: {
-              order: 0,
-              text: "",
-            },
-            done: false,
-            removed: false,
-            added: [firebase.firestore.Timestamp.fromDate(new Date())],
-          });
-        } catch (error) {
+        });
+    } else {
+      // A fresh add
+      db.collection(`shoppinglists/${id}/items`)
+        .add({
+          text: text.trim(),
+          description: "",
+          group: {
+            order: 0,
+            text: "",
+          },
+          done: false,
+          removed: false,
+          added: [firebase.firestore.Timestamp.fromDate(new Date())],
+        })
+        .catch((error) => {
           console.error("UNABLE TO ADD:", error);
           throw error;
-        }
-      }
-      setNewText("");
-      setNewDescription("");
-    } else {
-      console.warn("DB not available");
+        });
     }
   }
 
@@ -366,6 +361,17 @@ const ShoppingList: FunctionalComponent<Props> = ({
     groupOptions.sort();
   }
 
+  const pastItems: PastItem[] = [];
+  if (items) {
+    for (const item of items) {
+      if (item.removed) {
+        pastItems.push({
+          text: item.text,
+        });
+      }
+    }
+  }
+
   return (
     <div class={style.list}>
       {snapshotsOffline && <OfflineWarning />}
@@ -415,62 +421,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
       )}
 
       {!editAction && (
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            await addNewText(newText);
+        <NewItemForm
+          ready={!!items}
+          pastItems={pastItems}
+          saveHandler={(text: string) => {
+            addNewText(text);
           }}
-        >
-          <div class="input-group">
-            <input
-              type="search"
-              class="form-control"
-              value={newText}
-              onInput={({
-                currentTarget,
-              }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-                setNewText(currentTarget.value);
-              }}
-              aria-label="Text input with segmented dropdown button"
-              placeholder="Add new item..."
-              disabled={!items}
-            />
-            <button
-              type="submit"
-              class="btn btn-outline-secondary"
-              disabled={!newText.trim()}
-            >
-              Add
-            </button>
-          </div>
-
-          {items && (
-            <div class={style.search_suggestions}>
-              {searchSuggestions.length ? (
-                <p>
-                  {searchSuggestions.map((suggestion) => {
-                    return (
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                        key={suggestion}
-                        style={{ marginRight: 5 }}
-                        onClick={async () => {
-                          // setNewText(suggestion);
-                          await addNewText(suggestion);
-                        }}
-                      >
-                        {suggestion}?
-                      </button>
-                    );
-                  })}
-                </p>
-              ) : (
-                <p>&nbsp;</p>
-              )}
-            </div>
-          )}
-        </form>
+        />
       )}
 
       {!items && (
@@ -569,3 +526,90 @@ const ShoppingList: FunctionalComponent<Props> = ({
 };
 
 export default ShoppingList;
+
+function NewItemForm({
+  ready,
+  pastItems,
+  saveHandler,
+}: {
+  ready: boolean;
+  pastItems: PastItem[];
+  saveHandler: (text: string) => void;
+}) {
+  const [newText, setNewText] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!newText.trim()) {
+      setSearchSuggestions([]);
+    } else if (pastItems.length) {
+      const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const rex = new RegExp(`\\b${escaped}`, "i");
+      setSearchSuggestions(
+        pastItems
+          .filter((pastItem) => {
+            return rex.test(pastItem.text) && pastItem.text !== newText;
+          })
+          .map((pastItem) => pastItem.text)
+      );
+    }
+  }, [newText, pastItems]);
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        saveHandler(newText);
+        setNewText("");
+      }}
+    >
+      <div class="input-group">
+        <input
+          type="search"
+          class="form-control"
+          value={newText}
+          onInput={({
+            currentTarget,
+          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
+            setNewText(currentTarget.value);
+          }}
+          aria-label="Text input with segmented dropdown button"
+          placeholder="Add new item..."
+          disabled={!ready}
+        />
+        <button
+          type="submit"
+          class="btn btn-outline-secondary"
+          disabled={!newText.trim()}
+        >
+          Add
+        </button>
+      </div>
+
+      <div class={style.search_suggestions}>
+        {searchSuggestions.length ? (
+          <p>
+            {searchSuggestions.map((suggestion) => {
+              return (
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  key={suggestion}
+                  style={{ marginRight: 5 }}
+                  onClick={() => {
+                    saveHandler(suggestion);
+                    setNewText("");
+                  }}
+                >
+                  {suggestion}?
+                </button>
+              );
+            })}
+          </p>
+        ) : (
+          <p>&nbsp;</p>
+        )}
+      </div>
+    </form>
+  );
+}

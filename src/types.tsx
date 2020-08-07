@@ -47,3 +47,7 @@ export interface FirestoreInvite {
 export interface Invite extends FirestoreInvite {
   id: string;
 }
+
+export interface PastItem {
+  text: string;
+}

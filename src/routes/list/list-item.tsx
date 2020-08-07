@@ -42,8 +42,6 @@ export const ListItem: FunctionalComponent<Props> = ({
     }
   }, [editMode]);
 
-  console.log("RENDERING ITEM", { updated, text: item.text });
-
   if (editMode) {
     return (
       <li class="list-group-item">
