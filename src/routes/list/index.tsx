@@ -5,6 +5,7 @@ import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
+import { Loading } from "../../components/loading";
 import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { ListItem } from "./list-item";
@@ -32,28 +33,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   const [itemsError, setItemsError] = useState<Error | null>(null);
 
-  // const [newText, setNewText] = useState("");
-  // const [newDescription, setNewDescription] = useState("");
-  // const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-
   const [editAction, toggleEditAction] = useState(false);
-
-  // useEffect(() => {
-  //   if (!newText.trim()) {
-  //     setSearchSuggestions([]);
-  //   } else if (items) {
-  //     const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  //     const rex = new RegExp(`\\b${escaped}`, "i");
-  //     setSearchSuggestions(
-  //       items
-  //         .filter(
-  //           (item) =>
-  //             item.removed && rex.test(item.text) && item.text !== newText
-  //         )
-  //         .map((item) => item.text)
-  //     );
-  //   }
-  // }, [newText, items]);
 
   useEffect(() => {
     if (listNotFound) {
@@ -77,7 +57,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
       listDbRef = db.collection(`shoppinglists/${id}/items`).onSnapshot(
         // { includeMetadataChanges: true },
         (snapshot) => {
-          // console.log("LIST SNAPSHOT", JSON.stringify(snapshot.metadata));
           if (
             snapshot.metadata.fromCache &&
             snapshot.metadata.hasPendingWrites
@@ -430,7 +409,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!items && (
+      {!items && <Loading text="Loading shopping list..." />}
+      {/* {!items && (
         <div class={style.loading_list_items}>
           <div>
             <p class="text-center">
@@ -443,7 +423,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {items && !todoItems.length && !doneItems.length && (
         <p class={style.empty_list}>List is empty at the moment.</p>

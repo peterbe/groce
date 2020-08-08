@@ -8,7 +8,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 
-import Loading from "./loading";
+import { Loading } from "./loading";
 import Home from "../routes/home";
 import Invited from "../routes/invited";
 import Signin from "../routes/signin";
@@ -124,7 +124,7 @@ const App: FunctionalComponent = () => {
   return (
     <div id="app" class="container">
       {snapshotsOffline && <OfflineWarning />}
-      {db && auth && <Header auth={auth} user={user} />}
+      <Header auth={auth} user={user} />
 
       <DisplayPersistenceError error={persistenceError} />
       {/* <Router onChange={handleRoute}> */}

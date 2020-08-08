@@ -2,7 +2,28 @@ import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
 
-const Loading: FunctionalComponent = () => {
+interface Props {
+  text?: string;
+  delay?: number;
+}
+
+export const Loading: FunctionalComponent<Props> = ({
+  text = "Loading app...",
+  delay = 300,
+}: Props) => {
+  const [stall, setStalled] = useState(delay > 0);
+  useEffect(() => {
+    let mounted = true;
+    setTimeout(() => {
+      if (mounted) {
+        setStalled(false);
+      }
+    }, delay);
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const colors = [
     "text-success",
     "text-primary",
@@ -25,6 +46,12 @@ const Loading: FunctionalComponent = () => {
     };
   }, [color, colors]);
 
+  if (stall) {
+    <div class={style.loading}>
+      <p>&nbsp;</p>
+    </div>;
+  }
+
   return (
     <div class={style.loading}>
       <div class="text-center">
@@ -33,14 +60,12 @@ const Loading: FunctionalComponent = () => {
           style="width: 3rem; height: 3rem;"
           role="status"
         >
-          <span class="sr-only">Loading...</span>
+          <span class="sr-only">{text}</span>
         </div>
       </div>
       <div class="text-center">
-        <strong>Loading app...</strong>
+        <strong>{text}</strong>
       </div>
     </div>
   );
 };
-
-export default Loading;
