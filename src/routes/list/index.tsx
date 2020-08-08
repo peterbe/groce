@@ -86,8 +86,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
             } else if (!a.done && b.done) {
               return -1;
             } else {
-              // return a.group.order - b.group.order;
-              return a.added[0].seconds - b.added[0].seconds;
+              // Descending order. More recent additions on top.
+              return b.added[0].seconds - a.added[0].seconds;
             }
           });
 
