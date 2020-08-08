@@ -340,16 +340,16 @@ const ShoppingList: FunctionalComponent<Props> = ({
     groupOptions.sort();
   }
 
-  const pastItems: PastItem[] = [];
-  if (items) {
-    for (const item of items) {
-      if (item.removed) {
-        pastItems.push({
-          text: item.text,
-        });
-      }
-    }
-  }
+  // Note that thankfully they're already sorted
+  const pastItems: PastItem[] = items
+    ? items
+        .filter((i) => i.removed)
+        .map((item) => {
+          return {
+            text: item.text,
+          };
+        })
+    : [];
 
   return (
     <div class={style.list}>
@@ -530,6 +530,7 @@ function NewItemForm({
           .filter((pastItem) => {
             return rex.test(pastItem.text) && pastItem.text !== newText;
           })
+          .slice(0, 3)
           .map((pastItem) => pastItem.text)
       );
     }
@@ -587,7 +588,9 @@ function NewItemForm({
             })}
           </p>
         ) : (
-          <p>&nbsp;</p>
+          // This min-height number I got from using the Web Inspector
+          // when the p tag has buttons in it.
+          <p style={{ minHeight: 31 }}>&nbsp;</p>
         )}
       </div>
     </form>
