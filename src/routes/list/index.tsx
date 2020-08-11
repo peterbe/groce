@@ -41,13 +41,16 @@ const ShoppingList: FunctionalComponent<Props> = ({
     } else if (listError) {
       document.title = `List error!`;
     } else if (list) {
-      document.title = list.notes
-        ? `${list.name} (${list.notes})`
+      const countTodoItems = items
+        ? items.filter((i) => !i.removed && !i.done).length
+        : 0;
+      document.title = countTodoItems
+        ? `(${countTodoItems}) ${list.name}`
         : `${list.name}`;
     } else {
       document.title = "Shopping list";
     }
-  }, [list, listNotFound, listError]);
+  }, [items, list, listNotFound, listError]);
 
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 

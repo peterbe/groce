@@ -15,6 +15,7 @@ import Signin from "../routes/signin";
 import Shopping from "../routes/shopping";
 import ShoppingList from "../routes/list";
 import NotFoundPage from "../routes/notfound";
+import Settings from "../routes/settings";
 import Header from "./header";
 import { OfflineWarning } from "./offline-warning";
 
@@ -160,6 +161,7 @@ const App: FunctionalComponent = () => {
             db={db}
           />
           <Route path="/signin" component={Signin} user={user} auth={auth} />
+          <Route path="/settings" component={Settings} />
           <NotFoundPage default />
         </Router>
       ) : (
