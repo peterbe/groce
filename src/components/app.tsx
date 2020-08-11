@@ -66,6 +66,13 @@ const App: FunctionalComponent = () => {
     const db = firebase.firestore();
     setDB(db);
 
+    // firebase
+    //   .firestore()
+    //   .clearPersistence()
+    //   .catch((error) => {
+    //     console.error("Could not enable persistence:", error.code);
+    //   });
+
     // Enable offline-ness
     db.enablePersistence().catch((error) => {
       setPersistenceError(error);

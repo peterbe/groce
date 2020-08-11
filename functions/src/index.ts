@@ -25,7 +25,7 @@ export const onInviteAccept = functions.firestore
     const addedUID = [...acceptedBefore].filter((x) => !acceptedAfter.has(x));
     const removedUID = [...acceptedAfter].filter((x) => !acceptedBefore.has(x));
 
-    // functions.logger.info(`addedUID: ${JSON.stringify(addedUID)}  removedUID: ${JSON.stringify(removedUID)}`);
+    functions.logger.info(`addedUID: ${JSON.stringify(addedUID)}  removedUID: ${JSON.stringify(removedUID)}`);
     const listID = context.params.listID;
 
     for (const uid of addedUID) {

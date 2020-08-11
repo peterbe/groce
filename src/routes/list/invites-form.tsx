@@ -90,8 +90,17 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
 
   const [deleteError, setDeleteError] = useState<Error | null>(null);
 
-  function deleteInvite(inviteID: string) {
-    console.error("Work harder");
+  function deleteInvite(invitationID: string) {
+    db.collection(`shoppinglists/${list.id}/invitations`)
+      .doc(invitationID)
+      .delete()
+      .then(() => {
+        console.log("Invited deleted");
+      })
+      .catch((error) => {
+        console.error("Unable to delete invite", error);
+        setDeleteError(error);
+      });
 
     // db.collection("invites")
     //   .doc(inviteID)
@@ -117,7 +126,7 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
         about: {
           name: list.name,
           notes: list.notes,
-          inviter: user.displayName,
+          inviter: user.uid,
           inviter_name: user.displayName,
         },
       })
@@ -136,8 +145,6 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
       />
     );
   }
-
-  console.log({ invitations });
 
   return (
     <form>
@@ -158,13 +165,13 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
 
         {invitations && invitations.length ? (
           <div>
-            {invitations.map((invite) => {
-              const inviteURL = `/invited/${list.id}/${invite.id}`;
+            {invitations.map((invitation) => {
+              const inviteURL = `/invited/${list.id}/${invitation.id}`;
               const loc = window.location;
               const absoluteInviteURL = `${loc.protocol}//${loc.host}${inviteURL}`;
 
               return (
-                <div class="card" key={invite.id}>
+                <div class="card" key={invitation.id}>
                   <div class="card-header">Invite</div>
                   <div class="card-body">
                     <h5 class="card-title">
@@ -173,7 +180,8 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
                       </a>
                     </h5>
                     <p class="card-text">
-                      Expires: {invite.expires.toDate().toLocaleDateString()}
+                      Expires:{" "}
+                      {invitation.expires.toDate().toLocaleDateString()}
                     </p>
                     {shareError && (
                       <p style={{ color: "red" }}>
@@ -224,7 +232,12 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
                       }}
                     >
                       {copied ? "Copied to clipboard" : "Copy link"}
-                    </button>
+                    </button>{" "}
+                    <DeleteInviteOption
+                      confirmed={() => {
+                        deleteInvite(invitation.id);
+                      }}
+                    />
                   </div>
                 </div>
               );
@@ -248,3 +261,44 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
     </form>
   );
 };
+
+function DeleteInviteOption({ confirmed }: { confirmed: () => void }) {
+  const [certain, toggleCertain] = useState(false);
+  if (certain) {
+    return (
+      <span>
+        {" "}
+        <b>Certain?</b>{" "}
+        <button
+          type="button"
+          class="btn btn-info btn-sm"
+          onClick={() => {
+            toggleCertain(false);
+          }}
+        >
+          Cancel
+        </button>{" "}
+        <button
+          type="button"
+          class="btn btn-danger btn-sm"
+          onClick={() => {
+            confirmed();
+          }}
+        >
+          Yes
+        </button>
+      </span>
+    );
+  }
+  return (
+    <button
+      type="button"
+      class="btn btn-warning btn-sm"
+      onClick={() => {
+        toggleCertain(true);
+      }}
+    >
+      Delete
+    </button>
+  );
+}

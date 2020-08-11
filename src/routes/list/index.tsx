@@ -40,6 +40,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
       document.title = "🤮 Shopping list not found";
     } else if (listError) {
       document.title = `List error!`;
+    } else if (editAction) {
+      document.title = "List options";
     } else if (list) {
       const countTodoItems = items
         ? items.filter((i) => !i.removed && !i.done).length
@@ -50,7 +52,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     } else {
       document.title = "Shopping list";
     }
-  }, [items, list, listNotFound, listError]);
+  }, [items, list, listNotFound, listError, editAction]);
 
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 
