@@ -154,7 +154,7 @@ const App: FunctionalComponent = () => {
             db={db}
           />
           <Route
-            path="/invited/:id"
+            path="/invited/:listID/:invitationID"
             component={Invited}
             lists={lists}
             user={user}

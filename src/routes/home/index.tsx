@@ -105,7 +105,7 @@ function PendingInvite({ user }: { user: firebase.User | false | null }) {
   const [inviteID, setInviteID] = useState<string | null>(null);
   useEffect(() => {
     try {
-      const id = sessionStorage.getItem("invitedID");
+      const id = sessionStorage.getItem("invitationID");
       if (id) {
         setInviteID(id);
       }
@@ -133,7 +133,7 @@ function PendingInvite({ user }: { user: firebase.User | false | null }) {
         data-dismiss="alert"
         aria-label="Close"
         onClick={() => {
-          sessionStorage.removeItem("invitedID");
+          sessionStorage.removeItem("invitationID");
           setInviteID(null);
         }}
       >

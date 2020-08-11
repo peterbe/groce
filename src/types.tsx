@@ -29,22 +29,24 @@ export interface List extends FirestoreList {
   id: string;
 }
 
-export interface AboutInvite {
+export interface AboutInvitation {
   inviter: string;
   name: string;
   notes: string;
+  inviter_name: string;
 }
 
-export interface FirestoreInvite {
-  list: string;
+export interface FirestoreInvitation {
+  // list: string;
   email: string | null;
   added: firebase.firestore.Timestamp;
   expires: firebase.firestore.Timestamp;
   inviter_uid: string;
-  about: AboutInvite;
+  about: AboutInvitation;
+  accepted: string[];
 }
 
-export interface Invite extends FirestoreInvite {
+export interface Invitation extends FirestoreInvitation {
   id: string;
 }
 

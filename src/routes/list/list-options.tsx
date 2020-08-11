@@ -3,7 +3,7 @@ import { route } from "preact-router";
 import { useState } from "preact/hooks";
 
 import { Alert } from "../../components/alerts";
-import { InvitesForm } from "./invites-form";
+import { InvitationsForm } from "./invites-form";
 import { List } from "../../types";
 import * as style from "./style.css";
 
@@ -111,7 +111,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
 
       <div class={style.listoptions_section}>
         <h4>Share list (invite co-owners)</h4>
-        <InvitesForm db={db} list={list} user={user} />
+        <InvitationsForm db={db} list={list} user={user} />
       </div>
 
       <div class={style.listoptions_section}>

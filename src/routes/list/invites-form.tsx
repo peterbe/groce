@@ -4,7 +4,7 @@ import copy from "copy-to-clipboard";
 import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
-import { FirestoreInvite, Invite, List } from "../../types";
+import { FirestoreInvitation, Invitation, List } from "../../types";
 
 interface Props {
   list: List;
@@ -12,15 +12,14 @@ interface Props {
   user: firebase.User;
 }
 
-export const InvitesForm: FunctionalComponent<Props> = ({
+export const InvitationsForm: FunctionalComponent<Props> = ({
   list,
   db,
   user,
 }: Props) => {
-  const [invites, setInvites] = useState<Invite[] | null>(null);
-  const [invitesError, setInvitesError] = useState<Error | null>(null);
+  const [invitations, setInvitations] = useState<Invitation[] | null>(null);
+  const [invitationsError, setInvitationsError] = useState<Error | null>(null);
 
-  // const [showShare, setShowShare] = useState(!!navigator.share || true);
   const showShare = !!navigator.share;
   const [shared, setShared] = useState(false);
   const [shareError, setShareError] = useState<Error | null>(null);
@@ -55,38 +54,33 @@ export const InvitesForm: FunctionalComponent<Props> = ({
   }, [shared]);
 
   useEffect(() => {
-    const ref = db
-      .collection("invites")
-      .where("inviter_uid", "==", user.uid)
-      .where("list", "==", list.id)
-      .onSnapshot(
-        (snapshot) => {
-          const newInvites: Invite[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data() as FirestoreInvite;
-            // If it has expired, delete it immediately
-            if (data.expires.toDate() < new Date()) {
-              // Expired!
-              deleteInvite(doc.id);
-            } else {
-              newInvites.push({
-                id: doc.id,
-                list: data.list,
-                email: data.email,
-                added: data.added,
-                expires: data.expires,
-                about: data.about,
-                inviter_uid: data.inviter_uid,
-              });
-            }
+    let ref = db.collection(`shoppinglists/${list.id}/invitations`).onSnapshot(
+      (snapshot) => {
+        const newInvitations: Invitation[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreInvitation;
+          newInvitations.push({
+            id: doc.id,
+            email: data.email,
+            added: data.added,
+            expires: data.expires,
+            inviter_uid: data.inviter_uid,
+            about: {
+              inviter: data.about.inviter,
+              name: data.about.name,
+              notes: data.about.notes,
+              inviter_name: data.about.inviter_name,
+            },
+            accepted: [],
           });
-          setInvites(newInvites);
-        },
-        (error) => {
-          console.log("Error on snapshot", error);
-          setInvitesError(error);
-        }
-      );
+        });
+        setInvitations(newInvitations);
+      },
+      (error) => {
+        console.log("Error getting invitations list", error);
+      }
+    );
+
     return () => {
       if (ref) {
         ref();
@@ -97,34 +91,42 @@ export const InvitesForm: FunctionalComponent<Props> = ({
   const [deleteError, setDeleteError] = useState<Error | null>(null);
 
   function deleteInvite(inviteID: string) {
-    db.collection("invites")
-      .doc(inviteID)
-      .delete()
-      .then(() => {
-        console.log("Document successfully deleted!");
-      })
-      .catch((error) => {
-        console.error("Error removing document: ", error);
-        setDeleteError(error);
-      });
+    console.error("Work harder");
+
+    // db.collection("invites")
+    //   .doc(inviteID)
+    //   .delete()
+    //   .then(() => {
+    //     console.log("Document successfully deleted!");
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error removing document: ", error);
+    //     setDeleteError(error);
+    //   });
   }
 
-  async function generateInviteLink() {
+  function generateInviteLink() {
     const now = new Date();
     const future = new Date();
     future.setDate(now.getDate() + 30);
-    await db.collection("invites").add({
-      inviter_uid: user.uid,
-      inviter_name: user.displayName,
-      added: firebase.firestore.Timestamp.fromDate(now),
-      expires: firebase.firestore.Timestamp.fromDate(future),
-      list: list.id,
-      about: {
-        name: list.name,
-        notes: list.notes,
-        inviter: user.displayName,
-      },
-    });
+    db.collection(`shoppinglists/${list.id}/invitations`)
+      .add({
+        inviter_uid: user.uid,
+        added: firebase.firestore.Timestamp.fromDate(now),
+        expires: firebase.firestore.Timestamp.fromDate(future),
+        about: {
+          name: list.name,
+          notes: list.notes,
+          inviter: user.displayName,
+          inviter_name: user.displayName,
+        },
+      })
+      .then(() => {
+        console.log("Invitation created");
+      })
+      .catch((error) => {
+        console.error("Error adding invitation", error);
+      });
   }
   if (deleteError) {
     return (
@@ -135,16 +137,18 @@ export const InvitesForm: FunctionalComponent<Props> = ({
     );
   }
 
+  console.log({ invitations });
+
   return (
     <form>
       <div class="mb-3">
-        {invites && !invites.length && (
+        {invitations && !invitations.length && (
           <p>
             <button
               type="button"
               class="btn btn-info"
-              onClick={async () => {
-                await generateInviteLink();
+              onClick={() => {
+                generateInviteLink();
               }}
             >
               Generate new invite
@@ -152,10 +156,10 @@ export const InvitesForm: FunctionalComponent<Props> = ({
           </p>
         )}
 
-        {invites && invites.length ? (
+        {invitations && invitations.length ? (
           <div>
-            {invites.map((invite) => {
-              const inviteURL = `/invited/${invite.id}`;
+            {invitations.map((invite) => {
+              const inviteURL = `/invited/${list.id}/${invite.id}`;
               const loc = window.location;
               const absoluteInviteURL = `${loc.protocol}//${loc.host}${inviteURL}`;
 
@@ -228,16 +232,16 @@ export const InvitesForm: FunctionalComponent<Props> = ({
           </div>
         ) : null}
 
-        {invites && !invites.length && (
+        {invitations && !invitations.length && (
           <p>
             <i>You have no current invites to this list</i>
           </p>
         )}
 
-        {invitesError && (
+        {invitationsError && (
           <Alert
             heading="Error getting list of invites"
-            message={invitesError.toString()}
+            message={invitationsError.toString()}
           />
         )}
       </div>

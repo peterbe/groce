@@ -4,7 +4,7 @@ import { Link } from "preact-router";
 interface Props {
   heading: string;
   message: string | JSX.Element;
-  type?: "danger" | "warning" | "info" | "secondary";
+  type?: "danger" | "warning" | "info" | "secondary" | "success";
 }
 
 export const Alert: FunctionalComponent<Props> = ({

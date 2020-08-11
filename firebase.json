@@ -3,6 +3,9 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "functions": {
+    "runtime": "nodejs12"
+  },
   "hosting": {
     "public": "build",
     "ignore": [

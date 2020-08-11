@@ -6,92 +6,119 @@ import firebase from "firebase/app";
 import * as style from "./style.css";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
-import { List, Invite, FirestoreInvite } from "../../types";
+import { List, Invitation, FirestoreInvitation } from "../../types";
 
 interface Props {
   db: firebase.firestore.Firestore | null;
   user: firebase.User | false | null;
   lists: List[] | null;
-  id: string;
+  listID: string;
+  invitationID: string;
 }
 
 const Invited: FunctionalComponent<Props> = (props: Props) => {
-  const { id, user, db, lists } = props;
+  const { listID, invitationID, user, db, lists } = props;
+
+  useEffect(() => {
+    document.title = "Invitation";
+  }, []);
 
   useEffect(() => {
     try {
-      sessionStorage.setItem("invitedID", id);
+      sessionStorage.setItem("invitationID", `${listID}/${invitationID}`);
     } catch (error) {
       console.error("Unable to set sessionStorage item", error);
     }
-  }, [id]);
+  }, [listID, invitationID]);
 
-  const [invite, setInvite] = useState<Invite | null>(null);
-  const [inviteError, setInviteError] = useState<Error | null>(null);
+  const [waiting, setWaiting] = useState(false);
+
+  useEffect(() => {
+    if (lists) {
+      setWaiting(false);
+    }
+  }, [lists]);
+
+  const [invitation, setInvitation] = useState<Invitation | null>(null);
+  const [invitationError, setInvitationError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (user && lists && db) {
-      db.collection("invites")
-        .doc(id)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            const data = doc.data() as FirestoreInvite;
-            setInvite(
-              Object.assign(
-                {
-                  id: doc.id,
-                },
-                data
-              )
-            );
-            if (data.inviter_uid === user.uid) {
-              if (sessionStorage.getItem("invitedID")) {
-                try {
-                  // get rid of it
-                  sessionStorage.removeItem("invitedID");
-                } catch (error) {
-                  console.warn(
-                    "Unable to get rid of sessionStorage item",
-                    error
-                  );
+      db.collection(`shoppinglists/${listID}/invitations`)
+        .doc(invitationID)
+        .onSnapshot(
+          (doc) => {
+            if (doc.exists) {
+              const data = doc.data() as FirestoreInvitation;
+              setInvitation(
+                Object.assign(
+                  {
+                    id: doc.id,
+                  },
+                  data
+                )
+              );
+              // Was it your own invitation?
+              if (data.inviter_uid === user.uid) {
+                if (sessionStorage.getItem("invitationID")) {
+                  try {
+                    // get rid of it
+                    sessionStorage.removeItem("invitationID");
+                  } catch (error) {
+                    console.warn(
+                      "Unable to get rid of sessionStorage item",
+                      error
+                    );
+                  }
                 }
               }
+            } else {
+              setInvitationError(new Error("Invite does not exist"));
             }
-          } else {
-            setInviteError(new Error("Invite does not exist"));
+          },
+          (error) => {
+            console.error("Invite doc error:", error);
+            setInvitationError(error);
           }
-        })
-        .catch((error) => {
-          console.error("Invite doc error:", error);
-          setInviteError(error);
-        });
+        );
     }
-  }, [db, id, user, lists]);
-
-  // console.log({
-  //   db: !!db,
-  //   auth: !!auth,
-  //   user: !!user,
-  //   lists: !!lists,
-  //   invite: !!invite,
-  //   inviteError: !!inviteError,
-  // });
+  }, [db, listID, invitationID, user, lists]);
 
   function acceptInvite() {
-    if (db && invite) {
-      console.warn("Need a cloud function here!");
-      // const docRef = db.collection('shoppinglists').doc(invite.list)
-      // docRef.get().then(doc => {
-      //   if (doc.exists) {
-      //     const data = doc.data() as FirestoreList
-      //     const previousOwners = data.owners
-      //     console.log(previousOwners);
-
-      //   } else {
-      //     throw new Error("List doesn't exist!")
-      //   }
-      // })
+    if (db && user && invitation) {
+      const accepted = [...(invitation.accepted || [])];
+      if (!accepted.includes(user.uid)) {
+        db.collection(`shoppinglists/${listID}/invitations`)
+          .doc(invitation.id)
+          .update({
+            accepted: firebase.firestore.FieldValue.arrayUnion(user.uid),
+          })
+          .then(() => {
+            console.log("Added self to invitation");
+          })
+          .catch((error) => {
+            console.error("Error adding self to invitation", error);
+          });
+        try {
+          sessionStorage.removeItem("invitationID");
+        } catch (error) {
+          console.warn("Unable remove item from sessionStorage", error);
+        }
+      } else {
+        // Undo.
+        db.collection(`shoppinglists/${listID}/invitations`)
+          .doc(invitation.id)
+          .update({
+            accepted: firebase.firestore.FieldValue.arrayRemove(user.uid),
+          })
+          .then(() => {
+            console.log("Removed self from invitation");
+          })
+          .catch((error) => {
+            console.error("Error removing self from invitation", error);
+          });
+      }
+      setWaiting(true);
     } else {
       throw new Error("Can't accept invite yet");
     }
@@ -119,10 +146,12 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
         <p class="mb-0">Will need to verify the invitation.</p>
       </div>
     );
-  } else if (inviteError) {
-    inner = <Alert heading="Invite error" message={inviteError.toString()} />;
-  } else if (invite) {
-    if (user && invite.inviter_uid === user.uid) {
+  } else if (invitationError) {
+    inner = (
+      <Alert heading="Invite error" message={invitationError.toString()} />
+    );
+  } else if (invitation) {
+    if (user && invitation.inviter_uid === user.uid) {
       inner = (
         <Alert
           heading="This is your own invite"
@@ -130,34 +159,63 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
           type="warning"
         />
       );
-    } else if (invite.expires.toDate() < new Date()) {
+    } else if (invitation.expires.toDate() < new Date()) {
       inner = (
         <Alert
           heading="Invite has expired"
-          message={`Ask ${invite.about.inviter} to create a new invite maybe?`}
+          message={`Ask ${invitation.about.inviter} to create a new invite maybe?`}
           type="warning"
         />
+      );
+    } else if (lists && lists.map((list) => list.id).includes(listID)) {
+      try {
+        sessionStorage.removeItem("invitationID");
+      } catch (error) {
+        console.warn("Unable to remove item from sessionStorage", error);
+      }
+      inner = (
+        <div>
+          <Alert
+            heading="You're already in this list"
+            message=""
+            type="success"
+          />
+
+          <ShowYourLists lists={lists} />
+        </div>
       );
     } else {
       inner = (
         <div>
           <p>
-            You&apos;ve been invited by <b>{invite.about.inviter}</b> to
-            shopping list <b>{invite.about.name}</b>{" "}
-            {invite.about.notes && <small>({invite.about.notes})</small>}
+            You&apos;ve been invited by <b>{invitation.about.inviter}</b> to
+            shopping list <b>{invitation.about.name}</b>{" "}
+            {invitation.about.notes && (
+              <small>({invitation.about.notes})</small>
+            )}
           </p>
-          <button
-            type="button"
-            class="btn btn-primary btn-lg btn-block"
-            onClick={() => {
-              acceptInvite();
-            }}
-          >
-            Accept
-          </button>
-          <Link href="/" class="btn btn-info btn-block">
-            Cancel/ignore
-          </Link>
+          <p>
+            <button
+              type="button"
+              class="btn btn-primary btn-lg btn-block"
+              onClick={() => {
+                acceptInvite();
+              }}
+            >
+              {waiting && (
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+              )}
+              {waiting && <span class="sr-only">Loading...</span>} Accept
+            </button>
+            <Link href="/" class="btn btn-info btn-block">
+              Cancel/ignore
+            </Link>
+          </p>
+          <ShowAcceptedUsers accepted={invitation.accepted} user={user} />
         </div>
       );
     }
@@ -176,3 +234,52 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
 };
 
 export default Invited;
+
+function ShowAcceptedUsers({
+  accepted,
+  user,
+}: {
+  accepted: string[];
+  user: firebase.User | null;
+}) {
+  if (!accepted || !accepted.length) {
+    return null;
+  }
+  if (user && accepted.includes(user.uid)) {
+    return <p>You have accepted the invitation.</p>;
+  }
+
+  return (
+    <div>
+      {accepted.map((a) => {
+        return (
+          <p key={a}>
+            Previously accepted by <b>{a}</b>
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+function ShowYourLists({ lists }: { lists: List[] }) {
+  if (!lists) {
+    return null;
+  }
+  return (
+    <div>
+      <h4>Your lists</h4>
+      {lists.map((list) => {
+        return (
+          <a
+            key={list.id}
+            href={`/shopping/${list.id}`}
+            class="btn btn-block btn-outline-info"
+          >
+            {list.name}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
