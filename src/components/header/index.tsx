@@ -79,6 +79,18 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               </li>
             )}
+            {user && (
+              <li class="nav-item">
+                <Link
+                  class="nav-link"
+                  activeClassName={"active"}
+                  // aria-current="page"
+                  href="/settings"
+                >
+                  Settings
+                </Link>
+              </li>
+            )}
 
             {auth && !user && (
               <li class="nav-item dropdown">
