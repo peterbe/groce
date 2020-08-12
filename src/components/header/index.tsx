@@ -186,23 +186,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   class={showUserMenu ? "dropdown-menu show" : "dropdown-menu"}
                   aria-labelledby="navbarDropdown"
                 >
-                  <li>
-                    <a
-                      class="nav-link disabled"
-                      href="#"
-                      aria-disabled="true"
-                      title={user.email ? `Email: ${user.email}` : undefined}
-                    >
-                      {user.displayName}
-                    </a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li>
-                    <Link class="dropdown-item" href="/settings">
-                      Settings
-                    </Link>
+                  <li class="dropdown-item">
+                    <b>{user.displayName}</b>{' '}
+                    {user.email && `(${user.email})`}
                   </li>
                   <li>
                     <hr class="dropdown-divider" />
