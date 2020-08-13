@@ -378,15 +378,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {list && (
         <h2>
           {list.name}{" "}
-          {/* {list.notes && (
-            <small class="text-muted" style={{ fontSize: "60%" }}>
-              {list.notes}
-            </small>
-          )} */}
         </h2>
       )}
 
-      {list && editAction && (
+      {db && user && list && editAction && (
         <ListOptions
           db={db}
           user={user}

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -e
+
 yarn build
+
+# If the build failed, no build/index.html file would exist
+ls -l build/index.html
+
 cd functions && yarn build && cd ..
 firebase deploy
