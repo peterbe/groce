@@ -7,7 +7,6 @@ import { List } from "../../types";
 import { useEffect, useState } from "preact/hooks";
 
 interface Props {
-  db: firebase.firestore.Firestore | null;
   user: firebase.User | false | null;
   auth: firebase.auth.Auth | null;
   lists: List[] | null;

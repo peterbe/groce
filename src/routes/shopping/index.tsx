@@ -18,12 +18,12 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
 
   useEffect(() => {
-    if (lists && lists.length) {
-      document.title = `(${lists.length}) Shopping lists`;
-    } else {
-      document.title = "Shopping lists";
-    }
-  }, [lists]);
+    // if (lists && lists.length) {
+    //   document.title = `(${lists.length}) Shopping lists`;
+    // } else {
+    document.title = "Shopping lists";
+    // }
+  }, []);
 
   async function createNewGroup(name: string, notes: string) {
     if (db && user) {
@@ -36,18 +36,6 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
             1 +
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
         });
-        // doc.collection("items");
-        // doc.collection("items").add({
-        //   text: "Sample item",
-        //   description: "",
-        //   group: {
-        //     order: 0,
-        //     text: "",
-        //   },
-        //   done: false,
-        //   removed: false,
-        //   added: firebase.firestore.Timestamp.fromDate(new Date()),
-        // });
         setShowNewGroupModal(false);
       } catch (error) {
         console.error("Error creating shopping list:", error);
@@ -109,18 +97,21 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           );
         })}
 
-      <hr />
-      <button
-        type="button"
-        class="btn btn-secondary"
-        data-toggle="modal"
-        data-target="#newGroupModal"
-        onClick={() => {
-          setShowNewGroupModal(true);
-        }}
-      >
-        {lists && !lists.length ? "Create list" : "Create new list"}
-      </button>
+      {db && (
+        <div style={{ marginTop: 60 }}>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-toggle="modal"
+            data-target="#newGroupModal"
+            onClick={() => {
+              setShowNewGroupModal(true);
+            }}
+          >
+            {lists && !lists.length ? "Create list" : "Create new list"}
+          </button>
+        </div>
+      )}
 
       <CreateModal
         show={showNewGroupModal}

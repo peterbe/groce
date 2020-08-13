@@ -13,7 +13,7 @@ import { FirestoreItem, Item, List, PastItem } from "../../types";
 
 interface Props {
   user: firebase.User | false | null;
-  db: firebase.firestore.Firestore;
+  db: firebase.firestore.Firestore | null;
   id: string;
   lists: List[] | null;
 }
@@ -58,7 +58,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   useEffect(() => {
     let listDbRef: () => void;
-    if (list) {
+    if (db && list) {
       listDbRef = db.collection(`shoppinglists/${id}/items`).onSnapshot(
         // { includeMetadataChanges: true },
         (snapshot) => {
@@ -130,7 +130,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   }, [clearedItems, clearTimerRef]);
 
   function clearDoneItems() {
-    if (items) {
+    if (db && items) {
       const cleared: Item[] = [];
       const collectionRef = db.collection(`shoppinglists/${id}/items`);
       const batch = db.batch();
@@ -158,7 +158,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   }
 
   function undoClearDoneItems() {
-    if (items) {
+    if (db && items) {
       const collectionRef = db.collection(`shoppinglists/${id}/items`);
       const batch = db.batch();
       clearedItems.forEach((item) => {
@@ -186,7 +186,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     if (!text.trim()) {
       throw new Error("new text empty");
     }
-    if (!items) {
+    if (!items || !db) {
       console.warn("DB not available");
       return;
     }
@@ -236,18 +236,20 @@ const ShoppingList: FunctionalComponent<Props> = ({
   }
 
   function updateItemDoneToggle(item: Item) {
-    const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
-    itemRef
-      .update({
-        done: !item.done,
-      })
-      // .then(() => {
-      //   console.log("Updated", item.id);
-      // })
-      .catch((error) => {
-        // XXX Deal with this better.
-        console.error(`Error trying to update item ${item.id}:`, error);
-      });
+    if (db) {
+      const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
+      itemRef
+        .update({
+          done: !item.done,
+        })
+        // .then(() => {
+        //   console.log("Updated", item.id);
+        // })
+        .catch((error) => {
+          // XXX Deal with this better.
+          console.error(`Error trying to update item ${item.id}:`, error);
+        });
+    }
   }
 
   function updateItem(
@@ -256,26 +258,28 @@ const ShoppingList: FunctionalComponent<Props> = ({
     description: string,
     group: string
   ) {
-    const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
-    itemRef
-      .update({
-        text,
-        description,
-        group: {
-          order: item.group.order,
-          text: group,
-        },
-      })
-      .then(() => {
-        console.log("Updated", item.id);
-      })
-      .catch((error) => {
-        // XXX Deal with this better.
-        console.error(`Error trying to update item ${item.id}:`, error);
-      });
+    if (db) {
+      const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
+      itemRef
+        .update({
+          text,
+          description,
+          group: {
+            order: item.group.order,
+            text: group,
+          },
+        })
+        .then(() => {
+          console.log("Updated", item.id);
+        })
+        .catch((error) => {
+          // XXX Deal with this better.
+          console.error(`Error trying to update item ${item.id}:`, error);
+        });
+    }
   }
 
-  if (!user) {
+  if (user === false) {
     return (
       <div class={style.list}>
         <Alert
@@ -415,20 +419,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
       )}
 
       {!items && <Loading text="Loading shopping list..." />}
-      {/* {!items && (
-        <div class={style.loading_list_items}>
-          <div>
-            <p class="text-center">
-              <strong>Loading shopping list...</strong>
-            </p>
-          </div>
-          <div class="text-center">
-            <div class="spinner-border" role="status">
-              <span class="sr-only">Loading...</span>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {items && !todoItems.length && !doneItems.length && (
         <p class={style.empty_list}>List is empty at the moment.</p>

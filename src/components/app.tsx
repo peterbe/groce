@@ -8,7 +8,6 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 
-import { Loading } from "./loading";
 import Home from "../routes/home";
 import Invited from "../routes/invited";
 import Signin from "../routes/signin";
@@ -66,6 +65,7 @@ const App: FunctionalComponent = () => {
     const db = firebase.firestore();
     setDB(db);
 
+    // Clear any offline data.
     // firebase
     //   .firestore()
     //   .clearPersistence()
@@ -136,45 +136,42 @@ const App: FunctionalComponent = () => {
 
       <DisplayPersistenceError error={persistenceError} />
       {/* <Router onChange={handleRoute}> */}
-      {db && auth && user !== null ? (
-        <Router>
-          <Route
-            path="/"
-            component={Home}
-            user={user}
-            auth={auth}
-            db={db}
-            lists={lists}
-          />
-          <Route
-            path="/shopping"
-            component={Shopping}
-            user={user}
-            db={db}
-            lists={lists}
-          />
-          <Route
-            path="/shopping/:id"
-            component={ShoppingList}
-            lists={lists}
-            user={user}
-            db={db}
-          />
-          <Route
-            path="/invited/:listID/:invitationID"
-            component={Invited}
-            lists={lists}
-            user={user}
-            db={db}
-          />
-          <Route path="/signin" component={Signin} user={user} auth={auth} />
-          <Route path="/settings" component={Settings} />
-          <NotFoundPage default />
-        </Router>
-      ) : (
-        <Loading />
-      )}
-      {db && <DebugOffline db={db} />}
+
+      <Router>
+        <Route
+          path="/"
+          component={Home}
+          user={user}
+          auth={auth}
+          lists={lists}
+        />
+        <Route
+          path="/shopping"
+          component={Shopping}
+          user={user}
+          db={db}
+          lists={lists}
+        />
+        <Route
+          path="/shopping/:id"
+          component={ShoppingList}
+          lists={lists}
+          user={user}
+          db={db}
+        />
+        <Route
+          path="/invited/:listID/:invitationID"
+          component={Invited}
+          lists={lists}
+          user={user}
+          db={db}
+        />
+        <Route path="/signin" component={Signin} user={user} auth={auth} />
+        <Route path="/settings" component={Settings} />
+        <NotFoundPage default />
+      </Router>
+
+      {process.env.NODE_ENV === "development" && db && <DebugOffline db={db} />}
     </div>
   );
 };
