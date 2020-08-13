@@ -76,6 +76,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
           const newItems: Item[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as FirestoreItem;
+            if (
+              data.group.text &&
+              data.group.text.toLowerCase().startsWith("cheese")
+            ) {
+              console.log(data);
+            }
+
             newItems.push({
               id: doc.id,
               text: data.text,
@@ -93,6 +100,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
             } else if (!a.done && b.done) {
               return -1;
             } else {
+              if (a.group.order !== b.group.order) {
+                return a.group.order - b.group.order;
+              }
               // Descending order. More recent additions on top.
               return b.added[0].seconds - a.added[0].seconds;
             }

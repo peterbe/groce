@@ -173,7 +173,6 @@ export const ListItem: FunctionalComponent<Props> = ({
           }}
           aria-label={item.text}
         />{" "}
-        {/* <label htmlFor={`checkbox${item.id}`}>{item.text}</label> */}
         <span
           class={
             item.done
