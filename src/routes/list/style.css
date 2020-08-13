@@ -73,3 +73,12 @@
     background-position: 100% 0;
   }
 }
+
+.edit_groups_action {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.organize_groups {
+  /* Nothing at the moment */
+}

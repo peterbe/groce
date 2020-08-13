@@ -4,6 +4,7 @@ declare namespace StyleCssNamespace {
     clearitems: string;
     done_item: string;
     done_items: string;
+    edit_groups_action: string;
     editaction: string;
     empty_list: string;
     item_description: string;
@@ -11,6 +12,7 @@ declare namespace StyleCssNamespace {
     listoptions: string;
     listoptions_section: string;
     loading_list_items: string;
+    organize_groups: string;
     rainbow_animation: string;
     rainbow_text_animated: string;
     search_suggestions: string;

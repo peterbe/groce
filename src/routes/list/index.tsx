@@ -8,6 +8,7 @@ import { GoBack } from "../../components/go-back";
 import { Loading } from "../../components/loading";
 import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
+import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { FirestoreItem, Item, List, PastItem } from "../../types";
 
@@ -34,6 +35,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   const [itemsError, setItemsError] = useState<Error | null>(null);
 
   const [editAction, toggleEditAction] = useState(false);
+  const [editGroups, toggleEditGroups] = useState(false);
 
   useEffect(() => {
     if (listNotFound) {
@@ -375,11 +377,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           {editAction ? "Close" : "List options"}
         </button>
       </p>
-      {list && (
-        <h2>
-          {list.name}{" "}
-        </h2>
-      )}
+      {list && <h2>{list.name} </h2>}
 
       {db && user && list && editAction && (
         <ListOptions
@@ -388,6 +386,18 @@ const ShoppingList: FunctionalComponent<Props> = ({
           list={list}
           close={() => {
             toggleEditAction(false);
+          }}
+        />
+      )}
+
+      {db && user && list && editGroups && items && (
+        <OrganizeGroups
+          db={db}
+          user={user}
+          list={list}
+          items={items}
+          close={() => {
+            toggleEditGroups(false);
           }}
         />
       )}
@@ -403,7 +413,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && (
+      {!editAction && !editGroups && (
         <NewItemForm
           ready={!!items}
           pastItems={pastItems}
@@ -415,11 +425,15 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
       {!items && <Loading text="Loading shopping list..." />}
 
-      {items && !todoItems.length && !doneItems.length && (
-        <p class={style.empty_list}>List is empty at the moment.</p>
-      )}
+      {items &&
+        !editAction &&
+        !editGroups &&
+        !todoItems.length &&
+        !doneItems.length && (
+          <p class={style.empty_list}>List is empty at the moment.</p>
+        )}
 
-      {!editAction && !!todoItems.length && (
+      {!editAction && !editGroups && !!todoItems.length && (
         <ul class="list-group">
           {todoItems
             .filter((item) => !item.done)
@@ -436,7 +450,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
             })}
         </ul>
       )}
-      {!editAction && !!doneItems.length && (
+      {!editAction && !editGroups && !!doneItems.length && (
         <div class={style.done_items}>
           <h5>Done items</h5>
           <ul class="list-group">
@@ -457,7 +471,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      {!editAction && !!doneItems.length ? (
+      {!editAction && !editGroups && !!doneItems.length ? (
         <div class={style.clearitems}>
           <button
             type="button"
@@ -472,7 +486,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       ) : null}
 
-      {!editAction && !!clearedItems.length && (
+      {!editAction && !editGroups && !!clearedItems.length && (
         <div class={style.clearitems}>
           <button
             type="button"
@@ -486,6 +500,20 @@ const ShoppingList: FunctionalComponent<Props> = ({
             {clearedItems.length === 1
               ? "item"
               : `${clearedItems.length} items`}
+          </button>
+        </div>
+      )}
+
+      {db && user && items && !editAction && !editGroups && (
+        <div class={style.edit_groups_action}>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            onClick={() => {
+              toggleEditGroups(true);
+            }}
+          >
+            Organize groups &rarr;
           </button>
         </div>
       )}
