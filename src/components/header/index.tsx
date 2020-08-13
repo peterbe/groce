@@ -187,8 +187,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   aria-labelledby="navbarDropdown"
                 >
                   <li class="dropdown-item">
-                    <b>{user.displayName}</b>{' '}
-                    {user.email && `(${user.email})`}
+                    <b>{user.displayName}</b> {user.email && `(${user.email})`}
                   </li>
                   <li>
                     <hr class="dropdown-divider" />

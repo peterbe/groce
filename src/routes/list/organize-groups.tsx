@@ -1,11 +1,9 @@
 import { FunctionalComponent, h } from "preact";
-// import { route } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 import Sortable from "sortablejs";
 
 import { List, Item } from "../../types";
 import * as style from "./style.css";
-// import * as style from "./groups.css";
 
 interface Props {
   db: firebase.firestore.Firestore;
@@ -25,9 +23,6 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
   items,
   close,
 }: Props) => {
-  //   const groups = items.map((item) => item.group);
-  // console.log(items.map((i) => i.group));
-
   function changeGroupText(
     group: Group,
     newText: string,
@@ -97,15 +92,17 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
   }
 
   useEffect(() => {
-    var el = document.getElementById("sortable");
-    console.log(el);
-
-    var sortable = new Sortable(el, {
+    const el = document.getElementById("sortable");
+    if (!el) {
+      return;
+    }
+    new Sortable(el, {
       animation: 150,
       ghostClass: "blue-background-class",
-      onEnd: (/**Event*/ evt) => {
-        // var itemEl = evt.item; // dragged HTMLElement
-        var children = evt.to.children as HTMLCollection;
+      onEnd: (event) => {
+        // var itemEl = event.item; // dragged HTMLElement
+        // const children = event.to.children as HTMLCollection;
+        const children = event.to.children;
         const newOrder = new Map();
         Array.from(children).forEach((item, i) => {
           newOrder.set((item as HTMLElement).dataset.text?.toLowerCase(), i);
@@ -154,7 +151,6 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
               key={group.text}
               changeText={(text: string) => {
                 if (group.text.trim() !== text.trim()) {
-                  // console.log("GROM:", group.text, "TO", text);
                   changeGroupText(group, text, null);
                 }
               }}
@@ -163,12 +159,6 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
               }}
             />
           );
-          // return (
-          //   <li class="list-group-item  d-flex justify-content-between align-items-center" key={group.text}>
-          //     {group.text}
-          //     <button type="button" class="btn btn-sm">Edit</button>
-          //   </li>
-          // );
         })}
       </ul>
     </div>
@@ -239,17 +229,7 @@ function ListItem({
       ) : (
         group.text
       )}
-      {/* {edit && (
-        <button
-          type="button"
-          class="btn btn-info"
-          onClick={() => {
-            console.log("SAVE", text);
-          }}
-        >
-          Save
-        </button>
-      )} */}
+
       <button
         type="button"
         class="btn btn-sm"

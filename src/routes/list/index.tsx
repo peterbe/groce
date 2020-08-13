@@ -76,13 +76,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
           const newItems: Item[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as FirestoreItem;
-            if (
-              data.group.text &&
-              data.group.text.toLowerCase().startsWith("cheese")
-            ) {
-              console.log(data);
-            }
-
             newItems.push({
               id: doc.id,
               text: data.text,
@@ -403,7 +396,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {db && user && list && editGroups && items && (
         <OrganizeGroups
           db={db}
-          user={user}
           list={list}
           items={items}
           close={() => {

@@ -54,32 +54,34 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
   }, [shared]);
 
   useEffect(() => {
-    let ref = db.collection(`shoppinglists/${list.id}/invitations`).onSnapshot(
-      (snapshot) => {
-        const newInvitations: Invitation[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data() as FirestoreInvitation;
-          newInvitations.push({
-            id: doc.id,
-            email: data.email,
-            added: data.added,
-            expires: data.expires,
-            inviter_uid: data.inviter_uid,
-            about: {
-              inviter: data.about.inviter,
-              name: data.about.name,
-              notes: data.about.notes,
-              inviter_name: data.about.inviter_name,
-            },
-            accepted: [],
+    const ref = db
+      .collection(`shoppinglists/${list.id}/invitations`)
+      .onSnapshot(
+        (snapshot) => {
+          const newInvitations: Invitation[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreInvitation;
+            newInvitations.push({
+              id: doc.id,
+              email: data.email,
+              added: data.added,
+              expires: data.expires,
+              inviter_uid: data.inviter_uid,
+              about: {
+                inviter: data.about.inviter,
+                name: data.about.name,
+                notes: data.about.notes,
+                inviter_name: data.about.inviter_name,
+              },
+              accepted: [],
+            });
           });
-        });
-        setInvitations(newInvitations);
-      },
-      (error) => {
-        console.log("Error getting invitations list", error);
-      }
-    );
+          setInvitations(newInvitations);
+        },
+        (error) => {
+          console.log("Error getting invitations list", error);
+        }
+      );
 
     return () => {
       if (ref) {

@@ -1779,6 +1779,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/sortablejs@1.10.5":
+  version "1.10.5"
+  resolved "https://registry.yarnpkg.com/@types/sortablejs/-/sortablejs-1.10.5.tgz#341f5af3372180ce3cbfbd2b34a6fdefaca8d227"
+  integrity sha512-U/i9rGkCwmgmsa0UzHlGnQtL4y57tjywjp6j3GbA64MLaGO+sEBLVhBrQokWfgzeV2T6hQRYC4dZtXkl6dCMfw==
+
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-1.0.1.tgz#0a851d3bd96498fa25c33ab7278ed3bd65f06c3e"

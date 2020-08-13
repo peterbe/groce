@@ -23,6 +23,7 @@
     "build/*"
   ],
   "dependencies": {
+    "@types/sortablejs": "1.10.5",
     "bootstrap": "5.0.0-alpha1",
     "copy-to-clipboard": "3.3.1",
     "firebase": "7.16.1",
