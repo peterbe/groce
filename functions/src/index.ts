@@ -46,7 +46,7 @@ export const onInviteAccept = functions.firestore
           owners: admin.firestore.FieldValue.arrayRemove(uid),
         })
         .then(() => {
-          functions.logger.info(`User ${uid} added to ${listID}`);
+          functions.logger.info(`User ${uid} removed from ${listID}`);
         })
         .catch((error) => {
           functions.logger.error(error)

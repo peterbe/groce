@@ -18,14 +18,13 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
 
   return (
     <nav
-      // class="navbar navbar-expand-lg navbar-light bg-light"
-      class="navbar  fixed-bottom navbar-light bg-light"
+      class="navbar fixed-bottom navbar-light bg-light"
       style={{ backgroundColor: "#e3f2fd" }}
     >
       <div class="container-fluid">
         <Link class="navbar-brand" href="/">
           <img
-            src={"../assets/icons/favicon-32x32.png"}
+            src={"/assets/icons/favicon-32x32.png"}
             width="30"
             height="30"
             class="d-inline-block align-top"

@@ -92,12 +92,16 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
           .doc(invitation.id)
           .update({
             accepted: firebase.firestore.FieldValue.arrayUnion(user.uid),
+            accepted_names: firebase.firestore.FieldValue.arrayUnion(
+              user.displayName || user.email || user.uid
+            ),
           })
           .then(() => {
             console.log("Added self to invitation");
           })
           .catch((error) => {
             console.error("Error adding self to invitation", error);
+            setInvitationError(error);
           });
         try {
           sessionStorage.removeItem("invitationID");
@@ -110,12 +114,16 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
           .doc(invitation.id)
           .update({
             accepted: firebase.firestore.FieldValue.arrayRemove(user.uid),
+            accepted_names: firebase.firestore.FieldValue.arrayRemove(
+              user.displayName || user.email || user.uid
+            ),
           })
           .then(() => {
             console.log("Removed self from invitation");
           })
           .catch((error) => {
             console.error("Error removing self from invitation", error);
+            setInvitationError(error);
           });
       }
       setWaiting(true);
@@ -148,21 +156,35 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
     );
   } else if (invitationError) {
     inner = (
-      <Alert heading="Invite error" message={invitationError.toString()} />
+      <Alert heading="Invitation error" message={invitationError.toString()} />
     );
   } else if (invitation) {
-    if (user && invitation.inviter_uid === user.uid) {
+    if (
+      invitation.email &&
+      user &&
+      invitation.email.toLowerCase() !== (user.email || "").toLowerCase()
+    ) {
       inner = (
         <Alert
-          heading="This is your own invite"
-          message="You're viewing an invite you yourself created."
+          heading="Not for your email"
+          message={`The invitation was for a specific email address and not for yours (${
+            user.email || ""
+          })`}
+          type="warning"
+        />
+      );
+    } else if (user && invitation.inviter_uid === user.uid) {
+      inner = (
+        <Alert
+          heading="This is your own invitation"
+          message="You're viewing an invitation you yourself created."
           type="warning"
         />
       );
     } else if (invitation.expires.toDate() < new Date()) {
       inner = (
         <Alert
-          heading="Invite has expired"
+          heading="Invitation has expired"
           message={`Ask ${invitation.about.inviter} to create a new invite maybe?`}
           type="warning"
         />
@@ -188,8 +210,8 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
       inner = (
         <div>
           <p>
-            You&apos;ve been invited by <b>{invitation.about.inviter}</b> to
-            shopping list <b>{invitation.about.name}</b>{" "}
+            You&apos;ve been invited by <b>{invitation.about.inviter_name}</b>{" "}
+            to shopping list <b>{invitation.about.name}</b>{" "}
             {invitation.about.notes && (
               <small>({invitation.about.notes})</small>
             )}

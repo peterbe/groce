@@ -101,8 +101,6 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
       ghostClass: "blue-background-class",
       handle: ".handle",
       onEnd: (event) => {
-        // var itemEl = event.item; // dragged HTMLElement
-        // const children = event.to.children as HTMLCollection;
         const children = event.to.children;
         const newOrder = new Map();
         Array.from(children).forEach((item, i) => {

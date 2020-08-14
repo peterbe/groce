@@ -18,7 +18,6 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
   user,
 }: Props) => {
   const [invitations, setInvitations] = useState<Invitation[] | null>(null);
-  const [invitationsError, setInvitationsError] = useState<Error | null>(null);
 
   const showShare = !!navigator.share;
   const [shared, setShared] = useState(false);
@@ -120,6 +119,8 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
           inviter: user.uid,
           inviter_name: user.displayName,
         },
+        accepted: [],
+        accepted_names: [],
       })
       .then(() => {
         console.log("Invitation created");
@@ -128,6 +129,25 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
         console.error("Error adding invitation", error);
       });
   }
+
+  function setInvitationEmail(invitation: Invitation, email: string) {
+    email = email.trim();
+
+    const doc = db
+      .collection(`shoppinglists/${list.id}/invitations`)
+      .doc(invitation.id);
+    doc
+      .update({
+        email,
+      })
+      .then(() => {
+        console.log(`Email '${email}' set on invitation`);
+      })
+      .catch((error) => {
+        console.error("Error trying to set invitation email", error);
+      });
+  }
+
   if (deleteError) {
     return (
       <Alert
@@ -163,10 +183,10 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
 
               return (
                 <div class="card" key={invitation.id}>
-                  <div class="card-header">Invite</div>
+                  {/* <div class="card-header">Invite</div> */}
                   <div class="card-body">
                     <h5 class="card-title">
-                      <a href={inviteURL}>
+                      <a href={inviteURL} style={{ fontSize: "70%" }}>
                         <code>{absoluteInviteURL}</code>
                       </a>
                     </h5>
@@ -229,6 +249,12 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
                         deleteInvite(invitation.id);
                       }}
                     />
+                    <SetInvitationEmail
+                      invitation={invitation}
+                      update={(email: string) => {
+                        setInvitationEmail(invitation, email);
+                      }}
+                    />
                   </div>
                 </div>
               );
@@ -240,13 +266,6 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
           <p>
             <i>You have no current invites to this list</i>
           </p>
-        )}
-
-        {invitationsError && (
-          <Alert
-            heading="Error getting list of invites"
-            message={invitationsError.toString()}
-          />
         )}
       </div>
     </form>
@@ -291,5 +310,85 @@ function DeleteInviteOption({ confirmed }: { confirmed: () => void }) {
     >
       Delete
     </button>
+  );
+}
+
+function SetInvitationEmail({
+  invitation,
+  update,
+}: {
+  invitation: Invitation;
+  update: (email: string) => void;
+}) {
+  const [email, setEmail] = useState(invitation.email || "");
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    if (submitted) {
+      setTimeout(() => {
+        if (mounted) {
+          setSubmitted(false);
+        }
+      }, 3000);
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [submitted]);
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (email !== invitation.email) {
+          update(email);
+          setSubmitted(true);
+        }
+      }}
+    >
+      <label for="exampleInputEmail1" class="form-label">
+        Email address
+      </label>
+      <input
+        type="email"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+        value={email}
+        onInput={({
+          currentTarget,
+        }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
+          setEmail(currentTarget.value);
+        }}
+      />
+      <div id="emailHelp" class="form-text">
+        This <b>won&apos;t send</b> an email. It just means they&apos;ll{" "}
+        <b>see this when they sign in</b> without needing the link.
+      </div>
+      <button type="submit" class="btn btn-primary">
+        Save invitation email
+      </button>
+
+      {submitted && (
+        <div
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          Email set
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+            onClick={() => {
+              setSubmitted(false);
+            }}
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      )}
+    </form>
   );
 }
