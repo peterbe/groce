@@ -37,7 +37,6 @@ export interface AboutInvitation {
 }
 
 export interface FirestoreInvitation {
-  // list: string;
   email: string | null;
   added: firebase.firestore.Timestamp;
   expires: firebase.firestore.Timestamp;

@@ -103,17 +103,6 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
         console.error("Unable to delete invite", error);
         setDeleteError(error);
       });
-
-    // db.collection("invites")
-    //   .doc(inviteID)
-    //   .delete()
-    //   .then(() => {
-    //     console.log("Document successfully deleted!");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error removing document: ", error);
-    //     setDeleteError(error);
-    //   });
   }
 
   function generateInviteLink() {

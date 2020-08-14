@@ -99,6 +99,7 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
     new Sortable(el, {
       animation: 150,
       ghostClass: "blue-background-class",
+      handle: ".handle",
       onEnd: (event) => {
         // var itemEl = event.item; // dragged HTMLElement
         // const children = event.to.children as HTMLCollection;
@@ -227,7 +228,9 @@ function ListItem({
           </button>
         </form>
       ) : (
-        group.text
+        <span>
+          <span class="handle">↕</span> {group.text}
+        </span>
       )}
 
       <button
