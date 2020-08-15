@@ -25,8 +25,14 @@ export interface FirestoreList {
   owners: string[];
 }
 
+export interface FirestoreDocumentMetadata {
+  hasPendingWrites: boolean;
+  fromCache: boolean;
+}
+
 export interface List extends FirestoreList {
   id: string;
+  metadata: FirestoreDocumentMetadata;
 }
 
 export interface AboutInvitation {

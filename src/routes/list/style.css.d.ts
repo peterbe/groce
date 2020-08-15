@@ -7,15 +7,21 @@ declare namespace StyleCssNamespace {
     edit_groups_action: string;
     editaction: string;
     empty_list: string;
+    file: string;
     item_description: string;
     list: string;
     listoptions: string;
     listoptions_section: string;
     loading_list_items: string;
+    mappings: string;
+    names: string;
     organize_groups: string;
     rainbow_animation: string;
     rainbow_text_animated: string;
     search_suggestions: string;
+    sources: string;
+    sourcesContent: string;
+    version: string;
   }
 }
 

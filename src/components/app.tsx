@@ -90,7 +90,7 @@ const App: FunctionalComponent = () => {
         .collection("shoppinglists")
         .where("owners", "array-contains", user.uid)
         .orderBy("order")
-        .onSnapshot((snapshot) => {
+        .onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
           if (
             snapshot.metadata.fromCache &&
             snapshot.metadata.hasPendingWrites
@@ -109,6 +109,7 @@ const App: FunctionalComponent = () => {
               notes: data.notes,
               order: data.order,
               owners: data.owners,
+              metadata: doc.metadata,
             });
           });
 

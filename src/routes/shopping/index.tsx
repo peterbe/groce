@@ -7,6 +7,7 @@ import firebase from "firebase/app";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
 import { FirestoreItem, Item, List } from "../../types";
+// import { list } from "../list/style.css";
 
 interface Props {
   user: firebase.User | false | null;
@@ -15,7 +16,7 @@ interface Props {
 }
 
 const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
-  const [showNewGroupModal, setShowNewGroupModal] = useState(false);
+  const [addNewList, toggleAddNewList] = useState(false);
 
   useEffect(() => {
     // if (lists && lists.length) {
@@ -26,7 +27,15 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
   }, []);
 
   async function createNewGroup(name: string, notes: string) {
-    if (db && user) {
+    if (db && user && lists) {
+      if (
+        lists
+          .map((list) => list.name.toLowerCase())
+          .includes(name.toLowerCase())
+      ) {
+        console.warn("List already exists by that name.");
+        return;
+      }
       try {
         await db.collection("shoppinglists").add({
           name,
@@ -36,7 +45,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
             1 +
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
         });
-        setShowNewGroupModal(false);
+        toggleAddNewList(false);
       } catch (error) {
         console.error("Error creating shopping list:", error);
         // XXX
@@ -90,6 +99,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
                 <h5 class="card-title">{list.name}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
                 <p class="card-text">
+                  {/* {db && <PreviewList list={list} db={db} />} */}
                   {db && <PreviewList list={list} db={db} />}
                 </p>
               </div>
@@ -102,26 +112,27 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           <button
             type="button"
             class="btn btn-secondary"
-            data-toggle="modal"
-            data-target="#newGroupModal"
             onClick={() => {
-              setShowNewGroupModal(true);
+              toggleAddNewList((prev) => !prev);
             }}
           >
-            {lists && !lists.length ? "Create list" : "Create new list"}
+            {addNewList
+              ? "Close"
+              : lists && !lists.length
+              ? "Create list"
+              : "Create new list"}
           </button>
         </div>
       )}
 
-      <CreateModal
-        show={showNewGroupModal}
-        close={() => {
-          setShowNewGroupModal(false);
-        }}
-        create={async (name: string, notes: string) => {
-          await createNewGroup(name, notes);
-        }}
-      />
+      {db && addNewList && lists && (
+        <NewList
+          lists={lists}
+          create={async (name: string, notes: string) => {
+            await createNewGroup(name, notes);
+          }}
+        />
+      )}
 
       <GoBack />
     </div>
@@ -130,124 +141,79 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
 
 export default Shopping;
 
-function CreateModal({
-  show,
-  close,
+function NewList({
   create,
+  lists,
 }: {
-  show: boolean;
-  close: () => void;
   create: (name: string, notes: string) => void;
+  lists: List[];
 }) {
   const [name, setName] = useState("");
-  const [notes, setNewGroupNotes] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const submittable =
+    name.trim() &&
+    !lists
+      .map((list) => list.name.toLowerCase())
+      .includes(name.trim().toLowerCase());
 
   return (
-    <div
-      class={show ? "modal fade show" : "modal fade"}
-      id="newGroupModal"
-      aria-labelledby="exampleModalLabel"
-      aria-hidden={!show ? "true" : null}
-      style={show ? { display: "block" } : {}}
+    <form
+      style={{ marginTop: 40 }}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (submittable) {
+          create(name.trim(), notes.trim());
+        }
+      }}
     >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">
-              New shopping group
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-              onClick={close}
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form
-              onSubmit={(
-                event: h.JSX.TargetedEvent<HTMLFormElement, Event>
-              ) => {
-                event.preventDefault();
-                if (name.trim()) {
-                  create(name.trim(), notes.trim());
-                }
-              }}
-            >
-              <div class="mb-3">
-                <label htmlFor="groupName" class="form-label">
-                  Group name
-                </label>
-                <input
-                  value={name}
-                  onInput={({
-                    currentTarget,
-                  }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-                    setName(currentTarget.value);
-                  }}
-                  type="text"
-                  class="form-control"
-                  placeholder="for example: Hardware store"
-                  id="groupName"
-                  aria-describedby="groupNameHelp"
-                />
-                <div id="groupNameHelp" class="form-text">
-                  You can change the name later.
-                </div>
-              </div>
-              <div class="mb-3">
-                <label htmlFor="groupNotes" class="form-label">
-                  Notes/Description
-                </label>
-                <input
-                  value={notes}
-                  onInput={({
-                    currentTarget,
-                  }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-                    setNewGroupNotes(currentTarget.value);
-                  }}
-                  type="text"
-                  class="form-control"
-                  id="groupNotes"
-                  aria-describedby="groupNotesHelp"
-                />
-                <div id="groupNotesHelp" class="form-text">
-                  Just in case you need it and it helps.
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-              onClick={close}
-            >
-              Close
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              disabled={!name.trim()}
-              onClick={(
-                event: h.JSX.TargetedEvent<HTMLButtonElement, MouseEvent>
-              ) => {
-                event.preventDefault();
-                if (name.trim()) {
-                  create(name.trim(), notes.trim());
-                }
-              }}
-            >
-              Create list
-            </button>
-          </div>
+      <h4>New shopping list</h4>
+
+      <div class="mb-3">
+        <label htmlFor="newName" class="form-label">
+          Name
+        </label>
+        <input
+          value={name}
+          onInput={({
+            currentTarget,
+          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
+            setName(currentTarget.value);
+          }}
+          type="text"
+          class="form-control"
+          placeholder="for example: Hardware store"
+          id="newName"
+          aria-describedby="nameHelp"
+        />
+        <div id="nameHelp" class="form-text">
+          You can change the name later.
         </div>
       </div>
-    </div>
+      <div class="mb-3">
+        <label htmlFor="newNotes" class="form-label">
+          Notes/Description
+        </label>
+        <input
+          value={notes}
+          onInput={({
+            currentTarget,
+          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
+            setNotes(currentTarget.value);
+          }}
+          type="text"
+          class="form-control"
+          id="newNotes"
+          aria-describedby="newNotesHelp"
+        />
+        <div id="newNotesHelp" class="form-text">
+          Just in case you need it and it helps.
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" disabled={!submittable}>
+        Create list
+      </button>
+    </form>
   );
 }
 
@@ -259,9 +225,18 @@ function PreviewList({
   db: firebase.firestore.Firestore;
 }) {
   const [items, setItems] = useState<Item[] | null>(null);
+  const [itemsError, setItemsError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const itemsCollection = db.collection(`shoppinglists/${list.id}/items`);
+    if (list.metadata.hasPendingWrites) {
+      // List has pending writes so don't start querying it yet
+      return;
+    }
+
+    const itemsCollection = db
+      .collection("shoppinglists")
+      .doc(list.id)
+      .collection("items");
 
     const ref = itemsCollection.where("removed", "==", false).onSnapshot(
       (snapshot) => {
@@ -282,6 +257,7 @@ function PreviewList({
       },
       (error) => {
         console.error(`Error listing on ${list.id}:`, error);
+        setItemsError(error);
       }
     );
     return () => {
@@ -291,7 +267,16 @@ function PreviewList({
     };
   }, [list, db]);
 
-  if (!items) {
+  if (itemsError) {
+    return (
+      <Alert
+        heading="Error previewing list items"
+        message={itemsError.toString()}
+      />
+    );
+  }
+
+  if (!items || list.metadata.hasPendingWrites) {
     return (
       <div class="spinner-border" role="status">
         <span class="sr-only">Loading...</span>
@@ -302,7 +287,7 @@ function PreviewList({
   if (!items.length) {
     return (
       <p>
-        <i>List empty at the moment</i>
+        <i>List empty at the moment.</i>
       </p>
     );
   }
