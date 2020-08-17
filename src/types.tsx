@@ -36,6 +36,7 @@ export interface List extends FirestoreList {
 }
 
 export interface AboutInvitation {
+  id: string;
   inviter: string;
   name: string;
   notes: string;

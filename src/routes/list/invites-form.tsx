@@ -68,11 +68,12 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
               inviter_uid: data.inviter_uid,
               about: {
                 inviter: data.about.inviter,
+                id: data.about.id,
                 name: data.about.name,
                 notes: data.about.notes,
                 inviter_name: data.about.inviter_name,
               },
-              accepted: [],
+              accepted: data.accepted,
             });
           });
           setInvitations(newInvitations);
@@ -114,6 +115,7 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
         added: firebase.firestore.Timestamp.fromDate(now),
         expires: firebase.firestore.Timestamp.fromDate(future),
         about: {
+          id: list.id,
           name: list.name,
           notes: list.notes,
           inviter: user.uid,
@@ -138,7 +140,7 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
       .doc(invitation.id);
     doc
       .update({
-        email,
+        email: email.toLowerCase(),
       })
       .then(() => {
         console.log(`Email '${email}' set on invitation`);
@@ -347,7 +349,7 @@ function SetInvitationEmail({
         }
       }}
     >
-      <label for="exampleInputEmail1" class="form-label">
+      <label htmlFor="exampleInputEmail1" class="form-label">
         Email address
       </label>
       <input

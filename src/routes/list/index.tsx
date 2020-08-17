@@ -365,6 +365,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
         })
     : [];
 
+  const hasOrganizableGroups = Boolean(
+    items && items.filter((item) => item.group.text).length
+  );
+
   return (
     <div class={style.list}>
       {snapshotsOffline && <OfflineWarning />}
@@ -393,7 +397,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {db && user && list && editGroups && items && (
+      {db && items && list && editGroups && hasOrganizableGroups && (
         <OrganizeGroups
           db={db}
           list={list}
@@ -506,19 +510,24 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      {db && user && items && !editAction && !editGroups && (
-        <div class={style.edit_groups_action}>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-primary"
-            onClick={() => {
-              toggleEditGroups(true);
-            }}
-          >
-            Organize groups &rarr;
-          </button>
-        </div>
-      )}
+      {db &&
+        user &&
+        items &&
+        hasOrganizableGroups &&
+        !editAction &&
+        !editGroups && (
+          <div class={style.edit_groups_action}>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              onClick={() => {
+                toggleEditGroups(true);
+              }}
+            >
+              Organize groups &rarr;
+            </button>
+          </div>
+        )}
 
       <GoBack url="/shopping" name="all lists" />
     </div>

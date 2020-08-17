@@ -116,6 +116,7 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
       return [item.group.text, item.group.order];
     })
   );
+
   const groups: Group[] = [];
   uniqueGroups.forEach((order: number, text: string) => {
     if (text) {
@@ -142,24 +143,28 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
         &larr; back to shopping list
       </button>
       <p>Drag to change order. Click to edit.</p>
-      <ul class="list-group" id="sortable">
-        {groups.map((group) => {
-          return (
-            <ListItem
-              group={group}
-              key={group.text}
-              changeText={(text: string) => {
-                if (group.text.trim() !== text.trim()) {
-                  changeGroupText(group, text, null);
-                }
-              }}
-              deleteGroup={(group: Group) => {
-                deleteGroup(group);
-              }}
-            />
-          );
-        })}
-      </ul>
+      {groups.length ? (
+        <ul class="list-group" id="sortable">
+          {groups.map((group) => {
+            return (
+              <ListItem
+                group={group}
+                key={group.text}
+                changeText={(text: string) => {
+                  if (group.text.trim() !== text.trim()) {
+                    changeGroupText(group, text, null);
+                  }
+                }}
+                deleteGroup={(group: Group) => {
+                  deleteGroup(group);
+                }}
+              />
+            );
+          })}
+        </ul>
+      ) : (
+        <i>No groups to organize at the moment.</i>
+      )}
     </div>
   );
 };

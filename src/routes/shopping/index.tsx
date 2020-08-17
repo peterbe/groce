@@ -19,11 +19,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
   const [addNewList, toggleAddNewList] = useState(false);
 
   useEffect(() => {
-    // if (lists && lists.length) {
-    //   document.title = `(${lists.length}) Shopping lists`;
-    // } else {
     document.title = "Shopping lists";
-    // }
   }, []);
 
   async function createNewGroup(name: string, notes: string) {

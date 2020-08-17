@@ -142,6 +142,7 @@ const App: FunctionalComponent = () => {
         <Route
           path="/"
           component={Home}
+          db={db}
           user={user}
           auth={auth}
           lists={lists}
