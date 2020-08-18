@@ -12,6 +12,7 @@ export interface FirestoreItem {
   done: boolean;
   removed: boolean;
   added: firebase.firestore.Timestamp[];
+  times_added: number;
 }
 
 export interface Item extends FirestoreItem {

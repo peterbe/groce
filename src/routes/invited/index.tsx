@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { Link } from "preact-router";
+import { Link, route } from "preact-router";
 import { useEffect, useState } from "preact/hooks";
 import firebase from "firebase/app";
 
@@ -132,6 +132,23 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
     }
   }
 
+  function discardInvitation() {
+    if (db && user && invitation) {
+      db.collection("shoppinglists")
+        .doc(listID)
+        .collection("invitations")
+        .doc(invitation.id)
+        .delete()
+        .then(() => {
+          console.log("Invitation discarded");
+          route("/");
+        })
+        .catch((error) => {
+          console.error("Error trying to discard invitation", error);
+        });
+    }
+  }
+
   // Default is to say it's loading
   let inner = (
     <div class="text-center">
@@ -195,6 +212,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
       } catch (error) {
         console.warn("Unable to remove item from sessionStorage", error);
       }
+      discardInvitation();
       inner = (
         <div>
           <Alert
@@ -234,7 +252,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
               {waiting && <span class="sr-only">Loading...</span>} Accept
             </button>
             <Link href="/" class="btn btn-info btn-block">
-              Cancel/ignore
+              Cancel/Ignore
             </Link>
           </p>
           <ShowAcceptedUsers accepted={invitation.accepted} user={user} />

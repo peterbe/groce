@@ -264,6 +264,7 @@ function PendingInvitations({ invitations }: { invitations: Invitation[] }) {
     </div>
   );
 }
+
 function ShowInvitation({ invitation }: { invitation: Invitation }) {
   const [close, toggleClose] = useState(false);
 

@@ -84,6 +84,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
               group: data.group,
               removed: data.removed,
               added: data.added,
+              times_added: data.times_added || 1,
             });
           });
 
@@ -213,9 +214,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
             firebase.firestore.Timestamp.fromDate(new Date()),
             ...previousItem.added,
           ],
+          times_added: (previousItem.times_added || 1) + 1,
         })
         .catch((error) => {
-          // XXX deal with this better
           console.error("Unable to update:", error);
           throw error;
         });
@@ -232,9 +233,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
           done: false,
           removed: false,
           added: [firebase.firestore.Timestamp.fromDate(new Date())],
+          times_added: 1,
         })
         .catch((error) => {
-          console.error("UNABLE TO ADD:", error);
+          console.error("Error trying to add new item:", error);
           throw error;
         });
     }
