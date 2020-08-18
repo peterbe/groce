@@ -6,6 +6,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import { Alert } from "../../components/alerts";
 import { Loading } from "../../components/loading";
+import { AddToHomeScreen } from "./add-to-homescreen";
 import { List, FirestoreInvitation, Invitation } from "../../types";
 
 interface Props {
@@ -209,6 +210,8 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
           <Alert heading="Sign in error" message={signinError.toString()} />
         )}
       </div>
+
+      {user !== null && <AddToHomeScreen user={user} />}
     </div>
   );
 };

@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "preact build",
+    "postbuild": "node scripts/post-process-build.js",
     "serve": "sirv build --port 8080 --cors --single",
     "dev": "preact watch",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
