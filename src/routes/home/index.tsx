@@ -211,7 +211,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         )}
       </div>
 
-      {user !== null && <AddToHomeScreen user={user} />}
+      {user !== null && <AddToHomeScreen />}
     </div>
   );
 };
