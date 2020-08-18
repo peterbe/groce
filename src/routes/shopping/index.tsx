@@ -247,6 +247,7 @@ function PreviewList({
             group: data.group,
             removed: data.removed,
             added: data.added,
+            times_added: data.times_added || 1,
           });
         });
         setItems(newItems);
