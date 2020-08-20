@@ -1,0 +1,10 @@
+.feedback {
+  padding-top: 40px;
+}
+
+.submissions {
+  margin-top: 40px;
+  margin-bottom: 60px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgb(162, 162, 162);
+}

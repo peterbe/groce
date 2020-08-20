@@ -1,6 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { Route, Router } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
+
 import "../style/custom.scss";
 // import * as firebase from "firebase/app";
 import firebase from "firebase/app";
@@ -16,6 +17,7 @@ import ShoppingList from "../routes/list";
 import NotFoundPage from "../routes/notfound";
 import Settings from "../routes/settings";
 import Header from "./header";
+import Feedback from "../routes/feedback";
 import { OfflineWarning } from "./offline-warning";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,7 +126,6 @@ const App: FunctionalComponent = () => {
     }
     return () => {
       if (shoppinglistsDbRef) {
-        console.log("Detach shoppinglists db ref listener");
         shoppinglistsDbRef();
       }
     };
@@ -170,6 +171,13 @@ const App: FunctionalComponent = () => {
         />
         <Route path="/signin" component={Signin} user={user} auth={auth} />
         <Route path="/settings" component={Settings} />
+        <Route
+          path="/feedback"
+          component={Feedback}
+          lists={lists}
+          user={user}
+          db={db}
+        />
         <NotFoundPage default />
       </Router>
 

@@ -83,10 +83,20 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 <Link
                   class="nav-link"
                   activeClassName={"active"}
-                  // aria-current="page"
                   href="/settings"
                 >
                   Settings
+                </Link>
+              </li>
+            )}
+            {user && (
+              <li class="nav-item">
+                <Link
+                  class="nav-link"
+                  activeClassName={"active"}
+                  href="/feedback"
+                >
+                  Feedback
                 </Link>
               </li>
             )}
