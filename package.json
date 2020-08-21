@@ -24,10 +24,10 @@
     "build/*"
   ],
   "dependencies": {
-    "@types/sortablejs": "1.10.5",
+    "@types/sortablejs": "1.10.6",
     "bootstrap": "5.0.0-alpha1",
     "copy-to-clipboard": "3.3.1",
-    "firebase": "7.18.0",
+    "firebase": "7.19.0",
     "node-sass": "4.14.1",
     "preact": "^10.4.7",
     "preact-jsx-chai": "^3.0.0",

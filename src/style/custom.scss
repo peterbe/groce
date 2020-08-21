@@ -1,1 +1,8 @@
 @import "bootstrap/scss/bootstrap";
+
+div.main {
+  // Without this hack, the fixed-bottom navbar might always overlay
+  // the last items on the page.
+  padding-bottom: 80px;
+
+}

@@ -80,7 +80,12 @@ const FeedbackOuter: FunctionalComponent<Props> = (props: Props) => {
         just for you but for everybody. Please share you feedback.
       </p>
       <Feedback {...props} />
+
       <GoBack />
+
+      <p style={{marginTop: 50}}>
+        If you prefer you can send any feedback to <code>mail@peterbe.com</code>.
+      </p>
     </div>
   );
 };
@@ -123,9 +128,7 @@ function Form({
           : null,
         added: firebase.firestore.Timestamp.fromDate(new Date()),
       })
-      .then((thing) => {
-        console.log({ thing });
-
+      .then(() => {
         setSubmitted(true);
         setSubject("");
         setTopic("");
@@ -279,7 +282,7 @@ function Submissions({
             setSubmissions(newSubmissions);
           },
           (error) => {
-            console.error("Error getting snapshot", error);
+            console.error("Error getting submission snapshot", error);
           }
         );
     }
@@ -287,7 +290,7 @@ function Submissions({
     return () => {
       if (ref) ref();
     };
-  });
+  }, [db, user]);
 
   if (!submissions || !submissions.length) {
     return null;

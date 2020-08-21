@@ -1,6 +1,20 @@
 {
   "indexes": [
     {
+      "collectionGroup": "feedback",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "creator_uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "added",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "shoppinglists",
       "queryScope": "COLLECTION",
       "fields": [

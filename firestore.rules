@@ -2,6 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+		match /feedback/{feedbackID} {
+    	allow create: if request.auth != null;
+      allow read: if request.auth != null && request.auth.uid == resource.data.creator_uid;
+    }
 
 	  // Authenticated users can query the "invitations" collection group
     // Applies to collection queries, collection group queries, and

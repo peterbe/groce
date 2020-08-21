@@ -139,49 +139,52 @@ const App: FunctionalComponent = () => {
       <DisplayPersistenceError error={persistenceError} />
       {/* <Router onChange={handleRoute}> */}
 
-      <Router>
-        <Route
-          path="/"
-          component={Home}
-          db={db}
-          user={user}
-          auth={auth}
-          lists={lists}
-        />
-        <Route
-          path="/shopping"
-          component={Shopping}
-          user={user}
-          db={db}
-          lists={lists}
-        />
-        <Route
-          path="/shopping/:id"
-          component={ShoppingList}
-          lists={lists}
-          user={user}
-          db={db}
-        />
-        <Route
-          path="/invited/:listID/:invitationID"
-          component={Invited}
-          lists={lists}
-          user={user}
-          db={db}
-        />
-        <Route path="/signin" component={Signin} user={user} auth={auth} />
-        <Route path="/settings" component={Settings} />
-        <Route
-          path="/feedback"
-          component={Feedback}
-          lists={lists}
-          user={user}
-          db={db}
-        />
-        <NotFoundPage default />
-      </Router>
-
-      {process.env.NODE_ENV === "development" && db && <DebugOffline db={db} />}
+      <div class="main">
+        <Router>
+          <Route
+            path="/"
+            component={Home}
+            db={db}
+            user={user}
+            auth={auth}
+            lists={lists}
+          />
+          <Route
+            path="/shopping"
+            component={Shopping}
+            user={user}
+            db={db}
+            lists={lists}
+          />
+          <Route
+            path="/shopping/:id"
+            component={ShoppingList}
+            lists={lists}
+            user={user}
+            db={db}
+          />
+          <Route
+            path="/invited/:listID/:invitationID"
+            component={Invited}
+            lists={lists}
+            user={user}
+            db={db}
+          />
+          <Route path="/signin" component={Signin} user={user} auth={auth} />
+          <Route path="/settings" component={Settings} />
+          <Route
+            path="/feedback"
+            component={Feedback}
+            lists={lists}
+            user={user}
+            db={db}
+          />
+          <NotFoundPage default />
+        </Router>
+        {process.env.NODE_ENV === "development" && db && (
+          <DebugOffline db={db} />
+        )}
+      </div>
     </div>
   );
 };

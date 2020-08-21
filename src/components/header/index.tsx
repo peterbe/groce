@@ -21,7 +21,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
       class="navbar fixed-bottom navbar-light bg-light"
       style={{ backgroundColor: "#e3f2fd" }}
     >
-      <div class="container-fluid">
+      <div class="container-md">
         <Link class="navbar-brand" href="/">
           <img
             src={"/assets/icons/favicon-32x32.png"}
@@ -62,6 +62,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 activeClassName={"active"}
                 href="/"
                 aria-current="page"
+                onClick={() => {
+                  setShowNavbar(false)
+                }}
               >
                 Home
               </Link>
@@ -73,6 +76,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   activeClassName={"active"}
                   // aria-current="page"
                   href="/shopping"
+                  onClick={() => {
+                    setShowNavbar(false)
+                  }}
                 >
                   Shopping
                 </Link>
@@ -84,6 +90,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   class="nav-link"
                   activeClassName={"active"}
                   href="/settings"
+                  onClick={() => {
+                    setShowNavbar(false)
+                  }}
                 >
                   Settings
                 </Link>
@@ -95,6 +104,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   class="nav-link"
                   activeClassName={"active"}
                   href="/feedback"
+                  onClick={() => {
+                    setShowNavbar(false)
+                  }}
                 >
                   Feedback
                 </Link>
@@ -126,7 +138,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   }
                   aria-labelledby="navbarDropdownSignin"
                 >
-                  <li>
+                  {/* <li>
                     <a
                       class="dropdown-item"
                       href="#"
@@ -142,7 +154,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                     >
                       Popup
                     </a>
-                  </li>
+                  </li> */}
                   <li>
                     <a
                       class="dropdown-item"
@@ -156,7 +168,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                         }
                       }}
                     >
-                      Redirect
+                      Sign in with Google
                     </a>
                   </li>
                 </ul>
