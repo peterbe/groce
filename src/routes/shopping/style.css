@@ -5,3 +5,13 @@
   min-height: 100%; */
   width: 100%;
 }
+
+.list_preview_items {
+  margin-top: 15px;
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.add_new_group {
+  margin-top: 40px;
+}

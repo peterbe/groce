@@ -112,6 +112,8 @@ const App: FunctionalComponent = () => {
               order: data.order,
               owners: data.owners,
               metadata: doc.metadata,
+              recent_items: data.recent_items || [],
+              active_items_count: data.active_items_count || 0,
             });
           });
 

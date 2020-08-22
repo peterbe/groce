@@ -83,8 +83,9 @@ const FeedbackOuter: FunctionalComponent<Props> = (props: Props) => {
 
       <GoBack />
 
-      <p style={{marginTop: 50}}>
-        If you prefer you can send any feedback to <code>mail@peterbe.com</code>.
+      <p style={{ marginTop: 50 }}>
+        If you prefer you can send any feedback to <code>mail@peterbe.com</code>
+        .
       </p>
     </div>
   );

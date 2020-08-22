@@ -63,7 +63,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 href="/"
                 aria-current="page"
                 onClick={() => {
-                  setShowNavbar(false)
+                  setShowNavbar(false);
                 }}
               >
                 Home
@@ -77,7 +77,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   // aria-current="page"
                   href="/shopping"
                   onClick={() => {
-                    setShowNavbar(false)
+                    setShowNavbar(false);
                   }}
                 >
                   Shopping
@@ -91,7 +91,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   activeClassName={"active"}
                   href="/settings"
                   onClick={() => {
-                    setShowNavbar(false)
+                    setShowNavbar(false);
                   }}
                 >
                   Settings
@@ -105,7 +105,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   activeClassName={"active"}
                   href="/feedback"
                   onClick={() => {
-                    setShowNavbar(false)
+                    setShowNavbar(false);
                   }}
                 >
                   Feedback

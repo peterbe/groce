@@ -1,4 +1,4 @@
-import { FunctionalComponent, h, JSX } from "preact";
+import { FunctionalComponent, h, createRef } from "preact";
 import { route } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 import * as style from "./style.css";
@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
-import { FirestoreItem, Item, List } from "../../types";
+import { List } from "../../types";
 // import { list } from "../list/style.css";
 
 interface Props {
@@ -40,6 +40,8 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           order:
             1 +
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
+          recent_items: [],
+          active_items_count: 0,
         });
         toggleAddNewList(false);
       } catch (error) {
@@ -104,10 +106,10 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
         })}
 
       {db && (
-        <div style={{ marginTop: 60 }}>
+        <div class={style.add_new_group}>
           <button
             type="button"
-            class="btn btn-secondary"
+            class="btn btn-sm btn-outline-primary"
             onClick={() => {
               toggleAddNewList((prev) => !prev);
             }}
@@ -146,6 +148,13 @@ function NewList({
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
+  const newNameRef = createRef<HTMLInputElement>();
+
+  useEffect(() => {
+    if (newNameRef.current) {
+      newNameRef.current.focus();
+    }
+  }, [newNameRef]);
 
   const submittable =
     name.trim() &&
@@ -171,10 +180,9 @@ function NewList({
         </label>
         <input
           value={name}
-          onInput={({
-            currentTarget,
-          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-            setName(currentTarget.value);
+          ref={newNameRef}
+          onInput={(event) => {
+            setName(event.currentTarget.value);
           }}
           type="text"
           class="form-control"
@@ -215,71 +223,12 @@ function NewList({
 
 function PreviewList({
   list,
-  db,
 }: {
   list: List;
   db: firebase.firestore.Firestore;
 }) {
-  const [items, setItems] = useState<Item[] | null>(null);
-  const [itemsError, setItemsError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (list.metadata.hasPendingWrites) {
-      // List has pending writes so don't start querying it yet
-      return;
-    }
-
-    const itemsCollection = db
-      .collection("shoppinglists")
-      .doc(list.id)
-      .collection("items");
-
-    const ref = itemsCollection.where("removed", "==", false).onSnapshot(
-      (snapshot) => {
-        const newItems: Item[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data() as FirestoreItem;
-          newItems.push({
-            id: doc.id,
-            text: data.text,
-            description: data.description,
-            done: data.done,
-            group: data.group,
-            removed: data.removed,
-            added: data.added,
-            times_added: data.times_added || 1,
-          });
-        });
-        setItems(newItems);
-      },
-      (error) => {
-        console.error(`Error listing on ${list.id}:`, error);
-        setItemsError(error);
-      }
-    );
-    return () => {
-      if (ref) {
-        ref();
-      }
-    };
-  }, [list, db]);
-
-  if (itemsError) {
-    return (
-      <Alert
-        heading="Error previewing list items"
-        message={itemsError.toString()}
-      />
-    );
-  }
-
-  if (!items || list.metadata.hasPendingWrites) {
-    return (
-      <div class="spinner-border" role="status">
-        <span class="sr-only">Loading...</span>
-      </div>
-    );
-  }
+  const items = list.recent_items || [];
+  const activeItemsCount = list.active_items_count || 0;
 
   if (!items.length) {
     return (
@@ -289,14 +238,30 @@ function PreviewList({
     );
   }
 
+  const count = activeItemsCount || items.length;
+  const CUTOFF = 5;
+
   return (
-    <ul>
-      {items.slice(0, 5).map((item) => {
-        return <li key={item.id}>{item.text}</li>;
+    <ul class={style.list_preview_items}>
+      {items.slice(0, CUTOFF).map((item) => {
+        return (
+          <li key={item.text}>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value=""
+              disabled={true}
+              checked={item.done}
+            />{" "}
+            {item.text}
+          </li>
+        );
       })}
-      {items.length > 5 && (
+      {count > CUTOFF && (
         <li>
-          <i>and {items.length - 5} more items...</i>
+          <i>
+            and {count - CUTOFF} more item{count - CUTOFF > 1 ? "s" : ""}...
+          </i>
         </li>
       )}
     </ul>

@@ -35,12 +35,12 @@ export const ListItem: FunctionalComponent<Props> = ({
   }, [item]);
   const hasChanged = updated > 1;
 
-  const textInputRef = createRef();
+  const textInputRef = createRef<HTMLInputElement>();
   useEffect(() => {
     if (editMode && textInputRef.current) {
-      (textInputRef.current as HTMLInputElement).focus();
+      textInputRef.current.focus();
     }
-  }, [editMode]);
+  }, [editMode, textInputRef]);
 
   if (editMode) {
     return (

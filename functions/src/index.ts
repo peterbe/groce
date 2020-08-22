@@ -37,13 +37,10 @@ interface BriefItem {
 export const onShoppinglistItemWrite = functions.firestore
   .document("shoppinglists/{listID}/items/{itemID}")
   .onWrite((change, context) => {
-    // console.log(
-    //   `ITEM write: listID=${context.params.listID} itemID=${
-    //     context.params.itemID
-    //   }`
-    // );
-    // const data = change.after.data();
-    // console.log(`ITEM WRITE data: ${JSON.stringify(data)}`);
+    // Number of items to put into the `recent_items` array.
+    // It's ideal if this matches the business logic of displaying.
+    const CUTOFF_RECENT_ITEMS = 5;
+
     return admin
       .firestore()
       .collection("shoppinglists")
@@ -58,8 +55,10 @@ export const onShoppinglistItemWrite = functions.firestore
           return Promise.resolve("Shopping list contains no data :(");
         }
         // console.log(`Wrote to shopping list: ${data.name}`);
-        // Get a summary of the top 10 most recently added items
+        const recentItemsBefore = data.recent_items;
+        const activeItemsCountBefore = data.active_items_count;
 
+        // Get a summary of the top 10 most recently added items
         return admin
           .firestore()
           .collection("shoppinglists")
@@ -89,20 +88,35 @@ export const onShoppinglistItemWrite = functions.firestore
                 return -1;
               }
             });
+
             // console.log(`ITEMS: ${JSON.stringify(items)}`);
-            const recentItems = items.slice(0, 10).map(item => {
-              return {
-                text: item.text,
-                description: item.description,
-                done: item.done
-              };
-            });
+            const recentItems = items
+              .slice(0, CUTOFF_RECENT_ITEMS)
+              .map(item => {
+                return {
+                  text: item.text,
+                  description: item.description,
+                  done: item.done
+                };
+              });
+
+            if (
+              items.length === activeItemsCountBefore &&
+              JSON.stringify(recentItemsBefore) === JSON.stringify(recentItems)
+            ) {
+              console.log(
+                "The recent_items and active_items_count has not changed."
+              );
+              return Promise.resolve("No need to update");
+            }
+
             return admin
               .firestore()
               .collection("shoppinglists")
               .doc(context.params.listID)
               .update({
-                recent_items: recentItems
+                recent_items: recentItems,
+                active_items_count: items.length
               })
               .then(() => {
                 return Promise.resolve(

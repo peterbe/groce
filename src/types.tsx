@@ -19,11 +19,20 @@ export interface Item extends FirestoreItem {
   id: string;
 }
 
+export interface ListRecentItems {
+  text: string;
+  description: string;
+  done: boolean;
+}
 export interface FirestoreList {
   name: string;
   notes: string;
   order: number;
   owners: string[];
+  // XXX This can cease to be optional because all new lists
+  // are created with these set. As of Aug 21.
+  recent_items?: ListRecentItems[];
+  active_items_count?: number;
 }
 
 export interface FirestoreDocumentMetadata {
