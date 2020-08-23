@@ -1,5 +1,5 @@
-import { FunctionalComponent, h, createRef } from "preact";
-import { useState, useEffect } from "preact/hooks";
+import { FunctionalComponent, h } from "preact";
+import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
@@ -82,6 +82,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
               description: data.description,
               done: data.done,
               group: data.group,
+              quantity: data.quantity || 0,
               removed: data.removed,
               added: data.added,
               times_added: data.times_added || 1,
@@ -120,7 +121,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   const [clearedItems, setClearedItems] = useState<Item[]>([]);
 
-  const clearTimerRef = createRef();
+  const clearTimerRef = useRef();
 
   useEffect(() => {
     if (clearedItems.length) {
@@ -208,6 +209,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           text: previousItem.text,
           description: previousItem.description,
           group: previousItem.group,
+          quantity: 0,
           done: false,
           removed: false,
           added: [
@@ -230,6 +232,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
             order: 0,
             text: "",
           },
+          quantity: 0,
           done: false,
           removed: false,
           added: [firebase.firestore.Timestamp.fromDate(new Date())],
@@ -263,7 +266,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
     item: Item,
     text: string,
     description: string,
-    group: string
+    group: string,
+    quantity: number
   ) {
     if (db) {
       const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
@@ -275,6 +279,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
             order: item.group.order,
             text: group,
           },
+          quantity,
         })
         .then(() => {
           console.log("Updated", item.id);

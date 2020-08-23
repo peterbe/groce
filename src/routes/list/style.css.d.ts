@@ -16,6 +16,7 @@ declare namespace StyleCssNamespace {
     mappings: string;
     names: string;
     organize_groups: string;
+    quantity_button: string;
     rainbow_animation: string;
     rainbow_text_animated: string;
     search_suggestions: string;

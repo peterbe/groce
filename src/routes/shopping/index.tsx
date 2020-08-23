@@ -1,6 +1,6 @@
-import { FunctionalComponent, h, createRef } from "preact";
+import { FunctionalComponent, h } from "preact";
 import { route } from "preact-router";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
@@ -46,7 +46,6 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
         toggleAddNewList(false);
       } catch (error) {
         console.error("Error creating shopping list:", error);
-        // XXX
       }
     }
   }
@@ -148,11 +147,12 @@ function NewList({
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
-  const newNameRef = createRef<HTMLInputElement>();
+  const newNameRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
     if (newNameRef.current) {
       newNameRef.current.focus();
+      newNameRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [newNameRef]);
 
@@ -253,7 +253,8 @@ function PreviewList({
               disabled={true}
               checked={item.done}
             />{" "}
-            {item.text}
+            {item.text}{" "}
+            {!!item.quantity && item.quantity !== 1 && <b>x{item.quantity}</b>}
           </li>
         );
       })}

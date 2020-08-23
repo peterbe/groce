@@ -103,7 +103,6 @@ const App: FunctionalComponent = () => {
           }
           const newLists: List[] = [];
           snapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
             const data = doc.data() as FirestoreList;
             newLists.push({
               id: doc.id,
@@ -117,10 +116,23 @@ const App: FunctionalComponent = () => {
             });
           });
 
-          // XXX What we could do is newLists.length ===0 is to forcibly
-          // create a first default one.
           if (!newLists.length) {
-            console.log("Consider creating one!");
+            // Manually create their first ever list
+            db.collection("shoppinglists")
+              .add({
+                name: "Groceries 🌽",
+                notes: "",
+                owners: [user.uid],
+                order: 0,
+                recent_items: [],
+                active_items_count: 0,
+              })
+              .then(() => {
+                console.log("Added first default shopping list");
+              })
+              .catch((error) => {
+                console.error("Error creating first sample list", error);
+              });
           }
 
           setLists(newLists);

@@ -32,6 +32,7 @@ interface BriefItem {
   text: string;
   description: string;
   done: boolean;
+  quantity?: number;
   added: Date;
 }
 export const onShoppinglistItemWrite = functions.firestore
@@ -76,6 +77,7 @@ export const onShoppinglistItemWrite = functions.firestore
                 text: data.text,
                 description: data.description,
                 added: data.added[0].toDate(),
+                quantity: data.quantity || 0,
                 done: data.done
               });
             });
@@ -89,13 +91,13 @@ export const onShoppinglistItemWrite = functions.firestore
               }
             });
 
-            // console.log(`ITEMS: ${JSON.stringify(items)}`);
             const recentItems = items
               .slice(0, CUTOFF_RECENT_ITEMS)
               .map(item => {
                 return {
                   text: item.text,
                   description: item.description,
+                  quantity: item.quantity,
                   done: item.done
                 };
               });

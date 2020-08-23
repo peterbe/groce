@@ -9,6 +9,7 @@ export interface FirestoreItem {
   text: string;
   description: string;
   group: ItemGroup;
+  quantity: number;
   done: boolean;
   removed: boolean;
   added: firebase.firestore.Timestamp[];
@@ -23,6 +24,7 @@ export interface ListRecentItems {
   text: string;
   description: string;
   done: boolean;
+  quantity: number;
 }
 export interface FirestoreList {
   name: string;
