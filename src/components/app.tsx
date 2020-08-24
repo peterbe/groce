@@ -3,7 +3,6 @@ import { Route, Router } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 
 import "../style/custom.scss";
-// import * as firebase from "firebase/app";
 import firebase from "firebase/app";
 
 import "firebase/auth";
@@ -28,25 +27,11 @@ if ((module as any).hot) {
 }
 
 import { List, FirestoreList } from "../types";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBlMzrsBR_KWXDdgntBgnCThjRqr-0I8js",
-  authDomain: "groce-dev.firebaseapp.com",
-  databaseURL: "https://groce-dev.firebaseio.com",
-  projectId: "groce-dev",
-  storageBucket: "groce-dev.appspot.com",
-  messagingSenderId: "170241343352",
-  appId: "1:170241343352:web:5282dd555337af2a62d28d",
-};
+import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
 
 const App: FunctionalComponent = () => {
-  // let currentUrl: string;
-  // const handleRoute = (e: RouterOnChangeArgs) => {
-  //   currentUrl = e.url;
-  // };
-
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
   const [user, setUser] = useState<firebase.User | null | false>(null);
   const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);

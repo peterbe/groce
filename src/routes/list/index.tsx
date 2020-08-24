@@ -59,9 +59,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 
   useEffect(() => {
-    let listDbRef: () => void;
+    let ref: () => void;
     if (db && list) {
-      listDbRef = db.collection(`shoppinglists/${id}/items`).onSnapshot(
+      ref = db.collection(`shoppinglists/${id}/items`).onSnapshot(
         // { includeMetadataChanges: true },
         (snapshot) => {
           if (
@@ -112,9 +112,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
       );
     }
     return () => {
-      if (listDbRef) {
-        console.log("Detach list db ref listener");
-        listDbRef();
+      if (ref) {
+        ref();
       }
     };
   }, [id, list, user, db]);
