@@ -17,6 +17,15 @@
     ],
     "headers": [
       {
+        "source": "/sw-esm.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=0"
+          }
+        ]
+      },
+      {
         "source": "/bundle.*",
         "headers": [
           {
