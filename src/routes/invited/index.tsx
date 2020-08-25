@@ -133,7 +133,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
   }
 
   function discardInvitation() {
-    if (db && user && invitation) {
+    if (db && user && invitation && invitation.email === user.email) {
       db.collection("shoppinglists")
         .doc(listID)
         .collection("invitations")

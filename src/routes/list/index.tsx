@@ -58,6 +58,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 
+  const [recentlyModifiedItems, setRecentlyModifiedItems] = useState<
+    Map<string, Date>
+  >(new Map());
+
   useEffect(() => {
     let ref: () => void;
     if (db && list) {
@@ -104,6 +108,15 @@ const ShoppingList: FunctionalComponent<Props> = ({
           });
 
           setItems(newItems);
+
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "modified") {
+              // const newRecentlyModifiedItems = new Map(recentlyModifiedItems);
+              const newRecentlyModifiedItems = new Map();
+              newRecentlyModifiedItems.set(change.doc.id, new Date());
+              setRecentlyModifiedItems(newRecentlyModifiedItems);
+            }
+          });
         },
         (error) => {
           console.error("Snapshot error:", error);
@@ -454,6 +467,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
                 <ListItem
                   key={item.id}
                   item={item}
+                  modified={recentlyModifiedItems.get(item.id) || null}
                   groupOptions={groupOptions}
                   toggleDone={updateItemDoneToggle}
                   updateItem={updateItem}
@@ -473,6 +487,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
                   <ListItem
                     key={item.id}
                     item={item}
+                    modified={recentlyModifiedItems.get(item.id) || null}
                     groupOptions={groupOptions}
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}

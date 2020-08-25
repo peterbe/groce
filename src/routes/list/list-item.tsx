@@ -15,6 +15,7 @@ interface Props {
     group: string,
     quantity: number
   ) => void;
+  modified: null | Date;
 }
 
 export const ListItem: FunctionalComponent<Props> = ({
@@ -22,21 +23,24 @@ export const ListItem: FunctionalComponent<Props> = ({
   groupOptions,
   toggleDone,
   updateItem,
+  modified,
 }: Props) => {
-  const [text, setText] = useState(item.text);
-  const [description, setDescription] = useState(item.description);
-  const [group, setGroup] = useState(item.group.text);
-  const [quantity, setQuantity] = useState<string | number>(
-    item.quantity || ""
-  );
+  const [text, setText] = useState("");
+  const [description, setDescription] = useState("");
+  const [group, setGroup] = useState("");
+  const [quantity, setQuantity] = useState<string | number>("");
   const [editMode, setEditMode] = useState(false);
-  const [updated, setUpdated] = useState(0);
-  const [ignoreUpdatedWarning, toggleIgnoreUpdatedWarning] = useState(false);
+
+  const recentlyAdded = new Date().getTime() / 1000 - item.added[0].seconds < 3;
+  const recentlyModified =
+    modified && (new Date().getTime() - modified.getTime()) / 1000 < 3;
 
   useEffect(() => {
-    setUpdated((before) => before + 1);
+    setText(item.text);
+    setDescription(item.description);
+    setGroup(item.group.text);
+    setQuantity(item.quantity || "");
   }, [item]);
-  const hasChanged = updated > 1;
 
   const textInputRef = useRef<HTMLInputElement>();
   useEffect(() => {
@@ -48,6 +52,11 @@ export const ListItem: FunctionalComponent<Props> = ({
   if (editMode) {
     return (
       <li class="list-group-item">
+        {recentlyModified && (
+          <div class="alert alert-info" role="alert">
+            <small>This was recently modified.</small>
+          </div>
+        )}
         <form
           class="mb-3"
           onSubmit={(event) => {
@@ -59,6 +68,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               ? 0
               : parseInt(`${quantity}`);
             updateItem(item, text, description, group, quantityNumber);
+            // initialText.current = text;
             setEditMode(false);
           }}
         >
@@ -163,6 +173,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               type="button"
               class="btn btn-secondary"
               onClick={() => {
+                // resetEdits();
                 setEditMode(false);
               }}
             >
@@ -170,43 +181,8 @@ export const ListItem: FunctionalComponent<Props> = ({
             </button>
           </div>
         </form>
-        {hasChanged && !ignoreUpdatedWarning && (
-          <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Watch out!</h4>
-            <p>This item has changed since you started editing.</p>
-            <hr />
-            <p class="mb-0">
-              <button
-                type="button"
-                class="btn btn-sm btn-primary"
-                onClick={() => {
-                  setText(item.text);
-                  setDescription(item.description);
-                  setGroup(item.group.text);
-                  setUpdated(1);
-                }}
-              >
-                Reload
-              </button>{" "}
-              <button
-                type="button"
-                class="btn btn-sm btn-secondary"
-                onClick={() => {
-                  toggleIgnoreUpdatedWarning(true);
-                }}
-              >
-                Ignore
-              </button>
-            </p>
-          </div>
-        )}
       </li>
     );
-  }
-
-  function recentlyAdded(item: Item) {
-    const age = new Date().getTime() / 1000 - item.added[0].seconds;
-    return age < 2;
   }
 
   return (
@@ -226,7 +202,7 @@ export const ListItem: FunctionalComponent<Props> = ({
           class={
             item.done
               ? style.done_item
-              : recentlyAdded(item)
+              : recentlyAdded || recentlyModified
               ? style.rainbow_text_animated
               : undefined
           }
