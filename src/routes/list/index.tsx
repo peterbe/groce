@@ -392,7 +392,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     <div class={style.list}>
       {snapshotsOffline && <OfflineWarning />}
 
-      <p class="float-right">
+      <p class="float-right hide-in-print">
         <button
           type="button"
           class={editAction ? "btn btn-sm btn-info" : "btn btn-sm"}
@@ -537,7 +537,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         hasOrganizableGroups &&
         !editAction &&
         !editGroups && (
-          <div class={style.edit_groups_action}>
+          <div class={`${style.edit_groups_action} hide-in-print`}>
             <button
               type="button"
               class="btn btn-sm btn-outline-primary"

@@ -7,7 +7,10 @@ import firebase from "firebase/app";
 
 import "firebase/auth";
 import "firebase/firestore";
-import "firebase/performance";
+// Commented out at the moment because it breaks the preact-cli deployer
+// which does a Node render for the sake of a fast build artifact.
+// Hmmm...
+// import "firebase/performance";
 
 import Home from "../routes/home";
 import Invited from "../routes/invited";
@@ -18,6 +21,7 @@ import NotFoundPage from "../routes/notfound";
 import Settings from "../routes/settings";
 import Header from "./header";
 import Feedback from "../routes/feedback";
+import About from "../routes/about";
 import { OfflineWarning } from "./offline-warning";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,7 +37,11 @@ import { firebaseConfig } from "../firebaseconfig";
 const app = firebase.initializeApp(firebaseConfig);
 
 // Initialize Performance Monitoring and get a reference to the service
-const perf = firebase.performance();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// let perf: firebase.performance.Performance | null = null;
+// if (typeof window !== "undefined") {
+//   perf = firebase.performance();
+// }
 
 const App: FunctionalComponent = () => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
@@ -77,6 +85,11 @@ const App: FunctionalComponent = () => {
   useEffect(() => {
     let shoppinglistsDbRef: () => void;
     if (db && user) {
+      // const trace = perf
+      //   ? perf.trace("initial_shoppinglists_collection")
+      //   : null;
+      // let traceOnce = false;
+      // trace && trace.start();
       shoppinglistsDbRef = db
         .collection("shoppinglists")
         .where("owners", "array-contains", user.uid)
@@ -125,6 +138,11 @@ const App: FunctionalComponent = () => {
           }
 
           setLists(newLists);
+
+          // if (trace && !traceOnce) {
+          //   trace.stop();
+          //   traceOnce = true;
+          // }
         });
     }
     return () => {
@@ -182,6 +200,7 @@ const App: FunctionalComponent = () => {
             user={user}
             db={db}
           />
+          <Route path="/about" component={About} />
           <NotFoundPage default />
         </Router>
         {process.env.NODE_ENV === "development" && db && (
@@ -251,7 +270,7 @@ function DebugOffline({ db }: { db: firebase.firestore.Firestore }) {
     return null;
   }
   return (
-    <div>
+    <div class="hide-in-print">
       <div class="form-check form-switch" style={{ marginTop: 100 }}>
         <input
           class="form-check-input"

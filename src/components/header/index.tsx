@@ -110,6 +110,40 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               </li>
             )}
+            <li class="nav-item">
+              <Link
+                class="nav-link"
+                activeClassName={"active"}
+                href="/about"
+                onClick={() => {
+                  setShowNavbar(false);
+                }}
+              >
+                About
+              </Link>
+            </li>
+            <li class="nav-item">
+              <Link
+                class="nav-link"
+                href="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setShowNavbar(false);
+                  try {
+                    // Print for Safari browser
+                    document.execCommand("print", false);
+                  } catch (error) {
+                    // Firefox?
+                    console.error(
+                      "Unable to use 'document.execCommand(print)'"
+                    );
+                    window.print();
+                  }
+                }}
+              >
+                Print this page
+              </Link>
+            </li>
 
             {auth && !user && (
               <li class="nav-item dropdown">

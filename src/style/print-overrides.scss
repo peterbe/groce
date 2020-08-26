@@ -1,0 +1,37 @@
+@media print {
+  nav {
+    // Not sure why this is needed but it works.
+    display: none !important;
+  }
+  nav,
+  button,
+  a.btn,
+  .hide-in-print,
+  form {
+    display: none;
+  }
+  li.list-group-item {
+    border-radius: none;
+    border-left: none;
+    border-right: none;
+    padding: 10px;
+  }
+  ul.list-group {
+    margin-top: 50px;
+  }
+}
+
+// button,
+// nav {
+//   @media print {
+//     display: none;
+//   }
+// }
+
+.print-only {
+  display: none;
+
+  @media print {
+    display: block;
+  }
+}
