@@ -84,20 +84,18 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               </li>
             )}
-            {user && (
-              <li class="nav-item">
-                <Link
-                  class="nav-link"
-                  activeClassName={"active"}
-                  href="/settings"
-                  onClick={() => {
-                    setShowNavbar(false);
-                  }}
-                >
-                  Settings
-                </Link>
-              </li>
-            )}
+            <li class="nav-item">
+              <Link
+                class="nav-link"
+                activeClassName={"active"}
+                href="/settings"
+                onClick={() => {
+                  setShowNavbar(false);
+                }}
+              >
+                Settings
+              </Link>
+            </li>
             {user && (
               <li class="nav-item">
                 <Link

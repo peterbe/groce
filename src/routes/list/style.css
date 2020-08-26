@@ -61,7 +61,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   /*     color: black; */
-  animation: rainbow_animation 6s ease-in-out 1;
+  animation: rainbow_animation 4s ease-in-out 1;
   background-size: 400% 100%;
   background-position: 0 0;
 }
@@ -85,4 +85,9 @@
 
 .quantity_button {
   padding: 6px 20px;
+}
+
+.list_item_edit_mode {
+  padding-top: 35px;
+  padding-bottom: 20px;
 }

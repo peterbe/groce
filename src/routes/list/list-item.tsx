@@ -51,7 +51,7 @@ export const ListItem: FunctionalComponent<Props> = ({
 
   if (editMode) {
     return (
-      <li class="list-group-item">
+      <li class={`list-group-item ${style.list_item_edit_mode}`}>
         {recentlyModified && (
           <div class="alert alert-info" role="alert">
             <small>This was recently modified.</small>
@@ -68,7 +68,6 @@ export const ListItem: FunctionalComponent<Props> = ({
               ? 0
               : parseInt(`${quantity}`);
             updateItem(item, text, description, group, quantityNumber);
-            // initialText.current = text;
             setEditMode(false);
           }}
         >
@@ -172,8 +171,8 @@ export const ListItem: FunctionalComponent<Props> = ({
             <button
               type="button"
               class="btn btn-secondary"
-              onClick={() => {
-                // resetEdits();
+              onClick={(event) => {
+                event.stopPropagation();
                 setEditMode(false);
               }}
             >
@@ -186,14 +185,24 @@ export const ListItem: FunctionalComponent<Props> = ({
   }
 
   return (
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li
+      class="list-group-item d-flex justify-content-between align-items-center"
+      onClick={() => {
+        setEditMode(true);
+      }}
+    >
       <span>
         <input
           class="form-check-input mr-1"
           id={`checkbox${item.id}`}
           type="checkbox"
           checked={item.done}
-          onClick={() => {
+          onClick={(event) => {
+            // Because the whole <li> (that this is contained in) has an
+            // onClick, we have to use this line otherwise the "parent"
+            // onClick handler will also fire.
+            event.stopPropagation();
+
             toggleDone(item);
           }}
           aria-label={item.text}
@@ -206,9 +215,6 @@ export const ListItem: FunctionalComponent<Props> = ({
               ? style.rainbow_text_animated
               : undefined
           }
-          onClick={() => {
-            setEditMode(true);
-          }}
         >
           {item.text}{" "}
           {!!item.quantity && item.quantity !== 1 && <b>x{item.quantity}</b>}{" "}
@@ -223,9 +229,6 @@ export const ListItem: FunctionalComponent<Props> = ({
         class={
           item.group.text ? "badge bg-secondary" : "badge bg-light text-dark"
         }
-        onClick={() => {
-          setEditMode(true);
-        }}
       >
         {item.group.text || "no group"}
       </span>

@@ -7,6 +7,7 @@ import firebase from "firebase/app";
 
 import "firebase/auth";
 import "firebase/firestore";
+import "firebase/performance";
 
 import Home from "../routes/home";
 import Invited from "../routes/invited";
@@ -30,6 +31,9 @@ import { List, FirestoreList } from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
+
+// Initialize Performance Monitoring and get a reference to the service
+const perf = firebase.performance();
 
 const App: FunctionalComponent = () => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);

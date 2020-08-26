@@ -9,6 +9,7 @@ declare namespace StyleCssNamespace {
     empty_list: string;
     item_description: string;
     list: string;
+    list_item_edit_mode: string;
     listoptions: string;
     listoptions_section: string;
     loading_list_items: string;
