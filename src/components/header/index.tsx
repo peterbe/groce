@@ -138,23 +138,6 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   }
                   aria-labelledby="navbarDropdownSignin"
                 >
-                  {/* <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onClick={async () => {
-                        const provider = new firebase.auth.GoogleAuthProvider();
-                        try {
-                          await auth.signInWithPopup(provider);
-                          // route('/', true)
-                        } catch (error) {
-                          console.log("ERROR:", error);
-                        }
-                      }}
-                    >
-                      Popup
-                    </a>
-                  </li> */}
                   <li>
                     <a
                       class="dropdown-item"
@@ -169,6 +152,22 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                       }}
                     >
                       Sign in with Google
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onClick={async () => {
+                        const provider = new firebase.auth.GoogleAuthProvider();
+                        try {
+                          await auth.signInWithPopup(provider);
+                        } catch (error) {
+                          console.log("ERROR:", error);
+                        }
+                      }}
+                    >
+                      Sign in (with popup)
                     </a>
                   </li>
                 </ul>

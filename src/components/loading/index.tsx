@@ -22,7 +22,7 @@ export const Loading: FunctionalComponent<Props> = ({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [delay]);
 
   const colors = [
     "text-success",
@@ -34,7 +34,7 @@ export const Loading: FunctionalComponent<Props> = ({
   const [color, setColor] = useState(colors[0]);
   useEffect(() => {
     let mounted = true;
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       if (!mounted) return;
       const index = colors.findIndex((c) => c === color);
       const nextColor = colors[(index + 1) % colors.length];
@@ -43,6 +43,7 @@ export const Loading: FunctionalComponent<Props> = ({
     }, 1000);
     return () => {
       mounted = false;
+      clearTimeout(timeout);
     };
   }, [color, colors]);
 

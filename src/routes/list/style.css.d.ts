@@ -7,7 +7,6 @@ declare namespace StyleCssNamespace {
     edit_groups_action: string;
     editaction: string;
     empty_list: string;
-    file: string;
     item_description: string;
     list: string;
     listoptions: string;
@@ -20,6 +19,7 @@ declare namespace StyleCssNamespace {
     rainbow_animation: string;
     rainbow_text_animated: string;
     search_suggestions: string;
+    sourceRoot: string;
     sources: string;
     sourcesContent: string;
     version: string;

@@ -55,6 +55,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
   // Are there any standing invitations in my name?
   useEffect(() => {
     let ref: () => void;
+    let mounted = true;
 
     if (db && user && user.email && lists) {
       db.collectionGroup("invitations")
@@ -84,7 +85,9 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 accepted: data.accepted,
               });
             });
-            setInvitations(newInvitations);
+            if (mounted) {
+              setInvitations(newInvitations);
+            }
           },
           (error) => {
             console.error("Error getting invitations snapshot", error);
@@ -92,6 +95,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         );
     }
     return () => {
+      mounted = false;
       if (ref) {
         ref();
       }
