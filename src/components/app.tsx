@@ -7,9 +7,11 @@ import firebase from "firebase/app";
 
 import "firebase/auth";
 import "firebase/firestore";
+// import "firebase/analytics";
 // Commented out at the moment because it breaks the preact-cli deployer
 // which does a Node render for the sake of a fast build artifact.
 // Hmmm...
+// XXX Read up on https://kyleshevlin.com/firebase-and-gatsby-together-at-last
 // import "firebase/performance";
 
 import Home from "../routes/home";
@@ -35,6 +37,9 @@ import { List, FirestoreList } from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
+
+// // Enable analytics
+// firebase.analytics();
 
 // Initialize Performance Monitoring and get a reference to the service
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
