@@ -68,6 +68,7 @@ export interface Invitation extends FirestoreInvitation {
   id: string;
 }
 
-export interface PastItem {
+export interface SearchSuggestion {
   text: string;
+  popularity: number;
 }

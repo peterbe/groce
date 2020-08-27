@@ -10,7 +10,8 @@ import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
-import { FirestoreItem, Item, List, PastItem } from "../../types";
+import { ITEM_SUGGESTIONS } from "./default-suggestions";
+import { FirestoreItem, Item, List, SearchSuggestion } from "../../types";
 
 interface Props {
   user: firebase.User | false | null;
@@ -374,16 +375,19 @@ const ShoppingList: FunctionalComponent<Props> = ({
     groupOptions.sort();
   }
 
-  // Note that thankfully they're already sorted
-  const pastItems: PastItem[] = items
-    ? items
-        .filter((i) => i.removed)
-        .map((item) => {
-          return {
-            text: item.text,
-          };
-        })
-    : [];
+  // const searchSuggestions: SearchSuggestion[] = [];
+  // // Note that thankfully they're already sorted
+  // if (items) {
+  //   items.forEach((item, i) => {
+  //     if (item.removed) {
+  //       searchSuggestions.push({
+  //         text: item.text,
+  //         popularity: items.length - i,
+  //       });
+  //     }
+  //   });
+  // }
+  // console.log("Set searchSuggestions", searchSuggestions.length);
 
   const hasOrganizableGroups = Boolean(
     items && items.filter((item) => item.group.text).length
@@ -443,7 +447,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction && !editGroups && (
         <NewItemForm
           ready={!!items}
-          pastItems={pastItems}
+          items={items}
+          // searchSuggestions={searchSuggestions}
           saveHandler={(text: string) => {
             addNewText(text);
           }}
@@ -561,32 +566,73 @@ export default ShoppingList;
 
 function NewItemForm({
   ready,
-  pastItems,
+  // searchSuggestions,
+  items,
   saveHandler,
 }: {
   ready: boolean;
-  pastItems: PastItem[];
+  items: Item[] | null;
+  // searchSuggestions: SearchSuggestion[];
   saveHandler: (text: string) => void;
 }) {
   const [newText, setNewText] = useState("");
-  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  const MAX_SUGGESTIONS = 4;
 
   useEffect(() => {
     if (!newText.trim()) {
-      setSearchSuggestions([]);
-    } else if (pastItems.length) {
+      setSuggestions([]);
+    } else {
+      const newSuggestions: SearchSuggestion[] = [];
       const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const rex = new RegExp(`\\b${escaped}`, "i");
-      setSearchSuggestions(
-        pastItems
-          .filter((pastItem) => {
-            return rex.test(pastItem.text) && pastItem.text !== newText;
-          })
-          .slice(0, 3)
-          .map((pastItem) => pastItem.text)
+
+      if (items) {
+        items.forEach((item, i) => {
+          if (item.removed) {
+            if (
+              rex.test(item.text) &&
+              item.text.toLowerCase() !== newText.toLowerCase()
+            ) {
+              newSuggestions.push({
+                text: item.text,
+                popularity: items.length - i,
+              });
+            }
+          }
+        });
+      }
+      if (newSuggestions.length < MAX_SUGGESTIONS) {
+        // Add some brand new ones that have never been used but
+        // assuming it's English we can suggest some
+        ITEM_SUGGESTIONS.forEach((text) => {
+          if (rex.test(text) && text.toLowerCase() !== newText.toLowerCase()) {
+            newSuggestions.push({
+              text,
+              popularity: 0,
+            });
+          }
+        });
+      }
+
+      // if (searchSuggestions.length) {
+      //   const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      //   const rex = new RegExp(`\\b${escaped}`, "i");
+      //   for (const suggestion of searchSuggestions) {
+      //     if (rex.test(suggestion.text) && suggestion.text !== newText) {
+      //       newSuggestions.push({
+      //         text: suggestion.text,
+      //         popularity: suggestion.popularity,
+      //       });
+      //     }
+      //   }
+      // }
+      setSuggestions(
+        newSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
       );
     }
-  }, [newText, pastItems]);
+  }, [newText, items]);
 
   return (
     <form
@@ -620,9 +666,9 @@ function NewItemForm({
       </div>
 
       <div class={style.search_suggestions}>
-        {searchSuggestions.length ? (
+        {suggestions.length ? (
           <p>
-            {searchSuggestions.map((suggestion) => {
+            {suggestions.map((suggestion) => {
               return (
                 <button
                   type="button"
