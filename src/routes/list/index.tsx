@@ -42,7 +42,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     if (listNotFound) {
       document.title = "🤮 Shopping list not found";
     } else if (listError) {
-      document.title = `List error!`;
+      document.title = `💩List error!`;
     } else if (editAction) {
       document.title = "List options";
     } else if (list) {
