@@ -211,7 +211,11 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         )}
 
         {signinError && (
-          <Alert heading="Sign in error" message={signinError.toString()} />
+          <Alert
+            heading="Sign in error"
+            message={signinError}
+            offerReload={true}
+          />
         )}
       </div>
 

@@ -353,6 +353,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
               List error: <code>{listError.toString()}</code>{" "}
             </p>
           }
+          offerReload={true}
         />
       </div>
     );
@@ -435,6 +436,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
               Items error: <code>{itemsError.toString()}</code>
             </p>
           }
+          offerReload={true}
         />
       )}
 

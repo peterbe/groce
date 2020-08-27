@@ -173,7 +173,11 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
     );
   } else if (invitationError) {
     inner = (
-      <Alert heading="Invitation error" message={invitationError.toString()} />
+      <Alert
+        heading="Invitation error"
+        message={invitationError}
+        offerReload={true}
+      />
     );
   } else if (invitation) {
     if (

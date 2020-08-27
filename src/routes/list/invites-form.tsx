@@ -154,7 +154,8 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
     return (
       <Alert
         heading="Invite couldn't be deleted"
-        message={deleteError.toString()}
+        message={deleteError}
+        offerReload={true}
       />
     );
   }

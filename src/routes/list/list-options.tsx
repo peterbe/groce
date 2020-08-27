@@ -50,7 +50,11 @@ export const ListOptions: FunctionalComponent<Props> = ({
       >
         <h4>List details</h4>
         {updateError && (
-          <Alert heading="Update error" message={updateError.toString()} />
+          <Alert
+            heading="Update error"
+            message={updateError}
+            offerReload={true}
+          />
         )}
         <div class="mb-3">
           <label htmlFor="id_list_name" class="form-label">
@@ -156,7 +160,8 @@ export const ListOptions: FunctionalComponent<Props> = ({
         {deleteError && (
           <Alert
             heading="Unable to delete list"
-            message={deleteError.toString()}
+            message={deleteError}
+            offerReload={true}
           />
         )}
       </div>

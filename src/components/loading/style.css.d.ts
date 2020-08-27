@@ -2,12 +2,6 @@
 declare namespace StyleCssNamespace {
   export interface IStyleCss {
     loading: string;
-    mappings: string;
-    names: string;
-    sourceRoot: string;
-    sources: string;
-    sourcesContent: string;
-    version: string;
   }
 }
 

@@ -3,13 +3,7 @@ declare namespace StyleCssNamespace {
   export interface IStyleCss {
     add_new_group: string;
     list_preview_items: string;
-    mappings: string;
-    names: string;
     shopping: string;
-    sourceRoot: string;
-    sources: string;
-    sourcesContent: string;
-    version: string;
   }
 }
 

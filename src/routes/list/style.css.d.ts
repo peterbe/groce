@@ -13,17 +13,11 @@ declare namespace StyleCssNamespace {
     listoptions: string;
     listoptions_section: string;
     loading_list_items: string;
-    mappings: string;
-    names: string;
     organize_groups: string;
     quantity_button: string;
     rainbow_animation: string;
     rainbow_text_animated: string;
     search_suggestions: string;
-    sourceRoot: string;
-    sources: string;
-    sourcesContent: string;
-    version: string;
   }
 }
 

@@ -152,7 +152,11 @@ function Form({
       }}
     >
       {submitError && (
-        <Alert heading="Submission error" message={submitError.toString()} />
+        <Alert
+          heading="Submission error"
+          message={submitError}
+          offerReload={true}
+        />
       )}
       {submitted && (
         <Alert
