@@ -2,7 +2,7 @@
 
 set -e
 
-yarn build --preload
+yarn build --preload --prerenderUrls ./prerender-urls.js
 
 # If the build failed, no build/index.html file would exist
 ls -l build/index.html

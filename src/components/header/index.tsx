@@ -28,7 +28,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
             width="30"
             height="30"
             class="d-inline-block align-top"
-            alt=""
+            alt="Avocado logo"
             loading="lazy"
           />{" "}
           That&apos;s Groce!
