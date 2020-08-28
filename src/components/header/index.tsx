@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { Link } from "preact-router/match";
 // import * as style from "./style.css";
 import firebase from "firebase/app";
@@ -15,6 +15,14 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSigninMenu, setShowSigninMenu] = useState(false);
   const [showNavbar, setShowNavbar] = useState(false);
+  const [showPrintThisPage, setShowPrintThisPage] = useState(false);
+
+  useEffect(() => {
+    // Other insert it into the menu if you're on a mobile device.
+    if (typeof window.orientation !== "undefined") {
+      setShowPrintThisPage(true);
+    }
+  }, []);
 
   return (
     <nav
@@ -122,28 +130,30 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 About
               </Link>
             </li>
-            <li class="nav-item">
-              <Link
-                class="nav-link"
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setShowNavbar(false);
-                  try {
-                    // Print for Safari browser
-                    document.execCommand("print", false);
-                  } catch (error) {
-                    // Firefox?
-                    console.error(
-                      "Unable to use 'document.execCommand(print)'"
-                    );
-                    window.print();
-                  }
-                }}
-              >
-                Print this page
-              </Link>
-            </li>
+            {showPrintThisPage && (
+              <li class="nav-item">
+                <Link
+                  class="nav-link"
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setShowNavbar(false);
+                    try {
+                      // Print for Safari browser
+                      document.execCommand("print", false);
+                    } catch (error) {
+                      // Firefox?
+                      console.error(
+                        "Unable to use 'document.execCommand(print)'"
+                      );
+                      window.print();
+                    }
+                  }}
+                >
+                  Print this page
+                </Link>
+              </li>
+            )}
 
             {auth && !user && (
               <li class="nav-item dropdown">
