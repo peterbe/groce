@@ -101,3 +101,12 @@ export const ITEM_SUGGESTIONS = [
   "Ice 🧊",
   "Salt 🧂",
 ];
+
+export const GROUP_SUGGESTIONS = [
+  "Produce",
+  "Bread",
+  "Dairy",
+  "Pasta",
+  "Baking",
+  "Deli",
+];

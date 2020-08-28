@@ -10,7 +10,7 @@ import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
-import { ITEM_SUGGESTIONS } from "./default-suggestions";
+import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List, SearchSuggestion } from "../../types";
 
 interface Props {
@@ -362,32 +362,28 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   let todoItems: Item[] = [];
   let doneItems: Item[] = [];
-  let groupOptions: string[] = [];
+  const groupOptions: string[] = [];
+  const groupOptionsSet: Set<string> = new Set();
   if (items) {
     todoItems = items.filter((item) => !item.done && !item.removed);
     doneItems = items.filter((item) => item.done && !item.removed);
 
-    groupOptions = Array.from(
-      new Set(
-        items.filter((item) => item.group.text).map((item) => item.group.text)
-      )
-    );
-    groupOptions.sort();
+    for (const item of items) {
+      if (item.group && item.group.text) {
+        if (!groupOptionsSet.has(item.group.text.toLowerCase())) {
+          groupOptionsSet.add(item.group.text.toLowerCase());
+          groupOptions.push(item.group.text);
+        }
+      }
+    }
   }
-
-  // const searchSuggestions: SearchSuggestion[] = [];
-  // // Note that thankfully they're already sorted
-  // if (items) {
-  //   items.forEach((item, i) => {
-  //     if (item.removed) {
-  //       searchSuggestions.push({
-  //         text: item.text,
-  //         popularity: items.length - i,
-  //       });
-  //     }
-  //   });
-  // }
-  // console.log("Set searchSuggestions", searchSuggestions.length);
+  // Also, append any of the default group suggestions
+  // ...that haven't already been included.
+  for (const suggestion of GROUP_SUGGESTIONS) {
+    if (!groupOptionsSet.has(suggestion.toLowerCase())) {
+      groupOptions.push(suggestion);
+    }
+  }
 
   const hasOrganizableGroups = Boolean(
     items && items.filter((item) => item.group.text).length
@@ -616,18 +612,6 @@ function NewItemForm({
         });
       }
 
-      // if (searchSuggestions.length) {
-      //   const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      //   const rex = new RegExp(`\\b${escaped}`, "i");
-      //   for (const suggestion of searchSuggestions) {
-      //     if (rex.test(suggestion.text) && suggestion.text !== newText) {
-      //       newSuggestions.push({
-      //         text: suggestion.text,
-      //         popularity: suggestion.popularity,
-      //       });
-      //     }
-      //   }
-      // }
       setSuggestions(
         newSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
       );

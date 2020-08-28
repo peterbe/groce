@@ -49,6 +49,19 @@ export const ListItem: FunctionalComponent<Props> = ({
     }
   }, [editMode, textInputRef]);
 
+  function getFilteredGroupOptions() {
+    if (!group.trim()) {
+      return groupOptions;
+    }
+    // Because the browser filtering is entirely `string.includes(otherstring)`
+    // for a datalist, let's go beyond that a bit and weed out the bad matches.
+    const escaped = group.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const rex = new RegExp(`\\b${escaped}`, "i");
+    return groupOptions.filter(
+      (text) => rex.test(text) && text.toLowerCase() !== group.toLowerCase()
+    );
+  }
+
   if (editMode) {
     return (
       <li class={`list-group-item ${style.list_item_edit_mode}`}>
@@ -148,14 +161,12 @@ export const ListItem: FunctionalComponent<Props> = ({
               list="datalistOptions"
               placeholder="Group"
               value={group}
-              onInput={({
-                currentTarget,
-              }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-                setGroup(currentTarget.value);
+              onInput={(event) => {
+                setGroup(event.currentTarget.value);
               }}
             />
             <datalist id="datalistOptions">
-              {groupOptions.map((value) => {
+              {getFilteredGroupOptions().map((value) => {
                 return <option key={value} value={value} />;
               })}
             </datalist>
