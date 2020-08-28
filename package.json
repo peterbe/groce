@@ -27,9 +27,9 @@
     "@types/sortablejs": "1.10.6",
     "bootstrap": "5.0.0-alpha1",
     "copy-to-clipboard": "3.3.1",
-    "firebase": "7.19.0",
+    "firebase": "7.19.1",
     "node-sass": "4.14.1",
-    "preact": "^10.4.7",
+    "preact": "^10.4.8",
     "preact-cli-plugin-env-vars": "1.2.1",
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.0.0",
@@ -58,7 +58,7 @@
     "jest-preset-preact": "^4.0.0",
     "lint-staged": "^10.2.13",
     "preact-cli": "^3.0.1",
-    "prettier": "^2.1.0",
+    "prettier": "^2.1.1",
     "sirv-cli": "^1.0.6",
     "typescript": "^3.9.7"
   }
