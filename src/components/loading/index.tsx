@@ -1,6 +1,5 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import * as style from "./style.css";
 
 interface Props {
   text?: string;
@@ -48,13 +47,13 @@ export const Loading: FunctionalComponent<Props> = ({
   }, [color, colors]);
 
   if (stall) {
-    <div class={style.loading}>
+    <div class="loading">
       <p>&nbsp;</p>
     </div>;
   }
 
   return (
-    <div class={style.loading}>
+    <div class="loading">
       <div class="text-center">
         <div
           class={`spinner-border ${color} m-5`}

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+./bin/build
+
+PORT=8080 serve -s build

@@ -1,6 +1,5 @@
 import { FunctionalComponent, h } from "preact";
 import { Link } from "preact-router";
-import * as style from "./style.css";
 import firebase from "firebase/app";
 import { useEffect, useState } from "preact/hooks";
 
@@ -110,13 +109,13 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
     invitations.map((i) => i.id).includes(invitationIdentifier.split("/")[1]);
 
   return (
-    <div class={style.home}>
+    <div id="home">
       <div class="text-center">
         <h1 class="display-1">That&apos;s Groce!</h1>
         <p class="lead">Planning shopping and meals for the family.</p>
 
         {user && (
-          <div class={style.login}>
+          <div class="login">
             <p>
               Logged in as <b>{user.displayName}</b>{" "}
               {user.email && <span>({user.email})</span>}
@@ -146,7 +145,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         )}
 
         {user && (
-          <div class={style.options}>
+          <div class="options">
             <p>
               <Link href="/shopping" class="btn btn-primary btn-lg btn-block">
                 Shopping lists
@@ -172,7 +171,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         {user === null && <Loading />}
 
         {auth && user === false && (
-          <div class={style.login}>
+          <div class="login">
             {/* <p>
               <button
                 type="button"

@@ -110,12 +110,6 @@ const About: FunctionalComponent = () => {
         better and easier. Let us know what matters.
       </p>
 
-      <h3 class="display-3">Data privacy</h3>
-      <p>
-        Your personally identifiable data will never be shared or sold outside
-        the boundaries of the app.
-      </p>
-
       <GoBack />
     </div>
   );

@@ -7,3 +7,27 @@ div.main {
 }
 
 @import "./print-overrides";
+
+// For all the uses of the <Loading/> component
+.loading {
+  text-align: center;
+}
+
+// All specifically for the home page
+#home {
+  padding-top: 90px;
+  /* padding: 56px 20px;
+  min-height: 100%;
+  width: 100%; */
+
+  .login {
+    margin-top: 40px;
+  }
+
+  .options {
+    margin-top: 40px;
+  }
+  .options p {
+    margin-bottom: 30px;
+  }
+}
