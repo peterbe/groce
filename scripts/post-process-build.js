@@ -71,6 +71,36 @@ async function run(buildRoot) {
       );
     }
 
+    const largestIcon = manifest.icons
+      .filter((icon) => !icon.purpose)
+      .sort((a, b) => {
+        return parseInt(b.sizes) - parseInt(a.sizes);
+      })[0];
+    if (largestIcon) {
+      const metaOGURL = $('meta[property="og:image"]');
+      if (!metaOGURL.length) {
+        const tag = `<meta property="og:image" content="${largestIcon.src}">`;
+        $(tag).appendTo($("head"));
+        console.log(
+          `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`
+        );
+        const [width, height] = largestIcon.sizes
+          .split(" ")[0]
+          .split("x")
+          .map((x) => parseInt(x));
+        const tagWidth = `<meta property="og:image:width" content="${width}">`;
+        $(tagWidth).appendTo($("head"));
+        console.log(
+          `${chalk.green("Post-process injected:")} ${chalk.grey(tagWidth)}`
+        );
+        const tagHeight = `<meta property="og:image:height" content="${height}">`;
+        $(tagHeight).appendTo($("head"));
+        console.log(
+          `${chalk.green("Post-process injected:")} ${chalk.grey(tagHeight)}`
+        );
+      }
+    }
+
     // The critical CSS made my `minimalcss` is much better than that made with
     // preact-cli which uses `critters-webpack-plugin`.
     const uri = prerenderURL.url;
