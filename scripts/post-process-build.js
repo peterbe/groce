@@ -12,6 +12,8 @@ const getPrerenderURLs = require("../prerender-urls");
 
 const HTTP_SERVER_PORT = 8888;
 
+const ABSOLUTE_URL_BASE = "https://thatsgroce.web.app";
+
 /** Note!
  * You're going to get
  *
@@ -79,7 +81,10 @@ async function run(buildRoot) {
     if (largestIcon) {
       const metaOGURL = $('meta[property="og:image"]');
       if (!metaOGURL.length) {
-        const tag = `<meta property="og:image" content="${largestIcon.src}">`;
+        const imageURL = largestIcon.src.includes("://")
+          ? largestIcon.src
+          : `${ABSOLUTE_URL_BASE}${largestIcon.src}`;
+        const tag = `<meta property="og:image" content="${imageURL}">`;
         $(tag).appendTo($("head"));
         console.log(
           `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`
