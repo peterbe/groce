@@ -5,4 +5,5 @@ set -e
 ./bin/build
 
 cd functions && yarn build && cd ..
+firebase --version
 firebase deploy
