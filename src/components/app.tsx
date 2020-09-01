@@ -5,8 +5,8 @@ import { useState, useEffect } from "preact/hooks";
 import "../style/custom.scss";
 import firebase from "firebase/app";
 
-import "firebase/auth";
-import "firebase/firestore";
+// import "firebase/auth";
+// import "firebase/firestore";
 // import "firebase/analytics";
 // Commented out at the moment because it breaks the preact-cli deployer
 // which does a Node render for the sake of a fast build artifact.
@@ -62,25 +62,37 @@ const App: FunctionalComponent = () => {
   }
 
   useEffect(() => {
-    const appAuth = app.auth();
-    setAuth(appAuth);
-    appAuth.onAuthStateChanged(authStateChanged);
+    import("firebase/auth")
+      .then(() => {
+        const appAuth = app.auth();
+        setAuth(appAuth);
+        appAuth.onAuthStateChanged(authStateChanged);
+      })
+      .catch((error) => {
+        console.error("Unable to lazy-load firebase/auth:", error);
+      });
 
-    const db = firebase.firestore();
-    setDB(db);
+    import("firebase/firestore")
+      .then(() => {
+        const db = firebase.firestore();
+        setDB(db);
 
-    // Clear any offline data.
-    // firebase
-    //   .firestore()
-    //   .clearPersistence()
-    //   .catch((error) => {
-    //     console.error("Could not enable persistence:", error.code);
-    //   });
+        // Clear any offline data.
+        // firebase
+        //   .firestore()
+        //   .clearPersistence()
+        //   .catch((error) => {
+        //     console.error("Could not enable persistence:", error.code);
+        //   });
 
-    // Enable offline-ness
-    db.enablePersistence().catch((error) => {
-      setPersistenceError(error);
-    });
+        // Enable offline-ness
+        db.enablePersistence().catch((error) => {
+          setPersistenceError(error);
+        });
+      })
+      .catch((error) => {
+        console.error("Unable to lazy-load firebase/firestore:", error);
+      });
   }, []);
 
   const [lists, setLists] = useState<List[] | null>(null);
