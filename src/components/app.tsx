@@ -5,8 +5,6 @@ import { useState, useEffect } from "preact/hooks";
 import "../style/custom.scss";
 import firebase from "firebase/app";
 
-// import "firebase/auth";
-// import "firebase/firestore";
 // import "firebase/analytics";
 // Commented out at the moment because it breaks the preact-cli deployer
 // which does a Node render for the sake of a fast build artifact.
