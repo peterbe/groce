@@ -7,8 +7,9 @@ yarn build --prerenderUrls ./prerender-urls.js --no-inline-css
 # If the build failed, no build/index.html file would exist
 ls -l build/index.html
 
-# Manually move that exceptional one
+# Manually move the exceptions
 cp src/robots.txt build/
+cp src/google82872e9edd278578.html build/
 
 # Perfect the crap out of the built stuff
 yarn post-process-build
