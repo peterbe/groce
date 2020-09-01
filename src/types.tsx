@@ -31,6 +31,7 @@ export interface FirestoreList {
   notes: string;
   order: number;
   owners: string[];
+  disableGroups: boolean;
   // XXX This can cease to be optional because all new lists
   // are created with these set. As of Aug 21.
   recent_items?: ListRecentItems[];

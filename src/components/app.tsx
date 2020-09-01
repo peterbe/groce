@@ -5,7 +5,6 @@ import { useState, useEffect } from "preact/hooks";
 import "../style/custom.scss";
 import firebase from "firebase/app";
 
-// import "firebase/analytics";
 // Commented out at the moment because it breaks the preact-cli deployer
 // which does a Node render for the sake of a fast build artifact.
 // Hmmm...
@@ -35,9 +34,6 @@ import { List, FirestoreList } from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
-
-// // Enable analytics
-// firebase.analytics();
 
 // Initialize Performance Monitoring and get a reference to the service
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,6 +87,15 @@ const App: FunctionalComponent = () => {
       .catch((error) => {
         console.error("Unable to lazy-load firebase/firestore:", error);
       });
+
+    import("firebase/analytics")
+      .then(() => {
+        // Enable analytics
+        firebase.analytics();
+      })
+      .catch((error) => {
+        console.error("Unable to lazy-load firebase/analytics:", error);
+      });
   }, []);
 
   const [lists, setLists] = useState<List[] | null>(null);
@@ -128,6 +133,7 @@ const App: FunctionalComponent = () => {
               order: data.order,
               owners: data.owners,
               metadata: doc.metadata,
+              disableGroups: data.disableGroups || false,
               recent_items: data.recent_items || [],
               active_items_count: data.active_items_count || 0,
             });

@@ -22,6 +22,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
 }: Props) => {
   const [name, setName] = useState(list.name);
   const [notes, setNotes] = useState(list.notes);
+  const [disableGroups, setDisableGroups] = useState(!!list.disableGroups);
   const [updateError, setUpdateError] = useState<Error | null>(null);
   const [confirmDelete, toggleConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<Error | null>(null);
@@ -39,6 +40,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
             .update({
               name: name.trim(),
               notes: notes.trim(),
+              disableGroups,
             })
             .then(() => {
               close();
@@ -66,10 +68,8 @@ export const ListOptions: FunctionalComponent<Props> = ({
             id="id_list_name"
             required
             value={name}
-            onInput={({
-              currentTarget,
-            }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-              setName(currentTarget.value);
+            onInput={(event) => {
+              setName(event.currentTarget.value);
             }}
             aria-label="List's name"
           />
@@ -84,10 +84,8 @@ export const ListOptions: FunctionalComponent<Props> = ({
             class="form-control"
             id="id_list_notes"
             value={notes}
-            onInput={({
-              currentTarget,
-            }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-              setNotes(currentTarget.value);
+            onInput={(event) => {
+              setNotes(event.currentTarget.value);
             }}
             aria-label="List's notes"
             aria-describedby="notesHelp"
@@ -97,6 +95,28 @@ export const ListOptions: FunctionalComponent<Props> = ({
             Optional
           </div>
         </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              checked={disableGroups}
+              onClick={() => {
+                setDisableGroups((prev) => !prev);
+              }}
+              id="newDisableGroups"
+              aria-describedby="newDisableGroupsHelp"
+            />
+            <label class="form-check-label" htmlFor="newDisableGroups">
+              Disable groups
+            </label>
+          </div>
+          <div id="newDisableGroupsHelp" class="form-text">
+            Allows you to group items and sort by that.
+          </div>
+        </div>
+
         <div class="mb-3">
           <button type="submit" class="btn btn-primary" disabled={!name.trim()}>
             Save changes

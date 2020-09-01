@@ -16,6 +16,7 @@ interface Props {
     quantity: number
   ) => void;
   modified: null | Date;
+  disableGroups: boolean;
 }
 
 export const ListItem: FunctionalComponent<Props> = ({
@@ -24,6 +25,7 @@ export const ListItem: FunctionalComponent<Props> = ({
   toggleDone,
   updateItem,
   modified,
+  disableGroups,
 }: Props) => {
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
@@ -155,22 +157,25 @@ export const ListItem: FunctionalComponent<Props> = ({
             ></textarea>
           </div>
 
-          <div class="mb-2">
-            <input
-              class="form-control"
-              list="datalistOptions"
-              placeholder="Group"
-              value={group}
-              onInput={(event) => {
-                setGroup(event.currentTarget.value);
-              }}
-            />
-            <datalist id="datalistOptions">
-              {getFilteredGroupOptions().map((value) => {
-                return <option key={value} value={value} />;
-              })}
-            </datalist>
-          </div>
+          {!disableGroups && (
+            <div class="mb-2">
+              <input
+                class="form-control"
+                list="datalistOptions"
+                placeholder="Group"
+                value={group}
+                onInput={(event) => {
+                  setGroup(event.currentTarget.value);
+                }}
+              />
+              <datalist id="datalistOptions">
+                {getFilteredGroupOptions().map((value) => {
+                  return <option key={value} value={value} />;
+                })}
+              </datalist>
+            </div>
+          )}
+
           <div class="mb-2">
             <button
               type="submit"
@@ -236,13 +241,15 @@ export const ListItem: FunctionalComponent<Props> = ({
         </span>
       </span>
 
-      <span
-        class={
-          item.group.text ? "badge bg-secondary" : "badge bg-light text-dark"
-        }
-      >
-        {item.group.text || "no group"}
-      </span>
+      {!disableGroups && (
+        <span
+          class={
+            item.group.text ? "badge bg-secondary" : "badge bg-light text-dark"
+          }
+        >
+          {item.group.text || "no group"}
+        </span>
+      )}
     </li>
   );
 };

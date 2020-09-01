@@ -22,7 +22,11 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
     document.title = "Shopping lists";
   }, []);
 
-  async function createNewGroup(name: string, notes: string) {
+  async function createNewGroup(
+    name: string,
+    notes: string,
+    disableGroups = false
+  ) {
     if (db && user && lists) {
       if (
         lists
@@ -42,6 +46,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
           recent_items: [],
           active_items_count: 0,
+          disableGroups,
         });
         toggleAddNewList(false);
       } catch (error) {
@@ -125,8 +130,12 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
       {db && addNewList && lists && (
         <NewList
           lists={lists}
-          create={async (name: string, notes: string) => {
-            await createNewGroup(name, notes);
+          create={async (
+            name: string,
+            notes: string,
+            disableGroups: boolean
+          ) => {
+            await createNewGroup(name, notes, disableGroups);
           }}
         />
       )}
@@ -142,11 +151,12 @@ function NewList({
   create,
   lists,
 }: {
-  create: (name: string, notes: string) => void;
+  create: (name: string, notes: string, disableGroups: boolean) => void;
   lists: List[];
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
+  const [disableGroups, setDisableGroups] = useState(false);
   const newNameRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -168,7 +178,7 @@ function NewList({
       onSubmit={(event) => {
         event.preventDefault();
         if (submittable) {
-          create(name.trim(), notes.trim());
+          create(name.trim(), notes.trim(), disableGroups);
         }
       }}
     >
@@ -200,10 +210,8 @@ function NewList({
         </label>
         <input
           value={notes}
-          onInput={({
-            currentTarget,
-          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-            setNotes(currentTarget.value);
+          onInput={(event) => {
+            setNotes(event.currentTarget.value);
           }}
           type="text"
           class="form-control"
@@ -212,6 +220,26 @@ function NewList({
         />
         <div id="newNotesHelp" class="form-text">
           Just in case you need it and it helps.
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            checked={disableGroups}
+            onClick={() => {
+              setDisableGroups((prev) => !prev);
+            }}
+            id="newDisableGroups"
+            aria-describedby="newDisableGroupsHelp"
+          />
+          <label class="form-check-label" htmlFor="newDisableGroups">
+            Disable groups
+          </label>
+        </div>
+        <div id="newDisableGroupsHelp" class="form-text">
+          Allows you to group items and sort by that.
         </div>
       </div>
       <button type="submit" class="btn btn-primary" disabled={!submittable}>
