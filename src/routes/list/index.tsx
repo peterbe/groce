@@ -495,6 +495,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     item={item}
                     modified={recentlyModifiedItems.get(item.id) || null}
                     groupOptions={groupOptions}
+                    disableGroups={list ? list.disableGroups : false}
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}
                   />
