@@ -5,12 +5,6 @@ import { useState, useEffect } from "preact/hooks";
 import "../style/custom.scss";
 import firebase from "firebase/app";
 
-// Commented out at the moment because it breaks the preact-cli deployer
-// which does a Node render for the sake of a fast build artifact.
-// Hmmm...
-// XXX Read up on https://kyleshevlin.com/firebase-and-gatsby-together-at-last
-// import "firebase/performance";
-
 import Home from "../routes/home";
 import Invited from "../routes/invited";
 import Signin from "../routes/signin";
@@ -34,17 +28,13 @@ import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
 
-// Initialize Performance Monitoring and get a reference to the service
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// let perf: firebase.performance.Performance | null = null;
-// if (typeof window !== "undefined") {
-//   perf = firebase.performance();
-// }
-
 const App: FunctionalComponent = () => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
   const [user, setUser] = useState<firebase.User | null | false>(null);
   const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);
+  const [perf, setPerf] = useState<firebase.performance.Performance | null>(
+    null
+  );
   const [
     persistenceError,
     setPersistenceError,
@@ -94,6 +84,14 @@ const App: FunctionalComponent = () => {
       })
       .catch((error) => {
         console.error("Unable to lazy-load firebase/analytics:", error);
+      });
+
+    import("firebase/performance")
+      .then(() => {
+        setPerf(firebase.performance());
+      })
+      .catch((error) => {
+        console.error("Unable to lazy-load firebase/performance:", error);
       });
   }, []);
 
