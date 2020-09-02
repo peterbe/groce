@@ -386,7 +386,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   }
 
   const hasOrganizableGroups = Boolean(
-    !(list && list?.disableGroups) &&
+    !(list && list.config.disableGroups) &&
       items &&
       items.filter((item) => !item.removed && item.group.text).length > 1
   );
@@ -474,7 +474,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
                   item={item}
                   modified={recentlyModifiedItems.get(item.id) || null}
                   groupOptions={groupOptions}
-                  disableGroups={list ? list.disableGroups : false}
+                  disableGroups={list ? list.config.disableGroups : false}
+                  disableQuantity={list ? list.config.disableQuantity : false}
                   toggleDone={updateItemDoneToggle}
                   updateItem={updateItem}
                 />
@@ -495,7 +496,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     item={item}
                     modified={recentlyModifiedItems.get(item.id) || null}
                     groupOptions={groupOptions}
-                    disableGroups={list ? list.disableGroups : false}
+                    disableGroups={list ? list.config.disableGroups : false}
+                    disableQuantity={list ? list.config.disableQuantity : false}
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}
                   />

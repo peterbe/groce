@@ -26,12 +26,18 @@ export interface ListRecentItems {
   done: boolean;
   quantity: number;
 }
+
+export interface ListConfig {
+  disableGroups: boolean;
+  disableQuantity: boolean;
+}
+
 export interface FirestoreList {
   name: string;
   notes: string;
   order: number;
   owners: string[];
-  disableGroups: boolean;
+  config: ListConfig;
   // XXX This can cease to be optional because all new lists
   // are created with these set. As of Aug 21.
   recent_items?: ListRecentItems[];

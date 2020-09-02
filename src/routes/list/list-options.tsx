@@ -4,7 +4,7 @@ import { useState } from "preact/hooks";
 
 import { Alert } from "../../components/alerts";
 import { InvitationsForm } from "./invites-form";
-import { List } from "../../types";
+import { List, ListConfig } from "../../types";
 import * as style from "./style.css";
 
 interface Props {
@@ -22,7 +22,12 @@ export const ListOptions: FunctionalComponent<Props> = ({
 }: Props) => {
   const [name, setName] = useState(list.name);
   const [notes, setNotes] = useState(list.notes);
-  const [disableGroups, setDisableGroups] = useState(!!list.disableGroups);
+  const [disableGroups, setDisableGroups] = useState(
+    !!list.config.disableGroups
+  );
+  const [disableQuantity, setDisableQuantity] = useState(
+    !!list.config.disableQuantity
+  );
   const [updateError, setUpdateError] = useState<Error | null>(null);
   const [confirmDelete, toggleConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<Error | null>(null);
@@ -34,13 +39,16 @@ export const ListOptions: FunctionalComponent<Props> = ({
         onSubmit={(event) => {
           event.preventDefault();
           if (!name.trim()) return;
-
+          const config: ListConfig = {
+            disableGroups,
+            disableQuantity,
+          };
           const doc = db.collection("shoppinglists").doc(list.id);
           doc
             .update({
               name: name.trim(),
               notes: notes.trim(),
-              disableGroups,
+              config,
             })
             .then(() => {
               close();
@@ -113,7 +121,28 @@ export const ListOptions: FunctionalComponent<Props> = ({
             </label>
           </div>
           <div id="newDisableGroupsHelp" class="form-text">
-            Allows you to group items and sort by that.
+            Allows you to <i>group</i> items and sort by that.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              checked={disableQuantity}
+              onClick={() => {
+                setDisableQuantity((prev) => !prev);
+              }}
+              id="newDisableQuantity"
+              aria-describedby="newDisableQuantityHelp"
+            />
+            <label class="form-check-label" htmlFor="newDisableQuantity">
+              Disable quantity
+            </label>
+          </div>
+          <div id="newDisableQuantityHelp" class="form-text">
+            A <i>quantity</i> doesn&apos;t make sense for all lists.
           </div>
         </div>
 

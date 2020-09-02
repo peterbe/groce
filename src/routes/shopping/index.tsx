@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
-import { List } from "../../types";
+import { List, ListConfig } from "../../types";
 // import { list } from "../list/style.css";
 
 interface Props {
@@ -25,7 +25,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
   async function createNewGroup(
     name: string,
     notes: string,
-    disableGroups = false
+    config: ListConfig
   ) {
     if (db && user && lists) {
       if (
@@ -46,7 +46,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
           recent_items: [],
           active_items_count: 0,
-          disableGroups,
+          config,
         });
         toggleAddNewList(false);
       } catch (error) {
@@ -101,7 +101,6 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
                 <h5 class="card-title">{list.name}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
                 <p class="card-text">
-                  {/* {db && <PreviewList list={list} db={db} />} */}
                   {db && <PreviewList list={list} db={db} />}
                 </p>
               </div>
@@ -130,12 +129,8 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
       {db && addNewList && lists && (
         <NewList
           lists={lists}
-          create={async (
-            name: string,
-            notes: string,
-            disableGroups: boolean
-          ) => {
-            await createNewGroup(name, notes, disableGroups);
+          create={async (name: string, notes: string, config: ListConfig) => {
+            await createNewGroup(name, notes, config);
           }}
         />
       )}
@@ -151,12 +146,13 @@ function NewList({
   create,
   lists,
 }: {
-  create: (name: string, notes: string, disableGroups: boolean) => void;
+  create: (name: string, notes: string, config: ListConfig) => void;
   lists: List[];
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [disableGroups, setDisableGroups] = useState(false);
+  const [disableQuantity, setDisableQuantity] = useState(false);
   const newNameRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -178,7 +174,10 @@ function NewList({
       onSubmit={(event) => {
         event.preventDefault();
         if (submittable) {
-          create(name.trim(), notes.trim(), disableGroups);
+          create(name.trim(), notes.trim(), {
+            disableGroups,
+            disableQuantity,
+          });
         }
       }}
     >
@@ -204,6 +203,7 @@ function NewList({
           You can change the name later.
         </div>
       </div>
+
       <div class="mb-3">
         <label htmlFor="newNotes" class="form-label">
           Notes/Description
@@ -222,6 +222,7 @@ function NewList({
           Just in case you need it and it helps.
         </div>
       </div>
+
       <div class="mb-3">
         <div class="form-check">
           <input
@@ -239,9 +240,31 @@ function NewList({
           </label>
         </div>
         <div id="newDisableGroupsHelp" class="form-text">
-          Allows you to group items and sort by that.
+          Allows you to <i>group</i> items and sort by that.
         </div>
       </div>
+
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            checked={disableQuantity}
+            onClick={() => {
+              setDisableQuantity((prev) => !prev);
+            }}
+            id="newDisableQuantity"
+            aria-describedby="newDisableQuantityHelp"
+          />
+          <label class="form-check-label" htmlFor="newDisableQuantity">
+            Disable quantity
+          </label>
+        </div>
+        <div id="newDisableQuantityHelp" class="form-text">
+          A <i>quantity</i> doesn&apos;t make sense for all lists.
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-primary" disabled={!submittable}>
         Create list
       </button>
@@ -282,7 +305,9 @@ function PreviewList({
               checked={item.done}
             />{" "}
             {item.text}{" "}
-            {!!item.quantity && item.quantity !== 1 && <b>x{item.quantity}</b>}
+            {!list.config.disableQuantity &&
+              !!item.quantity &&
+              item.quantity !== 1 && <b>x{item.quantity}</b>}
           </li>
         );
       })}

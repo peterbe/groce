@@ -23,14 +23,13 @@ import Feedback from "../routes/feedback";
 import About from "../routes/about";
 import { OfflineWarning } from "./offline-warning";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
 if ((module as any).hot) {
   // tslint:disable-next-line:no-var-requires
   require("preact/debug");
 }
 
-import { List, FirestoreList } from "../types";
+import { List, FirestoreList, ListConfig } from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
@@ -110,6 +109,14 @@ const App: FunctionalComponent = () => {
       //   : null;
       // let traceOnce = false;
       // trace && trace.start();
+
+      // This is needed because it's added late. And instead of migrating
+      // all/any lists, we rely on a fallback default.
+      const defaultListConfig: ListConfig = {
+        disableGroups: false,
+        disableQuantity: false,
+      };
+
       shoppinglistsDbRef = db
         .collection("shoppinglists")
         .where("owners", "array-contains", user.uid)
@@ -126,6 +133,17 @@ const App: FunctionalComponent = () => {
           const newLists: List[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as FirestoreList;
+            const config = data.config || Object.assign({}, defaultListConfig);
+
+            // Because it used to be that `.disableGroups` used to be on the
+            // list itself, we need to respect that and migrate that over.
+            // Let's delete this in late 2020.
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+            if ((data as any).disableGroups && !data.config) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+              config.disableGroups = (data as any).disableGroups;
+            }
+
             newLists.push({
               id: doc.id,
               name: data.name,
@@ -133,7 +151,7 @@ const App: FunctionalComponent = () => {
               order: data.order,
               owners: data.owners,
               metadata: doc.metadata,
-              disableGroups: data.disableGroups || false,
+              config,
               recent_items: data.recent_items || [],
               active_items_count: data.active_items_count || 0,
             });
@@ -149,9 +167,10 @@ const App: FunctionalComponent = () => {
                 order: 0,
                 recent_items: [],
                 active_items_count: 0,
+                config: Object.assign({}, defaultListConfig),
               })
               .then(() => {
-                console.log("Added first default shopping list");
+                console.log("Initial sample list created");
               })
               .catch((error) => {
                 console.error("Error creating first sample list", error);

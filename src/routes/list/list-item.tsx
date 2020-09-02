@@ -17,6 +17,7 @@ interface Props {
   ) => void;
   modified: null | Date;
   disableGroups: boolean;
+  disableQuantity: boolean;
 }
 
 export const ListItem: FunctionalComponent<Props> = ({
@@ -26,6 +27,7 @@ export const ListItem: FunctionalComponent<Props> = ({
   updateItem,
   modified,
   disableGroups,
+  disableQuantity,
 }: Props) => {
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
@@ -98,51 +100,53 @@ export const ListItem: FunctionalComponent<Props> = ({
             />
           </div>
 
-          <div class="mb-2">
-            <div class="input-group">
-              <span class="input-group-text" id="id_quantity">
-                Quantity
-              </span>
-              <input
-                type="number"
-                class="form-control"
-                placeholder="1"
-                aria-label="Quantity"
-                aria-describedby="id_quantity"
-                value={quantity}
-              />
-              <button
-                class={`btn btn-outline-secondary ${style.quantity_button}`}
-                type="button"
-                onClick={() => {
-                  setQuantity((prev) => {
-                    if (!prev) {
-                      return 2;
-                    } else {
-                      return parseInt(`${prev}`) + 1;
-                    }
-                  });
-                }}
-              >
-                +1
-              </button>
-              <button
-                class={`btn btn-outline-secondary ${style.quantity_button}`}
-                type="button"
-                onClick={() => {
-                  setQuantity((prev) => {
-                    const prevNumber = parseInt(`${prev}`);
-                    if (isNaN(prevNumber) || prevNumber === 2) {
-                      return "";
-                    }
-                    return prevNumber - 1;
-                  });
-                }}
-              >
-                -1
-              </button>
+          {!disableQuantity && (
+            <div class="mb-2">
+              <div class="input-group">
+                <span class="input-group-text" id="id_quantity">
+                  Quantity
+                </span>
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="1"
+                  aria-label="Quantity"
+                  aria-describedby="id_quantity"
+                  value={quantity}
+                />
+                <button
+                  class={`btn btn-outline-secondary ${style.quantity_button}`}
+                  type="button"
+                  onClick={() => {
+                    setQuantity((prev) => {
+                      if (!prev) {
+                        return 2;
+                      } else {
+                        return parseInt(`${prev}`) + 1;
+                      }
+                    });
+                  }}
+                >
+                  +1
+                </button>
+                <button
+                  class={`btn btn-outline-secondary ${style.quantity_button}`}
+                  type="button"
+                  onClick={() => {
+                    setQuantity((prev) => {
+                      const prevNumber = parseInt(`${prev}`);
+                      if (isNaN(prevNumber) || prevNumber === 2) {
+                        return "";
+                      }
+                      return prevNumber - 1;
+                    });
+                  }}
+                >
+                  -1
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div class="mb-2">
             <textarea
@@ -233,7 +237,9 @@ export const ListItem: FunctionalComponent<Props> = ({
           }
         >
           {item.text}{" "}
-          {!!item.quantity && item.quantity !== 1 && <b>x{item.quantity}</b>}{" "}
+          {!disableQuantity && !!item.quantity && item.quantity !== 1 && (
+            <b>x{item.quantity}</b>
+          )}{" "}
           {/* <br/> */}
           {item.description && (
             <small class={style.item_description}>{item.description}</small>
