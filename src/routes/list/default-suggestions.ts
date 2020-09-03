@@ -109,4 +109,8 @@ export const GROUP_SUGGESTIONS = [
   "Pasta",
   "Baking",
   "Deli",
-];
+  "Seafood",
+  "Wine",
+  "Meat",
+  "Chips",
+].sort();

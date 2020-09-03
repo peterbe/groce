@@ -370,8 +370,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
     for (const item of items) {
       if (item.group && item.group.text) {
-        if (!groupOptionsSet.has(item.group.text.toLowerCase())) {
-          groupOptionsSet.add(item.group.text.toLowerCase());
+        const normalized = stripEmojis(item.group.text.toLowerCase());
+        if (!groupOptionsSet.has(normalized)) {
+          groupOptionsSet.add(normalized);
           groupOptions.push(item.group.text);
         }
       }
@@ -590,17 +591,23 @@ function NewItemForm({
       const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const rex = new RegExp(`\\b${escaped}`, "i");
 
+      // Our hash table for avoiding dupes
+      const newSuggestionsSet: Set<string> = new Set();
+
       if (items) {
         items.forEach((item, i) => {
           if (item.removed) {
+            const normalized = stripEmojis(item.text.toLowerCase());
             if (
               rex.test(item.text) &&
-              item.text.toLowerCase() !== newText.toLowerCase()
+              item.text.toLowerCase() !== newText.toLowerCase() &&
+              !newSuggestionsSet.has(normalized)
             ) {
               newSuggestions.push({
                 text: item.text,
                 popularity: items.length - i,
               });
+              newSuggestionsSet.add(normalized);
             }
           }
         });
@@ -609,11 +616,17 @@ function NewItemForm({
         // Add some brand new ones that have never been used but
         // assuming it's English we can suggest some
         ITEM_SUGGESTIONS.forEach((text) => {
-          if (rex.test(text) && text.toLowerCase() !== newText.toLowerCase()) {
+          const normalized = stripEmojis(text.toLowerCase());
+          if (
+            rex.test(text) &&
+            text.toLowerCase() !== newText.toLowerCase() &&
+            !newSuggestionsSet.has(normalized)
+          ) {
             newSuggestions.push({
               text,
               popularity: 0,
             });
+            newSuggestionsSet.add(normalized);
           }
         });
       }
@@ -683,4 +696,13 @@ function NewItemForm({
       </div>
     </form>
   );
+}
+
+function stripEmojis(s: string) {
+  return s
+    .replace(
+      /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+      ""
+    )
+    .trim();
 }

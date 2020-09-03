@@ -241,9 +241,9 @@ const App: FunctionalComponent = () => {
           <Route path="/about" component={About} />
           <NotFoundPage default />
         </Router>
-        {process.env.NODE_ENV === "development" && db && (
+        {/* {process.env.NODE_ENV === "development" && db && (
           <DebugOffline db={db} />
-        )}
+        )} */}
       </div>
     </div>
   );
