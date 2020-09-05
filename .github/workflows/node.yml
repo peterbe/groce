@@ -55,3 +55,9 @@ jobs:
           export PREACT_APP_FIREBASE_MEASUREMENTID=G-97FY43FWT4
 
           ./bin/build
+
+      - name: Run tests
+        run: |
+          # Remember, these tests depend on the build!
+          # It's for the headless tests's server.
+          yarn test
