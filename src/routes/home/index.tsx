@@ -168,7 +168,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
           </div>
         )}
 
-        {user === null && <Loading />}
+        {user === null && <Loading reloadDelay={5000} />}
 
         {auth && user === false && (
           <div class="login">

@@ -11,6 +11,7 @@ ls -l build/index.html
 cp src/robots.txt build/
 cp src/google82872e9edd278578.html build/
 cp src/sitemap.xml build/
+cp -r src/lazy-assets build/
 
 # Perfect the crap out of the built stuff
 yarn post-process-build

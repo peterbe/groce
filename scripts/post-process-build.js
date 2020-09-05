@@ -26,16 +26,18 @@ const ABSOLUTE_URL_BASE = "https://thatsgroce.web.app";
 async function main() {
   const buildRoot = path.resolve("build");
 
-  const browser = await puppeteer.launch();
+  // const browser = await puppeteer.launch();
   const server = httpServer.createServer({ root: buildRoot });
   server.listen(HTTP_SERVER_PORT);
   try {
+    // await run(browser, buildRoot);
     await run(buildRoot);
   } catch (error) {
     console.error(chalk.red(error));
-    throw error;
+    process.exitCode = 1;
+    // throw error;
   } finally {
-    await browser.close();
+    // await browser.close();
     server.close();
   }
 }
@@ -110,18 +112,28 @@ async function run(buildRoot) {
     // preact-cli which uses `critters-webpack-plugin`.
     const uri = prerenderURL.url;
 
-    const url = `http://0.0.0.0:${HTTP_SERVER_PORT}${uri}`;
+    const url = `http://localhost:${HTTP_SERVER_PORT}${uri}`;
+    // It's safer to create a new browser for every URL because of
+    // service workers.
+    const browser = await puppeteer.launch();
     try {
       result = await minimalcss.minimize({
+        browser,
         urls: [url],
+        withoutjavascript: false,
         skippable: (request) => {
-          return new URL(request.url()).host !== new URL(url).host;
+          const requestURL = new URL(request.url());
+          return !(
+            requestURL.host === new URL(url).host ||
+            requestURL.host.includes("firebaseinstallations")
+          );
         },
       });
     } catch (error) {
       console.log(`Problem running minimize on ${uri}`);
-      console.error(chalk.red(error));
       throw error;
+    } finally {
+      await browser.close();
     }
     const stylesheetsFound = Object.keys(result.stylesheetContents).map(
       (u) => new URL(u).pathname

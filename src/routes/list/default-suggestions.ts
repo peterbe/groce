@@ -100,6 +100,7 @@ export const ITEM_SUGGESTIONS = [
   "Rum 🍹",
   "Ice 🧊",
   "Salt 🧂",
+  "Mayonnaise",
 ];
 
 export const GROUP_SUGGESTIONS = [

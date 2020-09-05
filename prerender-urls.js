@@ -8,7 +8,7 @@ module.exports = function () {
     },
     {
       url: "/about",
-      title: "About this app",
+      title: "About That's Groce!",
     },
   ];
 };

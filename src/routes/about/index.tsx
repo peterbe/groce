@@ -28,6 +28,69 @@ const About: FunctionalComponent = () => {
         <b>hopefully what many other families need too.</b>
       </p>
 
+      <h3 class="display-3">Features</h3>
+      <h4>
+        Lists can have <b>co-owners</b>
+      </h4>
+      <p>
+        Anybody can create a shopping list and call it whatever they want. Once
+        created, you can invite friend, partner, spouse, whatever to be a
+        co-owner of the list. It basically means you&apos;re sharing the list
+        but you can still have lists only for yourself.
+      </p>
+
+      <h4>
+        Everything is <b>real-time</b>
+      </h4>
+      <p>
+        What you enter immediately appears on everyone else&apos;s device who
+        share the same shopping list.
+      </p>
+
+      <figure class="figure">
+        <video autoPlay loop muted controls={true} style={{ width: "100%" }}>
+          <source src="/lazy-assets/realtime.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="figure-caption">
+          Demo shows two different browsers viewing the same same shopping list.
+        </figcaption>
+      </figure>
+
+      <h4>
+        <b>Works offline</b>, but backs up to the cloud
+      </h4>
+      <p>
+        Everything you save is first stored in your device and then immediately
+        sent to the cloud, backed up to{" "}
+        <a href="https://firebase.google.com/" rel="noopener noreferrer">
+          Firebase
+        </a>
+        back by{" "}
+        <a href="https://cloud.google.com/" rel="noopener noreferrer">
+          Google Cloud Platform
+        </a>
+        .
+      </p>
+      <p>
+        If you&apos;re in the store, where you don&apos;t have a signal (WiFi or
+        data), it will not be able to synchronize it to the cloud unless you
+        keep the app open till you have a signal. Or, you re-open the app once
+        you&apos;re home so it gets a chance to back up. In other words, it
+        works offline but it&apos;s not able to synchronize (back up) in the
+        background.
+      </p>
+
+      <figure class="figure">
+        <img
+          src="/lazy-assets/offline-warning.png"
+          class="figure-img img-fluid rounded"
+          alt="Screenshot showing offline warning"
+        />
+        <figcaption class="figure-caption">
+          Screenshot showing offline warning.
+        </figcaption>
+      </figure>
+
       <h3 class="display-3">Frequently asked questions</h3>
       <h4>Is it free?</h4>
       <p>
