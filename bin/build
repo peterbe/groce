@@ -2,6 +2,8 @@
 
 set -e
 
+export PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1)
+
 yarn build --prerenderUrls ./prerender-urls.js --no-inline-css
 
 # If the build failed, no build/index.html file would exist

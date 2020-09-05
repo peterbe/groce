@@ -7,7 +7,7 @@
     "build": "preact build",
     "post-process-build": "node scripts/post-process-build.js",
     "serve": "sirv build --port 8080 --cors --single",
-    "dev": "preact watch",
+    "dev": "PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1) preact watch",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "test": "jest ./tests"
   },

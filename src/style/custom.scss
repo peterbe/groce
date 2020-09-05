@@ -6,6 +6,12 @@ div.main {
   padding-bottom: 80px;
 }
 
+.current-version-footer {
+  font-size: 50%;
+  margin-top: 200px;
+  opacity: 0.7;
+}
+
 @import "./print-overrides";
 
 // For all the uses of the <Loading/> component
