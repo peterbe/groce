@@ -162,6 +162,45 @@ export const ListOptions: FunctionalComponent<Props> = ({
         </div>
       </form>
 
+      {list.owners.length > 1 && (
+        <div class={style.listoptions_section}>
+          <h4>List co-owners</h4>
+          <ul class="list-group">
+            {list.owners.map((uid) => {
+              const metadata = list.ownersMetadata[uid] || null;
+              return (
+                <li key={uid} class="list-group-item">
+                  {metadata ? (
+                    <span>
+                      <img
+                        class="img-thumbnail float-left"
+                        width="60"
+                        style={{ marginRight: 5 }}
+                        src={metadata.photoURL || "/assets/icons/avatar.svg"}
+                        alt={metadata.displayName || metadata.email || uid}
+                      />{" "}
+                      <p>
+                        {metadata.displayName || metadata.email}
+                        <br />
+                        {metadata.displayName && metadata.email ? (
+                          <small>{metadata.email}</small>
+                        ) : (
+                          ""
+                        )}
+                      </p>
+                    </span>
+                  ) : uid === user.uid ? (
+                    "You"
+                  ) : (
+                    "someone else"
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
       <div class={style.listoptions_section}>
         <h4>Share list (invite co-owners)</h4>
         <InvitationsForm db={db} list={list} user={user} />

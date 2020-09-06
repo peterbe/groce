@@ -2,6 +2,9 @@
 declare namespace StyleCssNamespace {
   export interface IStyleCss {
     add_new_group: string;
+    card: string;
+    list_owners: string;
+    list_preview: string;
     list_preview_items: string;
     shopping: string;
   }

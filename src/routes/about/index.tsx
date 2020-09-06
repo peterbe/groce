@@ -85,6 +85,7 @@ const About: FunctionalComponent = () => {
           src="/lazy-assets/offline-warning.png"
           class="figure-img img-fluid rounded"
           alt="Screenshot showing offline warning"
+          loading="lazy"
         />
         <figcaption class="figure-caption">
           Screenshot showing offline warning.

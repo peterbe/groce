@@ -49,6 +49,10 @@
   margin-top: 10px;
 }
 
+.suggestion_button {
+  margin: 3px;
+}
+
 .rainbow_text_animated {
   background: linear-gradient(
     to right,

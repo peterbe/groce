@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
-import { List, ListConfig } from "../../types";
+import { List, ListConfig, OwnerMetadata } from "../../types";
 // import { list } from "../list/style.css";
 
 interface Props {
@@ -41,6 +41,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           name,
           notes,
           owners: [user.uid],
+          added: firebase.firestore.Timestamp.fromDate(new Date()),
           order:
             1 +
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
@@ -91,8 +92,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           return (
             <div
               key={list.id}
-              class="card"
-              style={{ marginTop: 30, cursor: "pointer" }}
+              class={`card ${style.card}`}
               onClick={() => {
                 route(getShoppingHref(list), true);
               }}
@@ -100,9 +100,10 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
               <div class="card-body">
                 <h5 class="card-title">{list.name}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
-                <p class="card-text">
+                <p class={`card-text ${style.list_preview}`}>
                   {db && <PreviewList list={list} db={db} />}
                 </p>
+                <ShowOwners uids={list.owners} metadata={list.ownersMetadata} />
               </div>
             </div>
           );
@@ -141,6 +142,36 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
 };
 
 export default Shopping;
+
+function ShowOwners({
+  uids,
+  metadata,
+}: {
+  uids: string[];
+  metadata: Record<string, OwnerMetadata>;
+}) {
+  if (uids.length === 1) {
+    return <p class={style.list_owners}>Owners: just you</p>;
+  }
+  const images = uids.map((uid) => {
+    const data = metadata[uid] || {};
+    if (data.photoURL) {
+      return (
+        <img
+          key={uid}
+          class="rounded"
+          width="30"
+          src={data.photoURL || "/assets/icons/avatar.svg"}
+          alt={data.displayName || data.email || uid}
+        />
+      );
+    }
+  });
+  if (uids.length !== images.length) {
+    return <p class={style.list_owners}>{uids.length} co-owners</p>;
+  }
+  return <p class={style.list_owners}>{images}</p>;
+}
 
 function NewList({
   create,
