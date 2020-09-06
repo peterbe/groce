@@ -35,6 +35,7 @@ interface BriefItem {
   quantity?: number;
   added: Date;
 }
+
 export const onShoppinglistItemWrite = functions.firestore
   .document("shoppinglists/{listID}/items/{itemID}")
   .onWrite((change, context) => {
@@ -144,52 +145,152 @@ export const onShoppinglistItemWrite = functions.firestore
 
 export const onInviteAccept = functions.firestore
   .document("shoppinglists/{listID}/invitations/{invitationID}")
-  .onUpdate((change, context) => {
+  .onUpdate(async (change, context) => {
     const newValue = change.after.data();
     const previousValue = change.before.data();
     const acceptedBefore = new Set(previousValue.accepted);
+    console.log(
+      `${context.params.invitationID} acceptedBefore: ${Array.from(
+        acceptedBefore
+      )}`
+    );
     const acceptedAfter = new Set(newValue.accepted);
-    const addedUID = [...acceptedBefore].filter(x => !acceptedAfter.has(x));
-    const removedUID = [...acceptedAfter].filter(x => !acceptedBefore.has(x));
+    console.log(
+      `${context.params.invitationID} acceptedAfter: ${Array.from(
+        acceptedAfter
+      )}`
+    );
+    const removedUID = [...acceptedBefore].filter(x => !acceptedAfter.has(x));
+    const addedUID = [...acceptedAfter].filter(x => !acceptedBefore.has(x));
 
-    console.log(`Invite: addedUID=${addedUID} removedUID=${removedUID}}`);
-    functions.logger.info(
+    console.log(
       `addedUID: ${JSON.stringify(addedUID)}  removedUID: ${JSON.stringify(
         removedUID
       )}`
     );
     const listID = context.params.listID;
 
-    for (const uid of addedUID) {
-      return admin
+    if (addedUID.length) {
+      await Promise.all(
+        addedUID.map(uid => {
+          console.log(`ADDING ${uid} from list ${listID}`);
+          return admin
+            .firestore()
+            .collection("shoppinglists")
+            .doc(listID)
+            .update({
+              owners: admin.firestore.FieldValue.arrayUnion(uid)
+            });
+        })
+      );
+    }
+
+    if (removedUID.length) {
+      await Promise.all(
+        removedUID.map(uid => {
+          console.log(`REMOVING ${uid} from list ${listID}`);
+
+          return admin
+            .firestore()
+            .collection("shoppinglists")
+            .doc(listID)
+            .update({
+              owners: admin.firestore.FieldValue.arrayRemove(uid)
+            });
+        })
+      );
+    }
+
+    // for (const uid of addedUID) {
+    //   return admin
+    //     .firestore()
+    //     .collection("shoppinglists")
+    //     .doc(listID)
+    //     .update({
+    //       owners: admin.firestore.FieldValue.arrayUnion(uid)
+    //     })
+    //     .then(() => {
+    //       functions.logger.info(`User ${uid} added to ${listID}`);
+    //     })
+    //     .catch(error => {
+    //       functions.logger.error(error);
+    //       return error;
+    //     });
+    // }
+    // for (const uid of removedUID) {
+    //   return admin
+    //     .firestore()
+    //     .collection("shoppinglists")
+    //     .doc(listID)
+    //     .update({
+    //       owners: admin.firestore.FieldValue.arrayRemove(uid)
+    //     })
+    //     .then(() => {
+    //       functions.logger.info(`User ${uid} removed from ${listID}`);
+    //     })
+    //     .catch(error => {
+    //       functions.logger.error(error);
+    //     });
+    // }
+    // if (promises.length) {
+    //   Promise.all(promises)
+    // }
+    // return Promise.resolve("Nothing updated.");
+  });
+
+interface OwnerMetadata {
+  email?: string;
+  displayName?: string;
+  photoURL?: string;
+}
+export const onShoppinglistWriteOwnersMetadata = functions.firestore
+  .document("shoppinglists/{listID}")
+  .onWrite(async (change, context) => {
+    const doc = await admin
+      .firestore()
+      .collection("shoppinglists")
+      .doc(context.params.listID)
+      .get();
+
+    if (!doc.exists) {
+      return console.error(`No shopping list with ID ${context.params.listID}`);
+    }
+    const data = doc.data();
+    if (!data) {
+      return console.error(
+        `Shopping list with ID ${context.params.listID} contains no data`
+      );
+    }
+    const owners: string[] = data.owners;
+    const ownersMetadataBefore: Record<string, OwnerMetadata> =
+      data.ownersBefore || {};
+    const ownersMetadata: Record<string, OwnerMetadata> = {};
+    const getters = [];
+    for (const uid of owners) {
+      getters.push(admin.auth().getUser(uid));
+    }
+    const users = await Promise.all(
+      owners.map(uid => admin.auth().getUser(uid))
+    );
+    for (const user of users) {
+      ownersMetadata[user.uid] = {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL
+      };
+    }
+    if (
+      JSON.stringify(ownersMetadata) !== JSON.stringify(ownersMetadataBefore)
+    ) {
+      console.log(
+        `SAVE new ownersMetadata := ${JSON.stringify(ownersMetadata)}`
+      );
+      admin
         .firestore()
         .collection("shoppinglists")
-        .doc(listID)
+        .doc(context.params.listID)
         .update({
-          owners: admin.firestore.FieldValue.arrayUnion(uid)
-        })
-        .then(() => {
-          functions.logger.info(`User ${uid} added to ${listID}`);
-        })
-        .catch(error => {
-          functions.logger.error(error);
-          return error;
+          ownersMetadata
         });
     }
-    for (const uid of removedUID) {
-      return admin
-        .firestore()
-        .collection("shoppinglists")
-        .doc(listID)
-        .update({
-          owners: admin.firestore.FieldValue.arrayRemove(uid)
-        })
-        .then(() => {
-          functions.logger.info(`User ${uid} removed from ${listID}`);
-        })
-        .catch(error => {
-          functions.logger.error(error);
-        });
-    }
-    return Promise.resolve("Nothing updated.");
   });

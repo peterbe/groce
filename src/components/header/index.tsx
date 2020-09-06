@@ -249,7 +249,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                     src={
                       user.photoURL
                         ? user.photoURL
-                        : "../assets/icons/avatar.svg"
+                        : "/assets/icons/avatar.svg"
                     }
                     class="img-thumbnail"
                     width="30"

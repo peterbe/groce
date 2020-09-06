@@ -32,11 +32,23 @@ export interface ListConfig {
   disableQuantity: boolean;
 }
 
+export interface OwnerMetadata {
+  email?: string;
+  displayName?: string;
+  photoURL?: string;
+}
+
+// export interface OwnerMetadataRecord {
+//   [key: string]: OwnerMetadata;
+// }
+
 export interface FirestoreList {
   name: string;
   notes: string;
   order: number;
+  added: firebase.firestore.Timestamp;
   owners: string[];
+  ownersMetadata: Record<string, OwnerMetadata>;
   config: ListConfig;
   // XXX This can cease to be optional because all new lists
   // are created with these set. As of Aug 21.

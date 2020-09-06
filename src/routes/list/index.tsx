@@ -675,9 +675,8 @@ function NewItemForm({
               return (
                 <button
                   type="button"
-                  class="btn btn-sm btn-outline-secondary"
+                  class={`btn btn-sm btn-outline-secondary ${style.suggestion_button}`}
                   key={suggestion}
-                  style={{ marginRight: 5 }}
                   onClick={() => {
                     saveHandler(suggestion);
                     setNewText("");
