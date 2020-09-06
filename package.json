@@ -59,7 +59,7 @@
     "jest": "^26.4.2",
     "jest-preset-preact": "^4.0.2",
     "jest-puppeteer": "4.4.0",
-    "lint-staged": "^10.2.13",
+    "lint-staged": "^10.3.0",
     "minimalcss": "0.10.0",
     "preact-cli": "^3.0.1",
     "prettier": "^2.1.1",
