@@ -38,10 +38,6 @@ export interface OwnerMetadata {
   photoURL?: string;
 }
 
-// export interface OwnerMetadataRecord {
-//   [key: string]: OwnerMetadata;
-// }
-
 export interface FirestoreList {
   name: string;
   notes: string;

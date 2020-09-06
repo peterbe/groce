@@ -140,7 +140,6 @@ export const onShoppinglistItemWrite = functions.firestore
         console.log("Error getting shopping list:", error);
         return Promise.reject(error);
       });
-    // return Promise.resolve("Nothing updated.");
   });
 
 export const onInviteAccept = functions.firestore
@@ -200,42 +199,6 @@ export const onInviteAccept = functions.firestore
         })
       );
     }
-
-    // for (const uid of addedUID) {
-    //   return admin
-    //     .firestore()
-    //     .collection("shoppinglists")
-    //     .doc(listID)
-    //     .update({
-    //       owners: admin.firestore.FieldValue.arrayUnion(uid)
-    //     })
-    //     .then(() => {
-    //       functions.logger.info(`User ${uid} added to ${listID}`);
-    //     })
-    //     .catch(error => {
-    //       functions.logger.error(error);
-    //       return error;
-    //     });
-    // }
-    // for (const uid of removedUID) {
-    //   return admin
-    //     .firestore()
-    //     .collection("shoppinglists")
-    //     .doc(listID)
-    //     .update({
-    //       owners: admin.firestore.FieldValue.arrayRemove(uid)
-    //     })
-    //     .then(() => {
-    //       functions.logger.info(`User ${uid} removed from ${listID}`);
-    //     })
-    //     .catch(error => {
-    //       functions.logger.error(error);
-    //     });
-    // }
-    // if (promises.length) {
-    //   Promise.all(promises)
-    // }
-    // return Promise.resolve("Nothing updated.");
   });
 
 interface OwnerMetadata {

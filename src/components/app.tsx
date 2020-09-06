@@ -148,7 +148,8 @@ const App: FunctionalComponent = () => {
               name: data.name,
               notes: data.notes,
               order: data.order,
-              added: data.added || firebase.firestore.Timestamp.fromDate(new Date()),
+              added:
+                data.added || firebase.firestore.Timestamp.fromDate(new Date()),
               owners: data.owners,
               ownersMetadata: data.ownersMetadata || {},
               metadata: doc.metadata,
