@@ -4750,10 +4750,10 @@ envinfo@^7.3.1:
   resolved "https://registry.yarnpkg.com/envinfo/-/envinfo-7.5.1.tgz#93c26897225a00457c75e734d354ea9106a72236"
   integrity sha512-hQBkDf2iO4Nv0CNHpCuSBeaSrveU6nThVxFGTrq/eDlV716UQk09zChaJae4mZRsos1x4YLY2TaH3LHUae3ZmQ==
 
-enzyme-adapter-preact-pure@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/enzyme-adapter-preact-pure/-/enzyme-adapter-preact-pure-2.2.0.tgz#8f6791d1f6500fa013a9d35cb2eecd44eedd6503"
-  integrity sha512-wb483yuBIk5CV+E9ardATYQxVywwWRo+Z3IaIECGTOLjWQYiv9NMSJGp0qXPKGp/zj9qS9yP1/qHEE4k9sEeYA==
+enzyme-adapter-preact-pure@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/enzyme-adapter-preact-pure/-/enzyme-adapter-preact-pure-2.2.3.tgz#b77c6272e7516cb952011047ddc754e1bce3f1b3"
+  integrity sha512-8BkTQRUDDCNe8/UDACU2wXoZNpUP2biq6sYvL9haN+UoKPfEVT1J4C8+gSvblNe4kcJZUMP48SltJQW47oia4w==
   dependencies:
     array.prototype.flatmap "^1.2.1"
     preact-render-to-string "^4.1.0"
@@ -9808,14 +9808,7 @@ preact-render-to-string@^4.1.0:
   dependencies:
     pretty-format "^3.8.0"
 
-preact-render-to-string@^5.0.4:
-  version "5.1.9"
-  resolved "https://registry.yarnpkg.com/preact-render-to-string/-/preact-render-to-string-5.1.9.tgz#201d7bb4c20899b68f5cbda705d36c45305f7efb"
-  integrity sha512-fuuZP/nBcsYvfI5Mjs8R0wVA8jPbnAsr/UQ5Y5/p9Qg4HAz9vSVJ03iejBVw4YGV8jkUCJv0++k4zwp6qjx2Kg==
-  dependencies:
-    pretty-format "^3.8.0"
-
-preact-render-to-string@^5.1.10:
+preact-render-to-string@^5.0.4, preact-render-to-string@^5.1.10:
   version "5.1.10"
   resolved "https://registry.yarnpkg.com/preact-render-to-string/-/preact-render-to-string-5.1.10.tgz#cce03d73b166c550148af9dedc9e06fdf6820f8a"
   integrity sha512-40svy7NDe5Qe0ymdsIC11f0hZb05MeTSUqqIaWJ5DEFCh/sF86KcpRW0kN/ymGYDVVUCfv9qFrVuLCXR7aQxgQ==
