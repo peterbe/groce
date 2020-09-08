@@ -1,6 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { route } from "preact-router";
 import { useState } from "preact/hooks";
+import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
 import { InvitationsForm } from "./invites-form";
@@ -49,6 +50,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
               name: name.trim(),
               notes: notes.trim(),
               config,
+              modified: firebase.firestore.Timestamp.fromDate(new Date())
             })
             .then(() => {
               close();

@@ -22,8 +22,6 @@ export const onFeedbackSubmitted = functions.firestore
         context.params.feedbackID
       } data=${JSON.stringify(data)}`
     );
-    // functions.logger.info(`Feedback created. Snapshot: ${JSON.stringify(snapshot)}`);
-    // functions.logger.info(`Feedback created. Context: ${JSON.stringify(context)}`);
 
     return Promise.resolve("Nothing updated.");
   });
@@ -56,7 +54,6 @@ export const onShoppinglistItemWrite = functions.firestore
         if (!data) {
           return Promise.resolve("Shopping list contains no data :(");
         }
-        // console.log(`Wrote to shopping list: ${data.name}`);
         const recentItemsBefore = data.recent_items;
         const activeItemsCountBefore = data.active_items_count;
 
@@ -119,7 +116,8 @@ export const onShoppinglistItemWrite = functions.firestore
               .doc(context.params.listID)
               .update({
                 recent_items: recentItems,
-                active_items_count: items.length
+                active_items_count: items.length,
+                modified: admin.firestore.Timestamp.fromDate(new Date())
               })
               .then(() => {
                 return Promise.resolve(

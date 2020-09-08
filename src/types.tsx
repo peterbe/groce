@@ -50,6 +50,7 @@ export interface FirestoreList {
   // are created with these set. As of Aug 21.
   recent_items?: ListRecentItems[];
   active_items_count?: number;
+  modified: firebase.firestore.Timestamp;
 }
 
 export interface FirestoreDocumentMetadata {

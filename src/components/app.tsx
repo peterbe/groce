@@ -156,6 +156,10 @@ const App: FunctionalComponent = () => {
               config,
               recent_items: data.recent_items || [],
               active_items_count: data.active_items_count || 0,
+              modified:
+                data.modified ||
+                data.added ||
+                firebase.firestore.Timestamp.fromDate(new Date()),
             });
           });
 
