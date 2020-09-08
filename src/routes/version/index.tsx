@@ -26,7 +26,7 @@ const Version: FunctionalComponent = () => {
 
   return (
     <div>
-      <p class="lead">
+      <p>
         The current version is:
         <br />
         <a href={absURL} rel="noopener noreferrer">
