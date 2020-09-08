@@ -1,4 +1,4 @@
-import { FunctionalComponent, JSX, h } from "preact";
+import { FunctionalComponent, h } from "preact";
 import { useState } from "preact/hooks";
 import { Link } from "preact-router";
 

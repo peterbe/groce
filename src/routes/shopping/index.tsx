@@ -42,6 +42,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           notes,
           owners: [user.uid],
           added: firebase.firestore.Timestamp.fromDate(new Date()),
+          modified: firebase.firestore.Timestamp.fromDate(new Date()),
           order:
             1 +
             ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
