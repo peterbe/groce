@@ -159,7 +159,11 @@ const App: FunctionalComponent = () => {
               modified:
                 data.modified ||
                 data.added ||
-                firebase.firestore.Timestamp.fromDate(new Date()),
+                // For legacy reasons, if it doesn't have a .added or
+                // .modified make it something old.
+                firebase.firestore.Timestamp.fromMillis(
+                  new Date().getTime() - 1000 * 60 * 60 * 24
+                ),
             });
           });
 
@@ -174,6 +178,8 @@ const App: FunctionalComponent = () => {
                 recent_items: [],
                 active_items_count: 0,
                 config: Object.assign({}, defaultListConfig),
+                added: firebase.firestore.Timestamp.fromDate(new Date()),
+                modified: firebase.firestore.Timestamp.fromDate(new Date()),
               })
               .then(() => {
                 console.log("Initial sample list created");
@@ -181,8 +187,13 @@ const App: FunctionalComponent = () => {
               .catch((error) => {
                 console.error("Error creating first sample list", error);
               });
+          } else if (newLists.length > 1) {
+            newLists.sort((a, b) => {
+              return (
+                b.modified.toDate().getTime() - a.modified.toDate().getTime()
+              );
+            });
           }
-
           setLists(newLists);
 
           // if (trace && !traceOnce) {

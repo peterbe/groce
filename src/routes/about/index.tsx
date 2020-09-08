@@ -1,7 +1,8 @@
 import { FunctionalComponent, h } from "preact";
-import * as style from "./style.css";
+import { Link } from "preact-router";
 import { useEffect } from "preact/hooks";
 
+import * as style from "./style.css";
 import { GoBack } from "../../components/go-back";
 
 const About: FunctionalComponent = () => {
@@ -17,6 +18,7 @@ const About: FunctionalComponent = () => {
         Developed out of necessity by a family (Peter and Ashley) and used daily
         in their home.
       </p>
+
       <p>
         This app was built by Peter and Ashley Bengtsson in 2020 because they
         were sick and tired of the other options and a pieces of pen and paper
@@ -28,7 +30,31 @@ const About: FunctionalComponent = () => {
         <b>hopefully what many other families need too.</b>
       </p>
 
+      <p>
+        <Link href="/" class="btn btn-sm btn-outline-primary">
+          &larr; Back to app
+        </Link>
+      </p>
+
       <h3 class="display-3">Features</h3>
+      <h4>It&apos;s a to-do list</h4>
+      <p>
+        But it&apos;s perfected for home grocery shopping and family life.
+        Suggestions are based on what you&apos;ve typed before and it&apos;s
+        learning to make better suggestions based on what you often add to the
+        list.
+      </p>
+      <figure class="figure">
+        <img
+          src="/lazy-assets/sample-list.png"
+          class="figure-img img-fluid rounded"
+          alt="Screenshot showing a sample list"
+          loading="lazy"
+        />
+        <figcaption class="figure-caption">
+          Screenshot showing a sample list.
+        </figcaption>
+      </figure>
       <h4>
         Lists can have <b>co-owners</b>
       </h4>
@@ -38,6 +64,17 @@ const About: FunctionalComponent = () => {
         co-owner of the list. It basically means you&apos;re sharing the list
         but you can still have lists only for yourself.
       </p>
+      <figure class="figure">
+        <img
+          src="/lazy-assets/co-owners.png"
+          class="figure-img img-fluid rounded"
+          alt="Screenshot listing co-owners"
+          loading="lazy"
+        />
+        <figcaption class="figure-caption">
+          Screenshot listing co-owners.
+        </figcaption>
+      </figure>
 
       <h4>
         Everything is <b>real-time</b>

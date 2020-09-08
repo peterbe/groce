@@ -50,7 +50,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
               name: name.trim(),
               notes: notes.trim(),
               config,
-              modified: firebase.firestore.Timestamp.fromDate(new Date())
+              modified: firebase.firestore.Timestamp.fromDate(new Date()),
             })
             .then(() => {
               close();
