@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+var postmark = require("postmark");
 
 admin.initializeApp();
 
@@ -18,8 +19,7 @@ export const onFeedbackSubmitted = functions.firestore
   .onCreate((snapshot, context) => {
     const data = snapshot.data();
     console.log(
-      `Feedback created: feedbackID=${
-        context.params.feedbackID
+      `Feedback created: feedbackID=${context.params.feedbackID
       } data=${JSON.stringify(data)}`
     );
 
@@ -46,7 +46,7 @@ export const onShoppinglistItemWrite = functions.firestore
       .collection("shoppinglists")
       .doc(context.params.listID)
       .get()
-      .then(doc => {
+      .then((doc) => {
         if (!doc.exists) {
           return Promise.resolve("Shopping list does not exist :(");
         }
@@ -65,9 +65,9 @@ export const onShoppinglistItemWrite = functions.firestore
           .collection("items")
           .where("removed", "==", false)
           .get()
-          .then(snapshot => {
+          .then((snapshot) => {
             const items: BriefItem[] = [];
-            snapshot.forEach(doc => {
+            snapshot.forEach((doc) => {
               // doc.data() is never undefined for query doc snapshots
               // console.log("ITEM...", doc.id, " => ", doc.data());
               const data = doc.data();
@@ -76,7 +76,7 @@ export const onShoppinglistItemWrite = functions.firestore
                 description: data.description,
                 added: data.added[0].toDate(),
                 quantity: data.quantity || 0,
-                done: data.done
+                done: data.done,
               });
             });
             items.sort((a, b) => {
@@ -91,12 +91,12 @@ export const onShoppinglistItemWrite = functions.firestore
 
             const recentItems = items
               .slice(0, CUTOFF_RECENT_ITEMS)
-              .map(item => {
+              .map((item) => {
                 return {
                   text: item.text,
                   description: item.description,
                   quantity: item.quantity,
-                  done: item.done
+                  done: item.done,
                 };
               });
 
@@ -117,24 +117,24 @@ export const onShoppinglistItemWrite = functions.firestore
               .update({
                 recent_items: recentItems,
                 active_items_count: items.length,
-                modified: admin.firestore.Timestamp.fromDate(new Date())
+                modified: admin.firestore.Timestamp.fromDate(new Date()),
               })
               .then(() => {
                 return Promise.resolve(
                   `Wrote recent_items: ${JSON.stringify(recentItems)}`
                 );
               })
-              .catch(error => {
+              .catch((error) => {
                 console.error("Error trying to write recent_items", error);
                 return Promise.reject(error);
               });
           })
-          .catch(error => {
+          .catch((error) => {
             console.error("Error getting items snapshot", error);
             return Promise.reject(error);
           });
       })
-      .catch(error => {
+      .catch((error) => {
         console.log("Error getting shopping list:", error);
         return Promise.reject(error);
       });
@@ -157,8 +157,8 @@ export const onInviteAccept = functions.firestore
         acceptedAfter
       )}`
     );
-    const removedUID = [...acceptedBefore].filter(x => !acceptedAfter.has(x));
-    const addedUID = [...acceptedAfter].filter(x => !acceptedBefore.has(x));
+    const removedUID = [...acceptedBefore].filter((x) => !acceptedAfter.has(x));
+    const addedUID = [...acceptedAfter].filter((x) => !acceptedBefore.has(x));
 
     console.log(
       `addedUID: ${JSON.stringify(addedUID)}  removedUID: ${JSON.stringify(
@@ -169,14 +169,14 @@ export const onInviteAccept = functions.firestore
 
     if (addedUID.length) {
       await Promise.all(
-        addedUID.map(uid => {
+        addedUID.map((uid) => {
           console.log(`ADDING ${uid} from list ${listID}`);
           return admin
             .firestore()
             .collection("shoppinglists")
             .doc(listID)
             .update({
-              owners: admin.firestore.FieldValue.arrayUnion(uid)
+              owners: admin.firestore.FieldValue.arrayUnion(uid),
             });
         })
       );
@@ -184,7 +184,7 @@ export const onInviteAccept = functions.firestore
 
     if (removedUID.length) {
       await Promise.all(
-        removedUID.map(uid => {
+        removedUID.map((uid) => {
           console.log(`REMOVING ${uid} from list ${listID}`);
 
           return admin
@@ -192,7 +192,7 @@ export const onInviteAccept = functions.firestore
             .collection("shoppinglists")
             .doc(listID)
             .update({
-              owners: admin.firestore.FieldValue.arrayRemove(uid)
+              owners: admin.firestore.FieldValue.arrayRemove(uid),
             });
         })
       );
@@ -231,13 +231,13 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
       getters.push(admin.auth().getUser(uid));
     }
     const users = await Promise.all(
-      owners.map(uid => admin.auth().getUser(uid))
+      owners.map((uid) => admin.auth().getUser(uid))
     );
     for (const user of users) {
       ownersMetadata[user.uid] = {
         email: user.email,
         displayName: user.displayName,
-        photoURL: user.photoURL
+        photoURL: user.photoURL,
       };
     }
     if (
@@ -251,7 +251,30 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
         .collection("shoppinglists")
         .doc(context.params.listID)
         .update({
-          ownersMetadata
+          ownersMetadata,
         });
     }
+  });
+
+export const onFeedbackAdded = functions.firestore
+  .document("feedback/{feedbackID}")
+  .onCreate((snap, context) => {
+    const data = snap.data();
+    const client = new postmark.Client(
+      functions.config().postmark.server_api_token
+    );
+
+    return client.sendEmail({
+      From: "That's Groce! <mail@peterbe.com>",
+      To: "peterbe@gmail.com",
+      Subject: `New feedback on That's Groce!: ${data.subject}`,
+      TextBody: `Feedback ID: ${context.params.feedbackID}
+Subject: ${data.subject}
+Topic: ${data.topic}
+Text: ${data.text}
+User: ${data.user.displayName || "*no name*"} (${data.user.email || "*no email*"
+        })
+
+Sent: ${new Date().toLocaleString()}`,
+    });
   });
