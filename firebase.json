@@ -11,7 +11,11 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
-        "source": "**",
+        "source": "/shopping{,/**}",
+        "destination": "/index.html"
+      },
+      {
+        "regex": "/(version|settings|feedback|invited|signin)",
         "destination": "/index.html"
       }
     ],
@@ -57,7 +61,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "max-age=864000"
+            "value": "max-age=3600"
           }
         ]
       }

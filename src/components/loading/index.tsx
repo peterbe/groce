@@ -17,7 +17,7 @@ const COLORS = [
 
 export const Loading: FunctionalComponent<Props> = ({
   text = "Loading app...",
-  delay = 300,
+  delay = 301,
   reloadDelay = 0,
 }: Props) => {
   const [stall, setStalled] = useState(delay > 0);
@@ -93,7 +93,7 @@ export const Loading: FunctionalComponent<Props> = ({
       <div class="text-center">
         <strong>{text}</strong>
       </div>
-      {offerReload && (
+      {offerReload ? (
         <div class="text-center">
           <p>Seems to be taking forever.</p>
           <a
@@ -115,6 +115,19 @@ export const Loading: FunctionalComponent<Props> = ({
             Try reloading
           </a>
         </div>
+      ) : (
+        <p>
+          <small>
+            <a
+              href="."
+              onClick={() => {
+                window.location.reload(true);
+              }}
+            >
+              Try reloading the page
+            </a>
+          </small>
+        </p>
       )}
     </div>
   );
