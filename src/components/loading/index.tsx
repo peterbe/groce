@@ -72,9 +72,11 @@ export const Loading: FunctionalComponent<Props> = ({
   }, [color]);
 
   if (stall) {
-    <div class="loading">
-      <p>&nbsp;</p>
-    </div>;
+    return (
+      <div class="loading">
+        <p>&nbsp;</p>
+      </div>
+    );
   }
 
   return (
