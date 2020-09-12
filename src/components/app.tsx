@@ -168,10 +168,13 @@ const App: FunctionalComponent = () => {
           });
 
           if (!newLists.length) {
+            const foodEmojis = ["🍌", "🥕", "🧃", "🥫", "🌽", "🍅", "🍉"];
+            const randomFoodEmoji =
+              foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
             // Manually create their first ever list
             db.collection("shoppinglists")
               .add({
-                name: "Groceries 🌽",
+                name: `Groceries ${randomFoodEmoji}`,
                 notes: "",
                 owners: [user.uid],
                 order: 0,
