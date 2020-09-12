@@ -70,7 +70,7 @@ const App: FunctionalComponent = () => {
         //   });
 
         // Enable offline-ness
-        db.enablePersistence().catch((error) => {
+        db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
           setPersistenceError(error);
         });
       })
@@ -168,10 +168,13 @@ const App: FunctionalComponent = () => {
           });
 
           if (!newLists.length) {
+            const foodEmojis = ["🍌", "🥕", "🧃", "🥫", "🌽", "🍅", "🍉"];
+            const randomFoodEmoji =
+              foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
             // Manually create their first ever list
             db.collection("shoppinglists")
               .add({
-                name: "Groceries 🌽",
+                name: `Groceries ${randomFoodEmoji}`,
                 notes: "",
                 owners: [user.uid],
                 order: 0,
@@ -278,7 +281,11 @@ function DisplayPersistenceError({
   error: firebase.firestore.FirestoreError | null;
 }) {
   if (error === null) return null;
-  let message = <span>Struggling to be offline.</span>;
+  let message = (
+    <span>
+      You might experience problems using the app without a connection.
+    </span>
+  );
   if (error.code == "failed-precondition") {
     message = (
       <span>

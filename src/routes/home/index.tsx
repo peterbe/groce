@@ -312,33 +312,40 @@ function AboutAbout() {
     return null;
   }
   return (
-    <div
-      class="alert alert-primary alert-dismissible fade show"
-      role="alert"
-      style={{ marginTop: 100 }}
-    >
-      <button
-        type="button"
-        class="close"
-        data-dismiss="alert"
-        aria-label="Close"
-        onClick={() => {
-          try {
-            sessionStorage.setItem("hide-about-about", "true");
-          } catch (error) {
-            console.error("Error sessionStorage setItem", error);
-          }
-          setClosed(true);
-        }}
-      >
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <h4 class="alert-heading">What is this app?</h4>
-      <p class="text-center">
-        <Link href="/about" class="btn btn-outline-primary">
-          Read more about this app &rarr;
-        </Link>
-      </p>
-    </div>
+    <p style={{ marginTop: 100, textAlign: "right" }}>
+      <Link href="/about" class="btn btn-outline-primary">
+        Read more <b>about</b> this app &rarr;
+      </Link>
+    </p>
   );
+  // return (
+  //   <div
+  //     class="alert alert-primary alert-dismissible fade show"
+  //     role="alert"
+  //     style={{ marginTop: 100 }}
+  //   >
+  //     <button
+  //       type="button"
+  //       class="close"
+  //       data-dismiss="alert"
+  //       aria-label="Close"
+  //       onClick={() => {
+  //         try {
+  //           sessionStorage.setItem("hide-about-about", "true");
+  //         } catch (error) {
+  //           console.error("Error sessionStorage setItem", error);
+  //         }
+  //         setClosed(true);
+  //       }}
+  //     >
+  //       <span aria-hidden="true">&times;</span>
+  //     </button>
+  //     <h4 class="alert-heading">What is this app?</h4>
+  //     <p class="text-center">
+  //       <Link href="/about" class="btn btn-outline-primary">
+  //         Read more about this app &rarr;
+  //       </Link>
+  //     </p>
+  //   </div>
+  // );
 }
