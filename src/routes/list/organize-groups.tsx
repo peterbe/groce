@@ -104,7 +104,10 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
         const children = event.to.children;
         const newOrder = new Map();
         Array.from(children).forEach((item, i) => {
-          newOrder.set((item as HTMLElement).dataset.text?.toLowerCase(), i);
+          newOrder.set(
+            (item as HTMLElement).dataset.text?.toLowerCase(),
+            i + 1
+          );
         });
         saveNewOrders(newOrder);
       },
