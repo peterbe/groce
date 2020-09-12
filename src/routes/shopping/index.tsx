@@ -194,6 +194,8 @@ function NewList({
     }
   }, [newNameRef]);
 
+  const [submitting, setSubmitting] = useState(false);
+
   const submittable =
     name.trim() &&
     !lists
@@ -206,6 +208,7 @@ function NewList({
       onSubmit={(event) => {
         event.preventDefault();
         if (submittable) {
+          setSubmitting(true);
           create(name.trim(), notes.trim(), {
             disableGroups,
             disableQuantity,
@@ -298,7 +301,7 @@ function NewList({
       </div>
 
       <button type="submit" class="btn btn-primary" disabled={!submittable}>
-        Create list
+        {submitting ? "Creating..." : "Create list"}
       </button>
     </form>
   );
