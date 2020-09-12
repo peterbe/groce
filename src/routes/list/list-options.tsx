@@ -30,8 +30,6 @@ export const ListOptions: FunctionalComponent<Props> = ({
     !!list.config.disableQuantity
   );
   const [updateError, setUpdateError] = useState<Error | null>(null);
-  const [confirmDelete, toggleConfirmDelete] = useState(false);
-  const [deleteError, setDeleteError] = useState<Error | null>(null);
 
   return (
     <div class={style.listoptions}>
@@ -207,54 +205,137 @@ export const ListOptions: FunctionalComponent<Props> = ({
         <h4>Share list (invite co-owners)</h4>
         <InvitationsForm db={db} list={list} user={user} />
       </div>
-
-      <div class={style.listoptions_section}>
-        <h4>Delete list</h4>
-        <div class="mb-3">
-          <button
-            type="button"
-            class="btn btn-warning"
-            onClick={() => {
-              toggleConfirmDelete(!confirmDelete);
-            }}
-          >
-            {confirmDelete ? "Cancel" : "Delete list"}
-          </button>
-        </div>
-        {confirmDelete && (
-          <div class="mb-3">
-            <h4>Are you sure?</h4>
-            <p>This can&apos;t be undone</p>
-            <button
-              type="button"
-              class="btn btn-danger"
-              onClick={() => {
-                const doc = db.collection("shoppinglists").doc(list.id);
-
-                doc
-                  .delete()
-                  .then(() => {
-                    close();
-                    route("/shopping", true);
-                  })
-                  .catch((error) => {
-                    console.error("Unable to delete list:", error);
-                    setDeleteError(error);
-                  });
-              }}
-            >
-              Yes, delete this list
-            </button>
-          </div>
-        )}
-        {deleteError && (
-          <Alert
-            heading="Unable to delete list"
-            message={deleteError}
-            offerReload={true}
-          />
-        )}
-      </div>
+      {list.owners.length === 1 ? (
+        <DeleteListOption db={db} list={list} />
+      ) : (
+        <LeaveListOption db={db} list={list} user={user} />
+      )}
     </div>
   );
 };
+
+function DeleteListOption({
+  db,
+  list,
+}: {
+  list: List;
+  db: firebase.firestore.Firestore;
+}) {
+  const [confirmDelete, toggleConfirmDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState<Error | null>(null);
+
+  return (
+    <div class={style.listoptions_section}>
+      <h4>Delete list</h4>
+      <div class="mb-3">
+        <button
+          type="button"
+          class="btn btn-warning"
+          onClick={() => {
+            toggleConfirmDelete(!confirmDelete);
+          }}
+        >
+          {confirmDelete ? "Cancel" : "Delete list"}
+        </button>
+      </div>
+      {confirmDelete && (
+        <div class="mb-3">
+          <h5>Are you sure?</h5>
+          <p>This can&apos;t be undone</p>
+          <button
+            type="button"
+            class="btn btn-danger"
+            onClick={() => {
+              const doc = db.collection("shoppinglists").doc(list.id);
+
+              doc
+                .delete()
+                .then(() => {
+                  close();
+                  route("/shopping", true);
+                })
+                .catch((error) => {
+                  console.error("Unable to delete list:", error);
+                  setDeleteError(error);
+                });
+            }}
+          >
+            Yes, delete this list
+          </button>
+        </div>
+      )}
+      {deleteError && (
+        <Alert
+          heading="Unable to delete list"
+          message={deleteError}
+          offerReload={true}
+        />
+      )}
+    </div>
+  );
+}
+
+function LeaveListOption({
+  db,
+  list,
+  user,
+}: {
+  list: List;
+  db: firebase.firestore.Firestore;
+  user: firebase.User;
+}) {
+  const [confirm, toggleConfirm] = useState(false);
+  const [updateError, setUpdateError] = useState<Error | null>(null);
+
+  return (
+    <div class={style.listoptions_section}>
+      <h4>Leave list</h4>
+      <small>You&apos;re one of {list.owners.length} co-owners.</small>
+      <div class="mb-3">
+        <button
+          type="button"
+          class="btn btn-warning"
+          onClick={() => {
+            toggleConfirm(!confirm);
+          }}
+        >
+          {confirm ? "Cancel" : "Leave list"}
+        </button>
+      </div>
+      {confirm && (
+        <div class="mb-3">
+          <h5>Are you sure?</h5>
+          <button
+            type="button"
+            class="btn btn-danger"
+            onClick={() => {
+              const doc = db.collection("shoppinglists").doc(list.id);
+
+              doc
+                .update({
+                  owners: firebase.firestore.FieldValue.arrayRemove(user.uid),
+                })
+                .then(() => {
+                  close();
+                  route("/", true);
+                })
+                .catch((error) => {
+                  console.error("Unable to leave list:", error);
+                  setUpdateError(error);
+                });
+            }}
+          >
+            Yes, leave list
+          </button>
+        </div>
+      )}
+      {updateError && (
+        <Alert
+          heading="Unable to leave list"
+          message={updateError}
+          offerReload={true}
+        />
+      )}
+    </div>
+  );
+}
