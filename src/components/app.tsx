@@ -70,7 +70,7 @@ const App: FunctionalComponent = () => {
         //   });
 
         // Enable offline-ness
-        db.enablePersistence().catch((error) => {
+        db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
           setPersistenceError(error);
         });
       })
@@ -278,7 +278,11 @@ function DisplayPersistenceError({
   error: firebase.firestore.FirestoreError | null;
 }) {
   if (error === null) return null;
-  let message = <span>Struggling to be offline.</span>;
+  let message = (
+    <span>
+      You might experience problems using the app without a connection.
+    </span>
+  );
   if (error.code == "failed-precondition") {
     message = (
       <span>
