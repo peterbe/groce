@@ -58,27 +58,34 @@ def test_200_bundles():
         for x in BUILD_ROOT.iterdir()
         if x.name.startswith("bundle") and ".esm." in x.name
     ]:
-        uri = f'/{path.relative_to(BUILD_ROOT)}'
+        uri = f"/{path.relative_to(BUILD_ROOT)}"
         r = get(uri)
         assert r.status_code == 200
-        if uri.endswith('.map'):
+        if uri.endswith(".map"):
             # https://stackoverflow.com/a/19912684/205832
-            assert r.headers['content-type'] == 'application/json; charset=utf-8'
+            assert r.headers["content-type"].startswith("application/json")
         else:
-            assert r.headers['content-type'] == 'application/javascript; charset=utf-8'
+            assert r.headers["content-type"].startswith("text/javascript") or r.headers[
+                "content-type"
+            ].startswith("application/javascript")
         assert r.headers["cache-control"] == "max-age=315360000"
 
+
 def test_400_nonexistant_bundle():
-    r = get('/bundle.404000.js')
+    r = get("/bundle.404000.js")
     assert r.status_code == 404
 
 
 def test_sw_headers():
     r = get("/sw.js")
     assert r.status_code == 200
-    assert r.headers["content-type"] == "application/javascript; charset=utf-8"
+    assert r.headers["content-type"].startswith("text/javascript") or r.headers[
+        "content-type"
+    ].startswith("application/javascript")
     assert r.headers["cache-control"] == "no-cache"
     r = get("/sw-esm.js")
     assert r.status_code == 200
-    assert r.headers["content-type"] == "application/javascript; charset=utf-8"
+    assert r.headers["content-type"].startswith("text/javascript") or r.headers[
+        "content-type"
+    ].startswith("application/javascript")
     assert r.headers["cache-control"] == "no-cache"
