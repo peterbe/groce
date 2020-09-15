@@ -212,15 +212,17 @@ const App: FunctionalComponent = () => {
     };
   }, [db, user]);
 
+  // function handleRoute(event: RouterOnChangeArgs) {}
+
   return (
     <div id="app" class="container">
       {snapshotsOffline && <OfflineWarning />}
       <Header auth={auth} user={user} />
 
       <DisplayPersistenceError error={persistenceError} />
-      {/* <Router onChange={handleRoute}> */}
 
       <div class="main">
+        {/* <Router onChange={handleRoute}> */}
         <Router>
           <Route
             path="/"

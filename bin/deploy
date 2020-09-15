@@ -2,8 +2,22 @@
 
 set -e
 
+if [ -d build ]; then
+  mkdir -p .builds
+  cp -r build .builds/$(date +%Y%m%d%H%M)
+fi
+
 ./bin/build
+ls  build/index.html
+
+for dir in .builds/*/     # list directories in the form "/tmp/dirname/"
+do
+    echo $dir
+    rsync --ignore-existing -avh $dir build
+done
+
 
 cd functions && yarn build && cd ..
 firebase --version
+
 firebase deploy
