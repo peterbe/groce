@@ -59,6 +59,13 @@ const App: FunctionalComponent = () => {
     import("firebase/firestore")
       .then(() => {
         const db = firebase.firestore();
+
+        // Enable offline-ness
+        // It's important that this is done *before* you use the `db`.
+        db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
+          setPersistenceError(error);
+        });
+
         setDB(db);
 
         // Clear any offline data.
@@ -68,11 +75,6 @@ const App: FunctionalComponent = () => {
         //   .catch((error) => {
         //     console.error("Could not enable persistence:", error.code);
         //   });
-
-        // Enable offline-ness
-        db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
-          setPersistenceError(error);
-        });
       })
       .catch((error) => {
         console.error("Unable to lazy-load firebase/firestore:", error);
