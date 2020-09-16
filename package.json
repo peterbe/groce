@@ -67,5 +67,8 @@
     "serve": "11.3.2",
     "sirv-cli": "^1.0.6",
     "typescript": "^3.9.7"
+  },
+  "resolutions": {
+    "node-fetch": ">=2.6.1"
   }
 }
