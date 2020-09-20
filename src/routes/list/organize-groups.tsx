@@ -116,7 +116,7 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
 
   const uniqueGroups = new Map(
     items.map((item) => {
-      return [item.group.text, item.group.order];
+      return [item.group.text.trim(), item.group.order];
     })
   );
 

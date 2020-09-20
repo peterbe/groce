@@ -16,6 +16,7 @@ import Header from "./header";
 import Feedback from "../routes/feedback";
 import About from "../routes/about";
 import Version from "../routes/version";
+import Counters from "../routes/counters";
 import { OfflineWarning } from "./offline-warning";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
@@ -267,6 +268,7 @@ const App: FunctionalComponent = () => {
 
           <Route path="/about" component={About} />
           <Route path="/version" component={Version} />
+          <Route path="/counters" component={Counters} db={db} />
           <NotFoundPage default />
         </Router>
         {/* {process.env.NODE_ENV === "development" && db && (

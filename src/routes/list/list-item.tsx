@@ -246,6 +246,7 @@ export const ListItem: FunctionalComponent<Props> = ({
           )}
         </span>
       </span>
+      <i>{JSON.stringify(item.group)}</i>
 
       {!disableGroups && (
         <span

@@ -1,0 +1,14 @@
+.counters {
+  padding-top: 50px;
+}
+
+.counters table td, .counters table th {
+  text-align: center;
+}
+.counters table tbody td {
+
+}
+
+span.number {
+  font-size: 250%;
+}

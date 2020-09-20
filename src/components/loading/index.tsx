@@ -17,7 +17,7 @@ const COLORS = [
 
 export const Loading: FunctionalComponent<Props> = ({
   text = "Loading app...",
-  delay = 301,
+  delay = 1500,
   reloadDelay = 0,
 }: Props) => {
   const [stall, setStalled] = useState(delay > 0);

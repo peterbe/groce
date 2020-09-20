@@ -15,7 +15,7 @@
         "destination": "/index.html"
       },
       {
-        "regex": "/(version|settings|feedback|invited|signin)",
+        "regex": "/(version|settings|feedback|invited|signin|counters)",
         "destination": "/index.html"
       }
     ],

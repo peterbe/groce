@@ -19,7 +19,8 @@ export const onFeedbackSubmitted = functions.firestore
   .onCreate((snapshot, context) => {
     const data = snapshot.data();
     console.log(
-      `Feedback created: feedbackID=${context.params.feedbackID
+      `Feedback created: feedbackID=${
+        context.params.feedbackID
       } data=${JSON.stringify(data)}`
     );
 
@@ -206,7 +207,7 @@ interface OwnerMetadata {
 }
 export const onShoppinglistWriteOwnersMetadata = functions.firestore
   .document("shoppinglists/{listID}")
-  .onWrite(async (change, context) => {
+  .onWrite(async (snapshot, context) => {
     const doc = await admin
       .firestore()
       .collection("shoppinglists")
@@ -272,9 +273,61 @@ export const onFeedbackAdded = functions.firestore
 Subject: ${data.subject}
 Topic: ${data.topic}
 Text: ${data.text}
-User: ${data.user.displayName || "*no name*"} (${data.user.email || "*no email*"
-        })
+User: ${data.user.displayName || "*no name*"} (${
+        data.user.email || "*no email*"
+      })
 
 Sent: ${new Date().toLocaleString()}`,
     });
+  });
+
+export const onShoppinglistItemUpdateCounter = functions.firestore
+  .document("shoppinglists/{listID}/items/{itemID}")
+  .onUpdate((change, context) => {
+    const newValue = change.after.data();
+    // ...or the previous value before this update
+    const previousValue = change.before.data();
+    // console.log(
+    //   "DONE BEFORE?",
+    //   previousValue.done,
+    //   "DONE NOW?",
+    //   newValue.done,
+    //   "REMOVED BEFORE?",
+    //   previousValue.removed,
+    //   "REMOVED NOW?",
+    //   newValue.removed
+    // );
+    if (!previousValue.done && newValue.done) {
+      const now = new Date();
+      const [year, month, day] = now.toISOString().split("T")[0].split("-");
+      return admin
+        .firestore()
+        .collection("counters")
+        .doc("itemsDone")
+        .update({
+          ever: admin.firestore.FieldValue.increment(1),
+          [year]: admin.firestore.FieldValue.increment(1),
+          [`${year}-${month}`]: admin.firestore.FieldValue.increment(1),
+          [`${year}-${month}-${day}`]: admin.firestore.FieldValue.increment(1),
+        });
+    } else {
+      return Promise.resolve();
+    }
+  });
+
+export const onShoppinglistsCreateCounter = functions.firestore
+  .document("shoppinglists/{listID}")
+  .onCreate(async () => {
+    const now = new Date();
+    const [year, month, day] = now.toISOString().split("T")[0].split("-");
+    return admin
+      .firestore()
+      .collection("counters")
+      .doc("listsCreated")
+      .update({
+        ever: admin.firestore.FieldValue.increment(1),
+        [year]: admin.firestore.FieldValue.increment(1),
+        [`${year}-${month}`]: admin.firestore.FieldValue.increment(1),
+        [`${year}-${month}-${day}`]: admin.firestore.FieldValue.increment(1),
+      });
   });

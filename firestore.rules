@@ -2,6 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    match /counters/{counterID=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
 		match /feedback/{feedbackID} {
     	allow create: if request.auth != null;
       allow read: if request.auth != null && request.auth.uid == resource.data.creator_uid;

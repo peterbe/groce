@@ -11,7 +11,13 @@ import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
-import { FirestoreItem, Item, List, SearchSuggestion } from "../../types";
+import {
+  FirestoreItem,
+  Item,
+  List,
+  SearchSuggestion,
+  ItemGroup,
+} from "../../types";
 
 interface Props {
   user: firebase.User | false | null;
@@ -284,14 +290,41 @@ const ShoppingList: FunctionalComponent<Props> = ({
   ) {
     if (db) {
       const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
+
+      const thisGroup = group.trim().toLowerCase();
+
+      let groupOrder = 0;
+      if (group.trim() && items) {
+        // Seek the highest group order of any item that matches this.
+        groupOrder = Math.max(
+          ...items
+            .filter((item) => item.group.text.toLowerCase() === thisGroup)
+            .map((item) => item.group.order)
+        );
+      }
+
+      // Preserve the way you've always been spelling it.
+      // For example, if you have at least one group called "Shoes"
+      // but now you typed "shoes", the override that spelling.
+      let groupText = group.trim();
+      if (groupText && items) {
+        const previousSame = items
+          .filter((item) => item.group.text.toLowerCase() === thisGroup)
+          .map((item) => item.group.text)
+        if (previousSame.length) {
+          groupText = previousSame[0]
+        }
+      }
+
+      const groupItem = {
+        order: groupOrder,
+        text: groupText,
+      };
       itemRef
         .update({
-          text,
-          description,
-          group: {
-            order: item.group.order,
-            text: group,
-          },
+          text: text.trim(),
+          description: description.trim(),
+          group: groupItem,
           quantity,
         })
         .then(() => {
