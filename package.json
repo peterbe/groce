@@ -27,7 +27,7 @@
     "@types/sortablejs": "1.10.6",
     "bootstrap": "5.0.0-alpha1",
     "copy-to-clipboard": "3.3.1",
-    "firebase": "7.20.0",
+    "firebase": "7.21.0",
     "node-sass": "4.14.1",
     "preact": "^10.4.8",
     "preact-cli-plugin-env-vars": "1.2.1",
