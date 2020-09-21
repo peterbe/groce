@@ -310,9 +310,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
       if (groupText && items) {
         const previousSame = items
           .filter((item) => item.group.text.toLowerCase() === thisGroup)
-          .map((item) => item.group.text)
+          .map((item) => item.group.text);
         if (previousSame.length) {
-          groupText = previousSame[0]
+          groupText = previousSame[0];
         }
       }
 
