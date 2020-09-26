@@ -11,13 +11,7 @@ import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
-import {
-  FirestoreItem,
-  Item,
-  List,
-  SearchSuggestion,
-  ItemGroup,
-} from "../../types";
+import { FirestoreItem, Item, List, SearchSuggestion } from "../../types";
 
 interface Props {
   user: firebase.User | false | null;

@@ -1,5 +1,38 @@
 @import "bootstrap/scss/bootstrap";
 
+li.list-group-item {
+  // On smaller devices, override the default (`padding: 0.5rem 1rem;`)
+  padding: 0.5rem 0.5rem;
+  // color: red;
+}
+// Make the main checkbox items a bit larger on mobile
+input.form-check-input[type="checkbox"] {
+  // font-size: 135%;
+}
+
+// On anything but small, go back to the Bootstrap default.
+@include media-breakpoint-up(sm) {
+  li.list-group-item {
+    padding: 0.5rem 1rem;
+    // color: blue
+  }
+  input.form-check-input[type="checkbox"] {
+    font-size: 100%;
+  }
+}
+@include media-breakpoint-up(md) {
+  // li { color: brown;}
+}
+@include media-breakpoint-up(lg) {
+  // li { color: pink;}
+}
+@include media-breakpoint-up(xl) {
+  // li { color: orange;}
+}
+@include media-breakpoint-up(xxl) {
+  // li { color: green}
+}
+
 div.main {
   // Without this hack, the fixed-bottom navbar might always overlay
   // the last items on the page.
