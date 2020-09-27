@@ -10,8 +10,10 @@ import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
-import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
-import { FirestoreItem, Item, List, SearchSuggestion } from "../../types";
+import { NewItemForm } from "./new-item-form";
+import { GROUP_SUGGESTIONS } from "./default-suggestions";
+import { FirestoreItem, Item, List } from "../../types";
+import { stripEmojis } from "../../utils";
 
 interface Props {
   user: firebase.User | false | null;
@@ -211,9 +213,16 @@ const ShoppingList: FunctionalComponent<Props> = ({
       return;
     }
     // If the exact same text has been used before, reuse it
+    const textLC = text.toLowerCase();
+    // The comparison using `stripEmojis()` is in case you have a previous
+    // item like "Bananas 🍌" and this time you just typed "bananas", then
+    // match that one.
     const previousItem = items.find(
-      (item) => item.text.toLowerCase() === text.toLowerCase()
+      (item) =>
+        item.text.toLowerCase() === textLC ||
+        stripEmojis(item.text).toLowerCase() === textLC
     );
+
     if (previousItem) {
       // Update it as not removed and not done
       db.collection(`shoppinglists/${id}/items`)
@@ -474,7 +483,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
         <NewItemForm
           ready={!!items}
           items={items}
-          // searchSuggestions={searchSuggestions}
           saveHandler={(text: string) => {
             addNewText(text);
           }}
@@ -513,7 +521,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       )}
       {!editAction && !editGroups && !!doneItems.length && (
         <div class={style.done_items}>
-          <h5>Done items</h5>
+          <h5>Done and dusted</h5>
           <ul class="list-group">
             {doneItems
               .filter((item) => item.done)
@@ -593,142 +601,3 @@ const ShoppingList: FunctionalComponent<Props> = ({
 };
 
 export default ShoppingList;
-
-function NewItemForm({
-  ready,
-  // searchSuggestions,
-  items,
-  saveHandler,
-}: {
-  ready: boolean;
-  items: Item[] | null;
-  // searchSuggestions: SearchSuggestion[];
-  saveHandler: (text: string) => void;
-}) {
-  const [newText, setNewText] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-
-  const MAX_SUGGESTIONS = 4;
-
-  useEffect(() => {
-    if (!newText.trim()) {
-      setSuggestions([]);
-    } else {
-      const newSuggestions: SearchSuggestion[] = [];
-      const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const rex = new RegExp(`\\b${escaped}`, "i");
-
-      // Our hash table for avoiding dupes
-      const newSuggestionsSet: Set<string> = new Set();
-
-      if (items) {
-        items.forEach((item, i) => {
-          if (item.removed) {
-            const normalized = stripEmojis(item.text.toLowerCase());
-            if (
-              rex.test(item.text) &&
-              item.text.toLowerCase() !== newText.toLowerCase() &&
-              !newSuggestionsSet.has(normalized)
-            ) {
-              newSuggestions.push({
-                text: item.text,
-                popularity: items.length - i,
-              });
-              newSuggestionsSet.add(normalized);
-            }
-          }
-        });
-      }
-      if (newSuggestions.length < MAX_SUGGESTIONS) {
-        // Add some brand new ones that have never been used but
-        // assuming it's English we can suggest some
-        ITEM_SUGGESTIONS.forEach((text) => {
-          const normalized = stripEmojis(text.toLowerCase());
-          if (
-            rex.test(text) &&
-            text.toLowerCase() !== newText.toLowerCase() &&
-            !newSuggestionsSet.has(normalized)
-          ) {
-            newSuggestions.push({
-              text,
-              popularity: 0,
-            });
-            newSuggestionsSet.add(normalized);
-          }
-        });
-      }
-
-      setSuggestions(
-        newSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
-      );
-    }
-  }, [newText, items]);
-
-  return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        saveHandler(newText);
-        setNewText("");
-      }}
-    >
-      <div class="input-group">
-        <input
-          type="search"
-          class="form-control"
-          value={newText}
-          onInput={({
-            currentTarget,
-          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-            setNewText(currentTarget.value);
-          }}
-          aria-label="Text input with segmented dropdown button"
-          placeholder="Add new item..."
-          disabled={!ready}
-        />
-        <button
-          type="submit"
-          class="btn btn-outline-secondary"
-          disabled={!newText.trim()}
-        >
-          Add
-        </button>
-      </div>
-
-      <div class={style.search_suggestions}>
-        {suggestions.length ? (
-          <p>
-            {suggestions.map((suggestion) => {
-              return (
-                <button
-                  type="button"
-                  class={`btn btn-sm btn-outline-secondary ${style.suggestion_button}`}
-                  key={suggestion}
-                  onClick={() => {
-                    saveHandler(suggestion);
-                    setNewText("");
-                  }}
-                >
-                  {suggestion}?
-                </button>
-              );
-            })}
-          </p>
-        ) : (
-          // This min-height number I got from using the Web Inspector
-          // when the p tag has buttons in it.
-          <p style={{ minHeight: 31 }}>&nbsp;</p>
-        )}
-      </div>
-    </form>
-  );
-}
-
-function stripEmojis(s: string) {
-  return s
-    .replace(
-      /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-      ""
-    )
-    .trim();
-}
