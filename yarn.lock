@@ -9521,10 +9521,10 @@ mini-css-extract-plugin@^0.9.0:
     schema-utils "^1.0.0"
     webpack-sources "^1.1.0"
 
-minimalcss@0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/minimalcss/-/minimalcss-0.10.0.tgz#314057537df9fad70e2c82a7e92d5139e7123f16"
-  integrity sha512-86Xz07mTC8rHY2xkjyveAadHzcSRURGsoMXNOMrM+12O5Oevqw9UBm0nNwjVkElwDPlb85Es/PEVZcPxwSkBNQ==
+minimalcss@0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/minimalcss/-/minimalcss-0.11.0.tgz#5eb8139b6924abe7af42156160a57e7a4b7d4e19"
+  integrity sha512-C6wbejrodNq6ODGLay089CVwCkDiMvmTXvog1emn9JQQybJEwFVJRRudxDq+8zCdeOCWV17b6uDCqIcOs1e6bg==
   dependencies:
     cheerio "1.0.0-rc.3"
     css-tree "1.0.0-alpha.37"
