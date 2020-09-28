@@ -8,7 +8,7 @@ if [ -d build ]; then
 fi
 
 ./bin/build
-ls  build/index.html
+ls build/index.html
 
 for dir in .builds/*/     # list directories in the form "/tmp/dirname/"
 do
@@ -16,8 +16,8 @@ do
     rsync --ignore-existing -avh $dir build
 done
 
+./bin/download-old-build-assets.js
 
 cd functions && yarn build && cd ..
 firebase --version
-
 firebase deploy
