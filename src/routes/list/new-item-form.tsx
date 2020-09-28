@@ -121,7 +121,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
                     setNewText("");
                   }}
                 >
-                  {suggestion}?
+                  {suggestion}
                 </button>
               );
             })}
