@@ -236,7 +236,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               : undefined
           }
         >
-          {item.text}{" "}
+          <span class="align-middle">{item.text}</span>{" "}
           {!disableQuantity && !!item.quantity && item.quantity !== 1 && (
             <b>x{item.quantity}</b>
           )}{" "}
