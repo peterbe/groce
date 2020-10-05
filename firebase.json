@@ -15,7 +15,11 @@
         "destination": "/index.html"
       },
       {
-        "regex": "/(version|settings|feedback|invited|signin|counters)",
+        "source": "/invited{,/**}",
+        "destination": "/index.html"
+      },
+      {
+        "regex": "/(version|settings|feedback|signin|counters)",
         "destination": "/index.html"
       }
     ],
