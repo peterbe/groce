@@ -39,7 +39,7 @@ const Counters: FunctionalComponent<Props> = (props: Props) => {
   const { db } = props;
   useEffect(() => {
     document.title = "Counters";
-  });
+  }, []);
 
   const [itemsDone, setItemsDone] = useState(new Map());
   const [listsCreated, setListsCreated] = useState(new Map());
