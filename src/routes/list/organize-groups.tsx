@@ -235,7 +235,7 @@ function ListItem({
         </form>
       ) : (
         <span>
-          <span class="handle">↕</span> {group.text}
+          <span class={`handle ${style.sorting_handle}`}>⇅</span> {group.text}
         </span>
       )}
 

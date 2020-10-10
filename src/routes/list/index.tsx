@@ -500,7 +500,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         )}
 
       {!editAction && !editGroups && !!todoItems.length && (
-        <ul class="list-group">
+        <ul class="list-group shadow-sm bg-white rounded">
           {todoItems
             .filter((item) => !item.done)
             .map((item) => {
@@ -522,7 +522,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction && !editGroups && !!doneItems.length && (
         <div class={style.done_items}>
           <h5>Done and dusted</h5>
-          <ul class="list-group">
+          <ul class="list-group shadow-sm bg-white rounded">
             {doneItems
               .filter((item) => item.done)
               .map((item) => {
