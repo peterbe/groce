@@ -166,7 +166,9 @@ const App: FunctionalComponent = () => {
                 // For legacy reasons, if it doesn't have a .added or
                 // .modified make it something old.
                 firebase.firestore.Timestamp.fromMillis(
-                  new Date().getTime() - 1000 * 60 * 60 * 24
+                  // Just make it really really old if it doesn't have a
+                  // .modified attribute.
+                  new Date().getTime() - 1000 * 60 * 60 * 24 * 90
                 ),
             });
           });

@@ -6,6 +6,7 @@ declare namespace StyleCssNamespace {
     list_owners: string;
     list_preview: string;
     list_preview_items: string;
+    preview_item: string;
     shopping: string;
   }
 }
