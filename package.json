@@ -37,7 +37,7 @@
     "preact-render-to-string": "^5.1.10",
     "preact-router": "^3.2.1",
     "rough-viz": "1.0.6",
-    "sass-loader": "9.0.3",
+    "sass-loader": "10.0.3",
     "sortablejs": "1.12.0"
   },
   "devDependencies": {
