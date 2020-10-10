@@ -134,6 +134,18 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
               <Link
                 class="nav-link"
                 activeClassName={"active"}
+                href="/share"
+                onClick={() => {
+                  setShowNavbar(false);
+                }}
+              >
+                Share the ❤️
+              </Link>
+            </li>
+            <li class="nav-item">
+              <Link
+                class="nav-link"
+                activeClassName={"active"}
                 href="/version"
                 onClick={() => {
                   setShowNavbar(false);

@@ -93,7 +93,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           return (
             <div
               key={list.id}
-              class={`card ${style.card}`}
+              class={`card ${style.card} shadow bg-white rounded`}
               onClick={() => {
                 route(getShoppingHref(list), true);
               }}
@@ -101,9 +101,9 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
               <div class="card-body">
                 <h5 class="card-title">{list.name}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
-                <p class={`card-text ${style.list_preview}`}>
+                <div class={`card-text ${style.list_preview}`}>
                   {db && <PreviewList list={list} db={db} />}
-                </p>
+                </div>
                 <ShowOwners uids={list.owners} metadata={list.ownersMetadata} />
               </div>
             </div>
@@ -328,10 +328,10 @@ function PreviewList({
   const CUTOFF = 5;
 
   return (
-    <ul class={style.list_preview_items}>
+    <ul class={`text-muted ${style.list_preview_items}`}>
       {items.slice(0, CUTOFF).map((item) => {
         return (
-          <li key={item.text}>
+          <li key={item.text} class={`overflow-hidden ${style.preview_item}`}>
             <input
               class="form-check-input"
               type="checkbox"

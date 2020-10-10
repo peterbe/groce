@@ -17,6 +17,7 @@ import Feedback from "../routes/feedback";
 import About from "../routes/about";
 import Version from "../routes/version";
 import Counters from "../routes/counters";
+import Share from "../routes/share";
 import { OfflineWarning } from "./offline-warning";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
@@ -165,7 +166,9 @@ const App: FunctionalComponent = () => {
                 // For legacy reasons, if it doesn't have a .added or
                 // .modified make it something old.
                 firebase.firestore.Timestamp.fromMillis(
-                  new Date().getTime() - 1000 * 60 * 60 * 24
+                  // Just make it really really old if it doesn't have a
+                  // .modified attribute.
+                  new Date().getTime() - 1000 * 60 * 60 * 24 * 90
                 ),
             });
           });
@@ -269,6 +272,7 @@ const App: FunctionalComponent = () => {
           <Route path="/about" component={About} />
           <Route path="/version" component={Version} />
           <Route path="/counters" component={Counters} db={db} />
+          <Route path="/share" component={Share} />
           <NotFoundPage default />
         </Router>
         {/* {process.env.NODE_ENV === "development" && db && (
