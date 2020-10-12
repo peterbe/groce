@@ -25,7 +25,7 @@
   ],
   "dependencies": {
     "@types/sortablejs": "1.10.6",
-    "bootstrap": "5.0.0-alpha1",
+    "bootstrap": "5.0.0-alpha2",
     "copy-to-clipboard": "3.3.1",
     "dayjs": "1.9.1",
     "node-sass": "4.14.1",
