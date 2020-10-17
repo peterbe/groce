@@ -13,6 +13,7 @@ interface Props {
   list: List;
   user: firebase.User;
   close: () => void;
+  togglePopularityContest: () => void;
 }
 
 export const ListOptions: FunctionalComponent<Props> = ({
@@ -20,6 +21,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
   list,
   close,
   user,
+  togglePopularityContest,
 }: Props) => {
   const [name, setName] = useState(list.name);
   const [notes, setNotes] = useState(list.notes);
@@ -161,6 +163,17 @@ export const ListOptions: FunctionalComponent<Props> = ({
           </button>
         </div>
       </form>
+
+      <div class={style.listoptions_section}>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          title="See which items you most often put onto the list"
+          onClick={() => togglePopularityContest()}
+        >
+          Popularity contest &rarr;
+        </button>
+      </div>
 
       {list.owners.length > 1 && (
         <div class={style.listoptions_section}>

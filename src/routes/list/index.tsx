@@ -11,6 +11,7 @@ import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { NewItemForm } from "./new-item-form";
+import { PopularityContest } from "./popularity-contest";
 import { GROUP_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List } from "../../types";
 import { stripEmojis } from "../../utils";
@@ -39,6 +40,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
   const [editAction, toggleEditAction] = useState(false);
   const [editGroups, toggleEditGroups] = useState(false);
+  const [popularityContest, setPopularityContest] = useState(false);
 
   useEffect(() => {
     if (listNotFound) {
@@ -445,11 +447,27 @@ const ShoppingList: FunctionalComponent<Props> = ({
       </p>
       {list && <h2>{list.name} </h2>}
 
+      {items && !editAction && popularityContest && (
+        <PopularityContest
+          // db={db}
+          // user={user}
+          // list={list}
+          items={items}
+          close={() => {
+            setPopularityContest(false);
+          }}
+        />
+      )}
+
       {db && user && list && editAction && (
         <ListOptions
           db={db}
           user={user}
           list={list}
+          togglePopularityContest={() => {
+            toggleEditAction(false);
+            setPopularityContest(true);
+          }}
           close={() => {
             toggleEditAction(false);
           }}
@@ -479,7 +497,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && !editGroups && (
+      {!editAction && !editGroups && !popularityContest && (
         <NewItemForm
           ready={!!items}
           items={items}
@@ -494,12 +512,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {items &&
         !editAction &&
         !editGroups &&
+        !popularityContest &&
         !todoItems.length &&
         !doneItems.length && (
           <p class={style.empty_list}>List is empty at the moment.</p>
         )}
 
-      {!editAction && !editGroups && !!todoItems.length && (
+      {!editAction && !editGroups && !popularityContest && !!todoItems.length && (
         <ul class="list-group shadow-sm bg-white rounded">
           {todoItems
             .filter((item) => !item.done)
@@ -519,7 +538,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
             })}
         </ul>
       )}
-      {!editAction && !editGroups && !!doneItems.length && (
+      {!editAction && !editGroups && !popularityContest && !!doneItems.length && (
         <div class={style.done_items}>
           <h5>Done and dusted</h5>
           <ul class="list-group shadow-sm bg-white rounded">
@@ -543,7 +562,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      {!editAction && !editGroups && !!doneItems.length ? (
+      {!editAction &&
+      !editGroups &&
+      !popularityContest &&
+      !!doneItems.length ? (
         <div class={style.clearitems}>
           <button
             type="button"
@@ -558,29 +580,33 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       ) : null}
 
-      {!editAction && !editGroups && !!clearedItems.length && (
-        <div class={style.clearitems}>
-          <button
-            type="button"
-            class="btn btn-secondary btn-sm btn-block"
-            onClick={(event) => {
-              event.preventDefault();
-              undoClearDoneItems();
-            }}
-          >
-            Undo cleared{" "}
-            {clearedItems.length === 1
-              ? "item"
-              : `${clearedItems.length} items`}
-          </button>
-        </div>
-      )}
+      {!editAction &&
+        !editGroups &&
+        !popularityContest &&
+        !!clearedItems.length && (
+          <div class={style.clearitems}>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm btn-block"
+              onClick={(event) => {
+                event.preventDefault();
+                undoClearDoneItems();
+              }}
+            >
+              Undo cleared{" "}
+              {clearedItems.length === 1
+                ? "item"
+                : `${clearedItems.length} items`}
+            </button>
+          </div>
+        )}
 
       {db &&
         user &&
         items &&
         hasOrganizableGroups &&
         !editAction &&
+        !popularityContest &&
         !editGroups && (
           <div class={`${style.edit_groups_action} hide-in-print`}>
             <button
