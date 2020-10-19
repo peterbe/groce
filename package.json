@@ -27,7 +27,7 @@
     "@types/sortablejs": "1.10.6",
     "bootstrap": "5.0.0-alpha2",
     "copy-to-clipboard": "3.3.1",
-    "dayjs": "1.9.1",
+    "dayjs": "1.9.3",
     "node-sass": "4.14.1",
     "preact": "^10.5.4",
     "firebase": "7.23.0",
