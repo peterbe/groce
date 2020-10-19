@@ -69,7 +69,7 @@
     "preact-cli": "^3.0.3",
     "prettier": "^2.1.2",
     "serve": "11.3.2",
-    "sirv-cli": "^1.0.6",
+    "sirv-cli": "^1.0.8",
     "typescript": "^3.9.7"
   },
   "resolutions": {
