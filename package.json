@@ -29,7 +29,7 @@
     "copy-to-clipboard": "3.3.1",
     "dayjs": "1.9.1",
     "node-sass": "4.14.1",
-    "preact": "^10.5.4",
+    "preact": "^10.5.5",
     "firebase": "7.23.0",
     "preact-cli-plugin-env-vars": "1.2.1",
     "preact-jsx-chai": "^3.0.0",
