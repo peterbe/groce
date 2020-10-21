@@ -1,29 +1,40 @@
 import { FunctionalComponent, h } from "preact";
 import { useState } from "preact/hooks";
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
 // import * as style from "./style.css";
 // import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
 import { Item } from "../../types";
 // import { stripEmojis } from "../../utils";
 
+dayjs.extend(relativeTime);
+
 interface Props {
   items: Item[];
   close: () => void;
+  maxAgeSeconds?: number;
 }
 
 interface ItemSummary {
   id: string;
   text: string;
   times_added: number;
+  added: firebase.firestore.Timestamp[];
   frequency: number;
 }
 
 type SortKeys = "frequency" | "added" | "alphabetically";
 
-export const PopularityContest: FunctionalComponent<Props> = ({
-  items,
-  close,
-}: Props) => {
+const MIN_TIMES_ADDED = 2;
+const MAX_AGE_SECONDS = 60 * 60 * 24 * 90;
+
+export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
+  const { items, close } = props;
+  const maxAgeSeconds = props.maxAgeSeconds || MAX_AGE_SECONDS;
+
+  const [expandedItemId, setExpandedItemId] = useState("");
   const [sortBy, setSortBy] = useState<SortKeys>("frequency");
   const [sortReverse, setSortReverse] = useState(false);
 
@@ -36,8 +47,14 @@ export const PopularityContest: FunctionalComponent<Props> = ({
     }
   }
 
+  const todaySeconds = new Date().getTime() / 1000;
   const itemsSummary: ItemSummary[] = items
-    .filter((item) => item.added.length > 2)
+    .filter((item) => {
+      const added = item.added.filter(
+        (d) => d.seconds >= todaySeconds - maxAgeSeconds
+      );
+      return added.length > MIN_TIMES_ADDED;
+    })
     .map((item) => {
       const distances = item.added
         .slice(0, -1)
@@ -50,6 +67,7 @@ export const PopularityContest: FunctionalComponent<Props> = ({
       return {
         id: item.id,
         text: item.text,
+        added: item.added,
         times_added: item.times_added,
         frequency,
       };
@@ -76,34 +94,51 @@ export const PopularityContest: FunctionalComponent<Props> = ({
       >
         &larr; back to shopping list
       </button>
-      <h4>Popularity contest</h4>
+      <h4 style={{ marginTop: 20 }}>Popularity contest</h4>
       <small>Reflect on your most commonly added items</small>
 
       <table class="table table-sm">
         <thead>
           <tr>
-            {/* <th scope="col">#</th> */}
             <th scope="col">Item</th>
             <th scope="col">Every...</th>
             <th scope="col">#</th>
           </tr>
         </thead>
         <tbody>
-          {itemsSummary.map((item, i) => {
-            return (
-              <tr key={item.id}>
-                {/* <th scope="row">{i + 1}</th> */}
-                <td>{item.text}</td>
-                <td>{formatFrequency(item.frequency)}</td>
-                <td>{item.times_added}</td>
-              </tr>
-            );
+          {itemsSummary.map((itemSummary, i) => {
+            const rows = [
+              <tr key={itemSummary.id}>
+                <td
+                  onClick={() => {
+                    setExpandedItemId(itemSummary.id);
+                  }}
+                >
+                  {itemSummary.text}
+                </td>
+                <td>{formatFrequency(itemSummary.frequency)}</td>
+                <td>{itemSummary.times_added}</td>
+              </tr>,
+            ];
+            if (itemSummary.id === expandedItemId) {
+              rows.push(
+                <ExpandedRow
+                  key={`${itemSummary.id}:expanded`}
+                  itemSummary={itemSummary}
+                  close={() => {
+                    setExpandedItemId("");
+                  }}
+                />
+              );
+            }
+            return rows;
           })}
         </tbody>
       </table>
       <p>
         <small>
-          Only items added more than <b>twice</b> included (so,{" "}
+          Only items added more than <b>{MIN_TIMES_ADDED} times</b> in the last{" "}
+          <b>{formatFrequency(maxAgeSeconds)}</b> included (so,{" "}
           {items.length - itemsSummary.length} excluded).
         </small>
       </p>
@@ -157,10 +192,53 @@ export const PopularityContest: FunctionalComponent<Props> = ({
   );
 };
 
+function ExpandedRow({
+  itemSummary,
+  close,
+}: {
+  itemSummary: ItemSummary;
+  close: () => void;
+}) {
+  return (
+    <tr>
+      <td colSpan={3}>
+        <button
+          class="btn btn-sm btn-outline-primary float-right"
+          onClick={() => {
+            close();
+          }}
+        >
+          Close
+        </button>
+        <span>Last added...</span>
+        <ul>
+          {itemSummary.added.map((ts, i) => {
+            const thisDate = dayjs(ts.toDate());
+
+            const isLast = i + 1 >= itemSummary.added.length;
+            const previousDate = isLast
+              ? null
+              : dayjs(itemSummary.added[i + 1].toDate());
+            return (
+              <li key={ts.seconds}>
+                <span>{thisDate.fromNow()}</span>
+                <br />
+                <span style={{ paddingLeft: 40, fontStyle: "italic" }}>
+                  {previousDate ? `↕ ${thisDate.to(previousDate, true)}` : ""}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </td>
+    </tr>
+  );
+}
+
 function formatFrequency(seconds: number) {
   const days = seconds / 60 / 60 / 24;
   if (days > 14) {
-    const weeks = Math.ceil(days / 7);
+    const weeks = Math.floor(days / 7);
     return `${weeks} week${weeks === 1 ? "" : "s"}`;
   }
   return `${Math.ceil(days)} day${Math.ceil(days) === 1 ? "" : "s"}`;
