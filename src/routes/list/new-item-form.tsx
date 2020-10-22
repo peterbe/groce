@@ -1,9 +1,9 @@
 import { FunctionalComponent, h } from "preact";
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 
 import * as style from "./style.css";
-import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
-import { FirestoreItem, Item, List, SearchSuggestion } from "../../types";
+import { ITEM_SUGGESTIONS } from "./default-suggestions";
+import { Item, SearchSuggestion } from "../../types";
 import { stripEmojis } from "../../utils";
 
 interface Props {

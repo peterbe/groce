@@ -106,7 +106,7 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
           </tr>
         </thead>
         <tbody>
-          {itemsSummary.map((itemSummary, i) => {
+          {itemsSummary.map((itemSummary) => {
             const rows = [
               <tr key={itemSummary.id}>
                 <td

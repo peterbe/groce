@@ -62,7 +62,7 @@ const Share: FunctionalComponent = () => {
             setCopied(true);
           }}
         >
-          {copied ? "Copied" : "Click to copy"}
+          {copied ? "Copied to your clipboard" : "Click to copy"}
         </button>
       </div>
     </div>
