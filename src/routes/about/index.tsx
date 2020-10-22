@@ -13,7 +13,7 @@ const About: FunctionalComponent = () => {
     <div class={style.about}>
       <h1 class="display-1">About this app</h1>
       <p class="lead">
-        A mobile web app to help families do grocery and meal planning.
+        A mobile web app to help families do grocery shopping and meal planning.
         <br />
         Developed out of necessity by a family (Peter and Ashley) and used daily
         in their home.
