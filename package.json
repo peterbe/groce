@@ -34,7 +34,7 @@
     "preact-cli-plugin-env-vars": "1.2.1",
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.0.0",
-    "preact-render-to-string": "^5.1.10",
+    "preact-render-to-string": "^5.1.11",
     "preact-router": "^3.2.1",
     "rough-viz": "1.0.6",
     "sass-loader": "9.0.3",
