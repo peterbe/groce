@@ -33,7 +33,10 @@ export const ListItem: FunctionalComponent<Props> = ({
   const [description, setDescription] = useState("");
   const [group, setGroup] = useState("");
   const [quantity, setQuantity] = useState<string | number>("");
-  const [editMode, setEditMode] = useState(false);
+  // const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState<
+    "" | "text" | "description" | "group"
+  >("");
 
   const recentlyAdded = new Date().getTime() / 1000 - item.added[0].seconds < 3;
   const recentlyModified =
@@ -47,11 +50,26 @@ export const ListItem: FunctionalComponent<Props> = ({
   }, [item]);
 
   const textInputRef = useRef<HTMLInputElement>();
+  const descriptionInputRef = useRef<HTMLTextAreaElement>();
+  const groupInputRef = useRef<HTMLInputElement>();
   useEffect(() => {
-    if (editMode && textInputRef.current) {
-      textInputRef.current.focus();
+    if (editMode) {
+      if (editMode === "description") {
+        if (descriptionInputRef.current) {
+          descriptionInputRef.current.focus();
+        }
+      } else if (editMode === "group") {
+        if (groupInputRef.current) {
+          groupInputRef.current.focus();
+        }
+      } else {
+        // Default is to focus on the text input
+        if (textInputRef.current) {
+          textInputRef.current.focus();
+        }
+      }
     }
-  }, [editMode, textInputRef]);
+  }, [editMode]);
 
   function getFilteredGroupOptions() {
     if (!group.trim()) {
@@ -85,7 +103,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               ? 0
               : parseInt(`${quantity}`);
             updateItem(item, text, description, group, quantityNumber);
-            setEditMode(false);
+            setEditMode("");
           }}
         >
           <div class="mb-2">
@@ -153,6 +171,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               class="form-control"
               id="exampleFormControlTextarea1"
               placeholder="Description"
+              ref={descriptionInputRef}
               value={description}
               onInput={(event) => {
                 setDescription(event.currentTarget.value);
@@ -167,6 +186,7 @@ export const ListItem: FunctionalComponent<Props> = ({
                 class="form-control"
                 list="datalistOptions"
                 placeholder="Group"
+                ref={groupInputRef}
                 value={group}
                 onInput={(event) => {
                   setGroup(event.currentTarget.value);
@@ -193,7 +213,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               class="btn btn-secondary"
               onClick={(event) => {
                 event.stopPropagation();
-                setEditMode(false);
+                setEditMode("");
               }}
             >
               Cancel
@@ -207,9 +227,9 @@ export const ListItem: FunctionalComponent<Props> = ({
   return (
     <li
       class="list-group-item d-flex justify-content-between align-items-center"
-      onClick={() => {
-        setEditMode(true);
-      }}
+      // onClick={() => {
+      //   setEditMode(true);
+      // }}
     >
       <span>
         <input
@@ -236,22 +256,39 @@ export const ListItem: FunctionalComponent<Props> = ({
               : undefined
           }
         >
-          <span class="align-middle">{item.text}</span>{" "}
+          <span
+            class={`align-middle ${style.click_to_edit}`}
+            onClick={() => {
+              setEditMode("text");
+            }}
+          >
+            {item.text}
+          </span>{" "}
           {!disableQuantity && !!item.quantity && item.quantity !== 1 && (
             <b>x{item.quantity}</b>
           )}{" "}
           {/* <br/> */}
           {item.description && (
-            <small class={style.item_description}>{item.description}</small>
+            <small
+              class={`${style.item_description} ${style.click_to_edit}`}
+              onClick={() => {
+                setEditMode("description");
+              }}
+            >
+              {item.description}
+            </small>
           )}
         </span>
       </span>
 
       {!disableGroups && (
         <span
-          class={
-            item.group.text ? "badge bg-secondary" : "badge bg-light text-dark"
-          }
+          onClick={() => {
+            setEditMode("group");
+          }}
+          class={`badge ${
+            item.group.text ? "bg-secondary" : "bg-light text-dark"
+          } ${style.click_to_edit}`}
         >
           {item.group.text || "no group"}
         </span>

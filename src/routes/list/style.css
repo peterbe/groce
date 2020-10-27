@@ -53,6 +53,10 @@
   margin: 3px;
 }
 
+.click_to_edit {
+  cursor: pointer;
+}
+
 .rainbow_text_animated {
   background: linear-gradient(
     to right,

@@ -2,6 +2,7 @@
 declare namespace StyleCssNamespace {
   export interface IStyleCss {
     clearitems: string;
+    click_to_edit: string;
     done_item: string;
     done_items: string;
     edit_groups_action: string;
