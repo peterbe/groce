@@ -569,7 +569,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         <div class={style.clearitems}>
           <button
             type="button"
-            class="btn btn-info btn-lg btn-block"
+            class="btn btn-success btn-lg btn-block"
             onClick={(event) => {
               event.preventDefault();
               clearDoneItems();
