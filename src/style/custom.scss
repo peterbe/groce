@@ -6,8 +6,9 @@ li.list-group-item {
   // color: red;
 }
 // Make the main checkbox items a bit larger on mobile
-input.form-check-input[type="checkbox"] {
-  // font-size: 135%;
+input.form-check-input.list-item {
+  font-size: 150%;
+  margin: 2px 4px 0 2px;
 }
 
 // On anything but small, go back to the Bootstrap default.
@@ -16,8 +17,8 @@ input.form-check-input[type="checkbox"] {
     padding: 0.5rem 1rem;
     // color: blue
   }
-  input.form-check-input[type="checkbox"] {
-    font-size: 100%;
+  input.form-check-input.list-item {
+    font-size: 130%;
   }
 }
 @include media-breakpoint-up(md) {

@@ -213,7 +213,7 @@ export const ListItem: FunctionalComponent<Props> = ({
     >
       <span>
         <input
-          class="form-check-input mr-1"
+          class="form-check-input list-item"
           id={`checkbox${item.id}`}
           type="checkbox"
           checked={item.done}
