@@ -1,10 +1,11 @@
 import { FunctionalComponent, h } from "preact";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useMemo } from "preact/hooks";
 
 import * as style from "./style.css";
 import { ITEM_SUGGESTIONS } from "./default-suggestions";
 import { Item, SearchSuggestion } from "../../types";
 import { stripEmojis } from "../../utils";
+import { getItemsSummary } from "./popularity-contest";
 
 interface Props {
   ready: boolean;
@@ -21,6 +22,14 @@ export const NewItemForm: FunctionalComponent<Props> = ({
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const MAX_SUGGESTIONS = 4;
+
+  const mostPopularTexts: string[] = useMemo(
+    () =>
+      items
+        ? getItemsSummary(items, { sortReverse: true }).map((x) => x.text)
+        : [],
+    [items]
+  );
 
   useEffect(() => {
     if (!newText.trim()) {
@@ -44,7 +53,16 @@ export const NewItemForm: FunctionalComponent<Props> = ({
             ) {
               newSuggestions.push({
                 text: item.text,
-                popularity: items.length - i,
+                // The `mostPopularTexts` is a sorted list of strings. The
+                // *last* string in the list is the most frequently used.
+                // Use findIndex to turn that into a simple integer.
+                // The Math.min() is to make sure that items that *have*
+                // been used before, but not so frequently always gets at
+                // least a popularity of 1 or more.
+                popularity: Math.min(
+                  mostPopularTexts.findIndex((t) => t === item.text),
+                  1
+                ),
               });
               newSuggestionsSet.add(normalized);
             }
@@ -63,12 +81,17 @@ export const NewItemForm: FunctionalComponent<Props> = ({
           ) {
             newSuggestions.push({
               text,
+              // Things that have never been used always gets the lowest
+              // possible popularity number.
               popularity: 0,
             });
             newSuggestionsSet.add(normalized);
           }
         });
       }
+
+      // Sort by highest popularity number first
+      newSuggestions.sort((a, b) => b.popularity - a.popularity);
 
       setSuggestions(
         newSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
