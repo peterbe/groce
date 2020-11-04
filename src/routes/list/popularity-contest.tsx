@@ -78,8 +78,6 @@ export function getItemsSummary(
       return reverse * a.text.localeCompare(b.text);
     }
   });
-  console.log("Figured out itemsSummary on", items.length, "items");
-
   return itemsSummary;
 }
 
