@@ -4,10 +4,7 @@ import { useState } from "preact/hooks";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-// import * as style from "./style.css";
-// import { ITEM_SUGGESTIONS, GROUP_SUGGESTIONS } from "./default-suggestions";
 import { Item } from "../../types";
-// import { stripEmojis } from "../../utils";
 
 dayjs.extend(relativeTime);
 
@@ -27,14 +24,88 @@ interface ItemSummary {
 
 type SortKeys = "frequency" | "added" | "alphabetically";
 
-const MIN_TIMES_ADDED = 2;
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 90;
+const MIN_TIMES_ADDED = 3;
+const MAX_AGE_SECONDS = 60 * 60 * 24 * 90; // ~3 months
+
+type getItemsSummaryOptions = {
+  maxAgeSeconds?: number;
+  sortBy?: string;
+  sortReverse?: boolean;
+};
+export function getItemsSummary(
+  items: Item[],
+  {
+    maxAgeSeconds = MAX_AGE_SECONDS,
+    sortBy = "frequency",
+    sortReverse = false,
+  }: getItemsSummaryOptions
+): ItemSummary[] {
+  const todaySeconds = new Date().getTime() / 1000;
+  const itemsSummary: ItemSummary[] = [];
+  for (const item of items) {
+    // Exclude those that are too long ago and of the remaining ones,
+    // reduce it down to a list of "clusters".
+    const added = reduceTooClose(
+      item.added.filter((d) => d.seconds >= todaySeconds - maxAgeSeconds)
+    );
+
+    if (added.length < MIN_TIMES_ADDED) {
+      continue;
+    }
+
+    const distances = added
+      .slice(0, -1)
+      .map((added, i) => added.seconds - item.added[i + 1].seconds);
+
+    const movingMedianDistances = smm(distances, Math.min(4, distances.length));
+    const frequency = movingMedianDistances[movingMedianDistances.length - 1];
+
+    itemsSummary.push({
+      id: item.id,
+      text: item.text,
+      added,
+      times_added: added.length,
+      frequency,
+    });
+  }
+  itemsSummary.sort((a, b) => {
+    const reverse = sortReverse ? -1 : 1;
+    if (sortBy === "frequency") {
+      return reverse * (a.frequency - b.frequency);
+    } else if (sortBy === "added") {
+      return reverse * (b.times_added - a.times_added);
+    } else {
+      return reverse * a.text.localeCompare(b.text);
+    }
+  });
+  return itemsSummary;
+}
+
+function reduceTooClose(
+  dates: firebase.firestore.Timestamp[],
+  minDistanceSeconds = 60 * 60
+): firebase.firestore.Timestamp[] {
+  const checked: firebase.firestore.Timestamp[] = [];
+  let previous: null | firebase.firestore.Timestamp = null;
+  for (const date of dates) {
+    if (!previous) {
+      checked.push(date);
+      previous = date;
+      continue;
+    }
+    const diffSeconds = previous.seconds - date.seconds;
+    if (diffSeconds > minDistanceSeconds) {
+      checked.push(date);
+    }
+    previous = date;
+  }
+  return checked;
+}
 
 export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
   const { items, close } = props;
   const maxAgeSeconds = props.maxAgeSeconds || MAX_AGE_SECONDS;
 
-  const [expandedItemId, setExpandedItemId] = useState("");
   const [sortBy, setSortBy] = useState<SortKeys>("frequency");
   const [sortReverse, setSortReverse] = useState(false);
 
@@ -47,41 +118,11 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
     }
   }
 
-  const todaySeconds = new Date().getTime() / 1000;
-  const itemsSummary: ItemSummary[] = items
-    .filter((item) => {
-      const added = item.added.filter(
-        (d) => d.seconds >= todaySeconds - maxAgeSeconds
-      );
-      return added.length > MIN_TIMES_ADDED;
-    })
-    .map((item) => {
-      const distances = item.added
-        .slice(0, -1)
-        .map((added, i) => added.seconds - item.added[i + 1].seconds);
-      const movingMedianDistances = smm(
-        distances,
-        Math.min(4, distances.length)
-      );
-      const frequency = movingMedianDistances[movingMedianDistances.length - 1];
-      return {
-        id: item.id,
-        text: item.text,
-        added: item.added,
-        times_added: item.times_added,
-        frequency,
-      };
-    })
-    .sort((a, b) => {
-      const reverse = sortReverse ? -1 : 1;
-      if (sortBy === "frequency") {
-        return reverse * (a.frequency - b.frequency);
-      } else if (sortBy === "added") {
-        return reverse * (b.times_added - a.times_added);
-      } else {
-        return reverse * a.text.localeCompare(b.text);
-      }
-    });
+  const itemsSummary = getItemsSummary(items, {
+    maxAgeSeconds,
+    sortBy,
+    sortReverse,
+  });
 
   return (
     <div>
@@ -97,44 +138,13 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
       <h4 style={{ marginTop: 20 }}>Popularity contest</h4>
       <small>Reflect on your most commonly added items</small>
 
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th scope="col">Item</th>
-            <th scope="col">Every...</th>
-            <th scope="col">#</th>
-          </tr>
-        </thead>
-        <tbody>
-          {itemsSummary.map((itemSummary) => {
-            const rows = [
-              <tr key={itemSummary.id}>
-                <td
-                  onClick={() => {
-                    setExpandedItemId(itemSummary.id);
-                  }}
-                >
-                  {itemSummary.text}
-                </td>
-                <td>{formatFrequency(itemSummary.frequency)}</td>
-                <td>{itemSummary.times_added}</td>
-              </tr>,
-            ];
-            if (itemSummary.id === expandedItemId) {
-              rows.push(
-                <ExpandedRow
-                  key={`${itemSummary.id}:expanded`}
-                  itemSummary={itemSummary}
-                  close={() => {
-                    setExpandedItemId("");
-                  }}
-                />
-              );
-            }
-            return rows;
-          })}
-        </tbody>
-      </table>
+      {itemsSummary.length ? (
+        <Table itemsSummary={itemsSummary} />
+      ) : (
+        <p style={{ margin: "50px 5px", textAlign: "center" }}>
+          <i>Not enough popular items at the moment</i>
+        </p>
+      )}
       <p>
         <small>
           Only items added more than <b>{MIN_TIMES_ADDED} times</b> in the last{" "}
@@ -143,54 +153,158 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
         </small>
       </p>
 
-      <div>
-        Sort by{" "}
-        <input
-          type="radio"
-          class="btn-check"
-          name="options"
-          id="option1"
-          autoComplete="off"
-          checked={sortBy === "frequency"}
-          onClick={() => {
-            toggleSortBy("frequency");
-          }}
-        />
-        <label class="btn btn-sm btn-outline-secondary" htmlFor="option1">
-          Frequency
-        </label>{" "}
-        <input
-          type="radio"
-          class="btn-check"
-          name="options"
-          id="option2"
-          autoComplete="off"
-          checked={sortBy === "added"}
-          onClick={() => {
-            toggleSortBy("added");
-          }}
-        />
-        <label class="btn btn-sm btn-outline-secondary" htmlFor="option2">
-          Times
-        </label>{" "}
-        <input
-          type="radio"
-          class="btn-check"
-          name="options"
-          id="option3"
-          autoComplete="off"
-          checked={sortBy === "alphabetically"}
-          onClick={() => {
-            toggleSortBy("alphabetically");
-          }}
-        />
-        <label class="btn btn-sm btn-outline-secondary" htmlFor="option3">
-          Text
-        </label>
-      </div>
+      {!!itemsSummary.length && (
+        <div>
+          Sort by{" "}
+          <input
+            type="radio"
+            class="btn-check"
+            name="options"
+            id="option1"
+            autoComplete="off"
+            checked={sortBy === "frequency"}
+            onClick={() => {
+              toggleSortBy("frequency");
+            }}
+          />
+          <label
+            class="btn btn-sm btn-outline-secondary"
+            htmlFor="option1"
+            style={
+              sortBy === "frequency" && sortReverse
+                ? { transform: "rotate(-180deg)" }
+                : undefined
+            }
+          >
+            Frequency
+          </label>{" "}
+          <input
+            type="radio"
+            class="btn-check"
+            name="options"
+            id="option2"
+            autoComplete="off"
+            checked={sortBy === "added"}
+            onClick={() => {
+              toggleSortBy("added");
+            }}
+          />
+          <label
+            class="btn btn-sm btn-outline-secondary"
+            htmlFor="option2"
+            style={
+              sortBy === "added" && sortReverse
+                ? { transform: "rotate(-180deg)" }
+                : undefined
+            }
+          >
+            Times
+          </label>{" "}
+          <input
+            type="radio"
+            class="btn-check"
+            name="options"
+            id="option3"
+            autoComplete="off"
+            checked={sortBy === "alphabetically"}
+            onClick={() => {
+              toggleSortBy("alphabetically");
+            }}
+          />
+          <label
+            class="btn btn-sm btn-outline-secondary"
+            htmlFor="option3"
+            style={
+              sortBy === "alphabetically" && sortReverse
+                ? { transform: "rotate(-180deg)" }
+                : undefined
+            }
+          >
+            Text
+          </label>
+        </div>
+      )}
     </div>
   );
 };
+
+// function omitTooCloseItems(minDistance: number, sequence: number[]) {
+//   const checked: number[] = [];
+//   // Given a sequence of numbers like
+//   //   [1, 4, 45, 87, 88, 89, 156]
+//   // you can see that some numbers are "too close".
+//   // For example, [1,4] are just 3 apart. And [87,88,89] is just 1 apart.
+//   // So instead return a new sequence were these too-close ones are omitted.
+//   // E.g.
+//   //   [1, 45, 87, 156]
+//   //
+
+//   let previous: number | null = null;
+//   for (const current of sequence) {
+//     if (previous !== null) {
+//       if (current - previous < minDistance) {
+//         continue;
+//       }
+//     }
+//     previous = current;
+//     checked.push(current);
+//   }
+
+//   return checked;
+// }
+
+function Table({ itemsSummary }: { itemsSummary: ItemSummary[] }) {
+  const [expandedItemId, setExpandedItemId] = useState("");
+  return (
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col">Every...</th>
+          <th scope="col">#</th>
+        </tr>
+      </thead>
+      <tbody>
+        {itemsSummary.map((itemSummary) => {
+          const rows = [
+            <tr key={itemSummary.id}>
+              <td
+                onClick={() => {
+                  if (expandedItemId === itemSummary.id) {
+                    setExpandedItemId("");
+                  } else {
+                    setExpandedItemId(itemSummary.id);
+                  }
+                }}
+                style={
+                  expandedItemId === itemSummary.id
+                    ? { fontWeight: "bold" }
+                    : undefined
+                }
+              >
+                {itemSummary.text}
+              </td>
+              <td>{formatFrequency(itemSummary.frequency)}</td>
+              <td>{itemSummary.times_added}</td>
+            </tr>,
+          ];
+          if (itemSummary.id === expandedItemId) {
+            rows.push(
+              <ExpandedRow
+                key={`${itemSummary.id}:expanded`}
+                itemSummary={itemSummary}
+                close={() => {
+                  setExpandedItemId("");
+                }}
+              />
+            );
+          }
+          return rows;
+        })}
+      </tbody>
+    </table>
+  );
+}
 
 function ExpandedRow({
   itemSummary,
