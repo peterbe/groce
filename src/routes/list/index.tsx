@@ -196,7 +196,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       batch
         .commit()
         .then(() => {
-          console.log("All items cleared");
+          console.log("Undo all items cleared");
         })
         .catch((error) => {
           console.error("Error doing batch operation", error);

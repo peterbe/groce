@@ -1,6 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import Sortable from "sortablejs";
+import firebase from "firebase/app";
 
 import { List, Item } from "../../types";
 import * as style from "./style.css";

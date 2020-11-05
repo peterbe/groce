@@ -1,6 +1,6 @@
 import { FunctionalComponent, h } from "preact";
 import { useState } from "preact/hooks";
-
+import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
