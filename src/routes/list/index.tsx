@@ -294,33 +294,26 @@ const ShoppingList: FunctionalComponent<Props> = ({
     quantity: number
   ) {
     if (db) {
-      const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
+      const collectionRef = db.collection(`shoppinglists/${id}/items`);
+      const itemRef = collectionRef.doc(item.id);
 
-      const thisGroup = group.trim().toLowerCase();
+      const normalizeGroupText = (s: string) => stripEmojis(s).toLowerCase();
+      const thisGroup = normalizeGroupText(group.trim());
 
       let groupOrder = 0;
       if (group.trim() && items) {
         // Seek the highest group order of any item that matches this.
         groupOrder = Math.max(
           ...items
-            .filter((item) => item.group.text.toLowerCase() === thisGroup)
+            .filter(
+              (item) =>
+                item.group.text &&
+                normalizeGroupText(item.group.text) === thisGroup
+            )
             .map((item) => item.group.order)
         );
       }
-
-      // Preserve the way you've always been spelling it.
-      // For example, if you have at least one group called "Shoes"
-      // but now you typed "shoes", the override that spelling.
-      let groupText = group.trim();
-      if (groupText && items) {
-        const previousSame = items
-          .filter((item) => item.group.text.toLowerCase() === thisGroup)
-          .map((item) => item.group.text);
-        if (previousSame.length) {
-          groupText = previousSame[0];
-        }
-      }
-
+      const groupText = group.trim();
       const groupItem = {
         order: groupOrder,
         text: groupText,
@@ -333,7 +326,47 @@ const ShoppingList: FunctionalComponent<Props> = ({
           quantity,
         })
         .then(() => {
-          console.log("Updated", item.id);
+          // console.log("Updated", item.id);
+
+          if (items && groupItem.text) {
+            // If the groupItem.text was changed, make sure all the other
+            // items' groupItem.text reflects that.
+            console.log({ GROUP: groupItem.text });
+            const correctGroupText = groupItem.text;
+
+            const normalizedGroupText = normalizeGroupText(groupItem.text);
+            const relatedItems = items.filter((relatedItem) => {
+              return (
+                relatedItem.id !== item.id &&
+                relatedItem.group.text &&
+                relatedItem.group.text !== correctGroupText &&
+                normalizeGroupText(relatedItem.group.text) ===
+                  normalizedGroupText
+              );
+            });
+            if (relatedItems.length) {
+              const batch = db.batch();
+              relatedItems.forEach((relatedItem) => {
+                const itemDoc = collectionRef.doc(relatedItem.id);
+                batch.update(itemDoc, {
+                  group: {
+                    text: correctGroupText,
+                    order: groupOrder,
+                  },
+                });
+              });
+              batch
+                .commit()
+                .then(() => {
+                  console.log(
+                    `Correct group on ${relatedItems.length} other items`
+                  );
+                })
+                .catch((error) => {
+                  console.error("Error doing batch operation", error);
+                });
+            }
+          }
         })
         .catch((error) => {
           // XXX Deal with this better.
@@ -474,16 +507,22 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {db && items && list && editGroups && hasOrganizableGroups && (
-        <OrganizeGroups
-          db={db}
-          list={list}
-          items={items}
-          close={() => {
-            toggleEditGroups(false);
-          }}
-        />
-      )}
+      {db &&
+        items &&
+        list &&
+        !editAction &&
+        !popularityContest &&
+        editGroups &&
+        hasOrganizableGroups && (
+          <OrganizeGroups
+            db={db}
+            list={list}
+            items={items}
+            close={() => {
+              toggleEditGroups(false);
+            }}
+          />
+        )}
 
       {itemsError && (
         <Alert
