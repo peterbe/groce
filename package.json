@@ -57,7 +57,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "firebase-tools": "8.15.1",
+    "firebase-tools": "8.16.2",
     "got": "11.8.0",
     "http-server": "0.12.3",
     "husky": "^4.3.0",
