@@ -47,7 +47,7 @@ const About: FunctionalComponent = () => {
       <figure class="figure">
         <img
           src="/lazy-assets/sample-list.png"
-          class="figure-img img-fluid rounded"
+          class="figure-img img-fluid rounded shadow"
           alt="Screenshot showing a sample list"
           loading="lazy"
         />
@@ -67,7 +67,7 @@ const About: FunctionalComponent = () => {
       <figure class="figure">
         <img
           src="/lazy-assets/co-owners.png"
-          class="figure-img img-fluid rounded"
+          class="figure-img img-fluid rounded shadow"
           alt="Screenshot listing co-owners"
           loading="lazy"
         />
@@ -85,7 +85,14 @@ const About: FunctionalComponent = () => {
       </p>
 
       <figure class="figure">
-        <video autoPlay loop muted controls={true} style={{ width: "100%" }}>
+        <video
+          autoPlay
+          loop
+          muted
+          controls={true}
+          style={{ width: "100%" }}
+          class="shadow"
+        >
           <source src="/lazy-assets/realtime.mp4" type="video/mp4" />
         </video>
         <figcaption class="figure-caption">
@@ -120,7 +127,7 @@ const About: FunctionalComponent = () => {
       <figure class="figure">
         <img
           src="/lazy-assets/offline-warning.png"
-          class="figure-img img-fluid rounded"
+          class="figure-img img-fluid rounded shadow"
           alt="Screenshot showing offline warning"
           loading="lazy"
         />
