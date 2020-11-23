@@ -58,10 +58,10 @@ export const NewItemForm: FunctionalComponent<Props> = ({
                 // The `mostPopularTexts` is a sorted list of strings. The
                 // *last* string in the list is the most frequently used.
                 // Use findIndex to turn that into a simple integer.
-                // The Math.min() is to make sure that items that *have*
+                // The Math.max() is to make sure that items that *have*
                 // been used before, but not so frequently always gets at
                 // least a popularity of 1 or more.
-                popularity: Math.min(
+                popularity: Math.max(
                   mostPopularTexts.findIndex((t) => t === item.text),
                   1
                 ),
