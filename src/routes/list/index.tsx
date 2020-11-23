@@ -231,7 +231,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         .doc(previousItem.id)
         .set({
           text: previousItem.text,
-          description: previousItem.description,
+          description: "",
           group: previousItem.group,
           quantity: 0,
           done: false,
