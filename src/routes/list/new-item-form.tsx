@@ -11,12 +11,14 @@ interface Props {
   ready: boolean;
   items: Item[] | null;
   saveHandler: (text: string) => void;
+  disableDefaultSuggestions: boolean;
 }
 
 export const NewItemForm: FunctionalComponent<Props> = ({
   ready,
   items,
   saveHandler,
+  disableDefaultSuggestions,
 }: Props) => {
   const [newText, setNewText] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -69,7 +71,10 @@ export const NewItemForm: FunctionalComponent<Props> = ({
           }
         });
       }
-      if (newSuggestions.length < MAX_SUGGESTIONS) {
+      if (
+        !disableDefaultSuggestions &&
+        newSuggestions.length < MAX_SUGGESTIONS
+      ) {
         // Add some brand new ones that have never been used but
         // assuming it's English we can suggest some
         ITEM_SUGGESTIONS.forEach((text) => {

@@ -30,6 +30,7 @@ export interface ListRecentItems {
 export interface ListConfig {
   disableGroups: boolean;
   disableQuantity: boolean;
+  disableDefaultSuggestions: boolean;
 }
 
 export interface OwnerMetadata {

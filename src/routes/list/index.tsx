@@ -543,6 +543,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           saveHandler={(text: string) => {
             addNewText(text);
           }}
+          disableDefaultSuggestions={!!list?.config.disableDefaultSuggestions}
         />
       )}
 

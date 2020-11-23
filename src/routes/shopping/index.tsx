@@ -185,6 +185,9 @@ function NewList({
   const [notes, setNotes] = useState("");
   const [disableGroups, setDisableGroups] = useState(false);
   const [disableQuantity, setDisableQuantity] = useState(false);
+  const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
+    false
+  );
   const newNameRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -212,6 +215,7 @@ function NewList({
           create(name.trim(), notes.trim(), {
             disableGroups,
             disableQuantity,
+            disableDefaultSuggestions,
           });
         }
       }}
@@ -297,6 +301,31 @@ function NewList({
         </div>
         <div id="newDisableQuantityHelp" class="form-text">
           A <i>quantity</i> doesn&apos;t make sense for all lists.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            checked={disableDefaultSuggestions}
+            onClick={() => {
+              setDisableDefaultSuggestions((prev) => !prev);
+            }}
+            id="newDisableDefaultSuggestions"
+            aria-describedby="newDisableDefaultSuggestionsHelp"
+          />
+          <label
+            class="form-check-label"
+            htmlFor="newDisableDefaultSuggestions"
+          >
+            Disable default suggestions
+          </label>
+        </div>
+        <div id="newDisableDefaultSuggestionsHelp" class="form-text">
+          Default suggestions are <i>food words</i> that help suggest when
+          adding new items.
         </div>
       </div>
 

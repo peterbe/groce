@@ -118,6 +118,7 @@ const App: FunctionalComponent = () => {
       const defaultListConfig: ListConfig = {
         disableGroups: false,
         disableQuantity: false,
+        disableDefaultSuggestions: false,
       };
 
       shoppinglistsDbRef = db

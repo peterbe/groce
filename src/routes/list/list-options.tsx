@@ -31,6 +31,9 @@ export const ListOptions: FunctionalComponent<Props> = ({
   const [disableQuantity, setDisableQuantity] = useState(
     !!list.config.disableQuantity
   );
+  const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
+    !!list.config.disableDefaultSuggestions
+  );
   const [updateError, setUpdateError] = useState<Error | null>(null);
 
   return (
@@ -43,6 +46,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
           const config: ListConfig = {
             disableGroups,
             disableQuantity,
+            disableDefaultSuggestions,
           };
           const doc = db.collection("shoppinglists").doc(list.id);
           doc
@@ -145,6 +149,31 @@ export const ListOptions: FunctionalComponent<Props> = ({
           </div>
           <div id="newDisableQuantityHelp" class="form-text">
             A <i>quantity</i> doesn&apos;t make sense for all lists.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              checked={disableDefaultSuggestions}
+              onClick={() => {
+                setDisableDefaultSuggestions((prev) => !prev);
+              }}
+              id="newDisableDefaultSuggestions"
+              aria-describedby="newDisableDefaultSuggestionsHelp"
+            />
+            <label
+              class="form-check-label"
+              htmlFor="newDisableDefaultSuggestions"
+            >
+              Disable default suggestions
+            </label>
+          </div>
+          <div id="newDisableDefaultSuggestionsHelp" class="form-text">
+            Default suggestions are <i>food words</i> that help suggest when
+            adding new items.
           </div>
         </div>
 
