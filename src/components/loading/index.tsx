@@ -87,7 +87,7 @@ export const Loading: FunctionalComponent<Props> = ({
           style="width: 3rem; height: 3rem;"
           role="status"
         >
-          <span class="sr-only">{text}</span>
+          <span class="visually-hidden">{text}</span>
         </div>
       </div>
       <div class="text-center">

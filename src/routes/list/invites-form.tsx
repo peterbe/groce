@@ -168,6 +168,7 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
             <button
               type="button"
               class="btn btn-info"
+              disabled={user.isAnonymous}
               onClick={() => {
                 generateInviteLink();
               }}
@@ -265,10 +266,13 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
           </div>
         ) : null}
 
-        {invitations && !invitations.length && (
+        {invitations && !invitations.length && !user.isAnonymous && (
           <p>
             <i>You have no current invites to this list</i>
           </p>
+        )}
+        {invitations && !invitations.length && user.isAnonymous && (
+          <p>You must signed in to generate an invite.</p>
         )}
       </div>
     </form>
