@@ -1,9 +1,11 @@
-import { FunctionalComponent, h } from "preact";
+import { FunctionalComponent, Fragment, h } from "preact";
+import { useState } from "preact/hooks";
 import { route } from "preact-router";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
 import { GoBack } from "../../components/go-back";
+import { Alert } from "../../components/alerts";
 
 interface Props {
   user: firebase.User | false | null;
@@ -12,15 +14,19 @@ interface Props {
 
 const Signin: FunctionalComponent<Props> = (props: Props) => {
   const { user, auth } = props;
-
+  const [signInError, setSignInError] = useState<Error | null>(null);
   return (
-    <div class={style.signin}>
-      <h2>{user ? "You are signed in" : "Sign in"}</h2>
-      {/* Not sure what the point of installing FirebaseUI is
-      https://firebase.google.com/docs/auth/web/firebaseui?authuser=0#initialize_firebaseui
-       */}
-      User: {user ? <b>{user.displayName}</b> : <i>No user</i>}
-      {user && auth && (
+    <div>
+      <h2>{user && !user.isAnonymous ? "You are signed in" : "Sign in"}</h2>
+
+      {signInError && <Alert heading="Sign in error" message={signInError} />}
+      {user && !user.isAnonymous && (
+        <p>
+          Currently signed in as <b>{user.displayName}</b>
+        </p>
+      )}
+
+      {user && !user.isAnonymous && auth && (
         <p>
           <button
             type="button"
@@ -34,44 +40,62 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
           </button>
         </p>
       )}
-      {!user && auth && (
-        <p>
-          <button
-            type="button"
-            class="btn btn-primary"
-            onClick={async () => {
-              // console.log(auth);
-              const provider = new firebase.auth.GoogleAuthProvider();
-              try {
-                await auth.signInWithPopup(provider);
-                route("/", true);
-              } catch (error) {
-                console.log("ERROR:", error);
-              }
-            }}
-          >
-            Sign in (popup)
-          </button>
-        </p>
+      {(!user || user.isAnonymous) && auth && (
+        <Fragment>
+          <p style={{ marginTop: 10 }}>
+            <button
+              type="button"
+              class="btn btn-primary btn-lg"
+              onClick={async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                if (user && user.isAnonymous) {
+                  try {
+                    await user.linkWithPopup(provider);
+                    route("/", true);
+                  } catch (error) {
+                    setSignInError(error);
+                    console.log("ERROR:", error);
+                  }
+                } else {
+                  try {
+                    await auth.signInWithPopup(provider);
+                    route("/", true);
+                  } catch (error) {
+                    setSignInError(error);
+                    console.log("ERROR:", error);
+                  }
+                }
+              }}
+            >
+              Sign in with Google
+            </button>
+          </p>
+          {/* {user && user.isAnonymous && (
+            <p>
+              <small>Your temporary data will be saved.</small>
+            </p>
+          )} */}
+        </Fragment>
       )}
-      {!user && auth && (
-        <p>
+      {user && user.isAnonymous && (
+        <p style={{ marginTop: 50 }}>
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-warning btn-sm"
             onClick={async () => {
-              const provider = new firebase.auth.GoogleAuthProvider();
-              try {
-                await auth.signInWithRedirect(provider);
-              } catch (error) {
-                console.log("ERROR:", error);
-                return;
+              if (auth) {
+                try {
+                  await auth.signOut();
+                } catch (error) {
+                  console.error("Unable to sign out", error);
+                }
               }
-              route("/", true);
             }}
           >
-            Sign in (redirect)
+            Discard temporary data
           </button>
+          <br />
+          <small>Because you are &quot;temporarily signed in&quot;</small>.
         </p>
       )}
       <GoBack />
@@ -79,4 +103,12 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
   );
 };
 
-export default Signin;
+const SigninOuter: FunctionalComponent<Props> = (props: Props) => {
+  return (
+    <div class={style.signin}>
+      <Signin {...props} />
+    </div>
+  );
+};
+
+export default SigninOuter;

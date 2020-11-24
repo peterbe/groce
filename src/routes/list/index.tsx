@@ -1,4 +1,5 @@
 import { FunctionalComponent, h } from "preact";
+import { Link } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
@@ -660,6 +661,14 @@ const ShoppingList: FunctionalComponent<Props> = ({
             </button>
           </div>
         )}
+
+      {db && user && user.isAnonymous && (
+        <div class={`${style.sign_in_reminder} text-right`}>
+          <Link href="/signin" class="btn btn-sm btn-outline-primary">
+            Sign in to not lose your list &rarr;
+          </Link>
+        </div>
+      )}
 
       <GoBack url="/shopping" name="all lists" />
     </div>
