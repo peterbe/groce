@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { route } from "preact-router";
+import { Link, route } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
@@ -110,7 +110,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           );
         })}
 
-      {db && (
+      {db && user && !user.isAnonymous && (
         <div class={style.add_new_group}>
           <button
             type="button"
@@ -125,6 +125,14 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
               ? "Create list"
               : "Create new list"}
           </button>
+        </div>
+      )}
+
+      {db && user && user.isAnonymous && (
+        <div class={`${style.sign_in_reminder} text-right`}>
+          <Link href="/signin" class="btn btn-sm btn-outline-primary">
+            Sign in to not lose your list &rarr;
+          </Link>
         </div>
       )}
 

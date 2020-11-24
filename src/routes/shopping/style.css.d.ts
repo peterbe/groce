@@ -8,6 +8,7 @@ declare namespace StyleCssNamespace {
     list_preview_items: string;
     preview_item: string;
     shopping: string;
+    sign_in_reminder: string;
   }
 }
 

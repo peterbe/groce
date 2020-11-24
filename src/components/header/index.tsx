@@ -1,6 +1,6 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { Link } from "preact-router/match";
+import { Link, route } from "preact-router";
 // import * as style from "./style.css";
 import firebase from "firebase/app";
 
@@ -12,8 +12,8 @@ interface Props {
 const Header: FunctionalComponent<Props> = (props: Props) => {
   const { user, auth } = props;
 
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showSigninMenu, setShowSigninMenu] = useState(false);
+  // const [showUserMenu, setShowUserMenu] = useState(false);
+  // const [showSigninMenu, setShowSigninMenu] = useState(false);
   const [showNavbar, setShowNavbar] = useState(false);
   const [showPrintThisPage, setShowPrintThisPage] = useState(false);
 
@@ -178,8 +178,54 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               </li>
             )}
+            {user && !user.isAnonymous ? (
+              <li class="nav-item">
+                {auth && (
+                  <a
+                    class="nav-link"
+                    href="#"
+                    onClick={async () => {
+                      await auth.signOut();
+                    }}
+                  >
+                    <img
+                      src={
+                        user.photoURL
+                          ? user.photoURL
+                          : "/assets/icons/avatar.svg"
+                      }
+                      class="img-thumbnail"
+                      width="30"
+                      alt="Avatar"
+                    />{" "}
+                    Sign out ({user.email})
+                  </a>
+                )}
+              </li>
+            ) : (
+              <li class="nav-item">
+                {auth && (
+                  <Link
+                    href="/"
+                    class="nav-link"
+                    onClick={async (event) => {
+                      event.preventDefault();
+                      const provider = new firebase.auth.GoogleAuthProvider();
+                      try {
+                        await auth.signInWithRedirect(provider);
+                      } catch (error) {
+                        console.log("ERROR:", error);
+                        route("/signin", true);
+                      }
+                    }}
+                  >
+                    Sign in with Google
+                  </Link>
+                )}
+              </li>
+            )}
 
-            {auth && !user && (
+            {/* {auth && (!user || user.isAnonymous) && (
               <li class="nav-item dropdown">
                 <a
                   class={
@@ -238,9 +284,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   </li>
                 </ul>
               </li>
-            )}
+            )} */}
 
-            {user && auth && (
+            {/* {user && !user.isAnonymous && auth && (
               <li class="nav-item dropdown">
                 <a
                   class={
@@ -289,7 +335,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                   </li>
                 </ul>
               </li>
-            )}
+            )} */}
           </ul>
         </div>
       </div>

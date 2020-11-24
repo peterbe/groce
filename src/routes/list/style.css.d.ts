@@ -19,6 +19,7 @@ declare namespace StyleCssNamespace {
     rainbow_animation: string;
     rainbow_text_animated: string;
     search_suggestions: string;
+    sign_in_reminder: string;
     sorting_handle: string;
     suggestion_button: string;
   }

@@ -8,7 +8,7 @@ import { GoBack } from "../../components/go-back";
 const About: FunctionalComponent = () => {
   useEffect(() => {
     document.title = "About this app";
-  });
+  }, []);
   return (
     <div class={style.about}>
       <h1 class="display-1">About this app</h1>

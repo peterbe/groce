@@ -62,6 +62,21 @@ const Feedback: FunctionalComponent<Props> = (props: Props) => {
   if (!db) {
     return <Loading />;
   }
+  if (user.isAnonymous) {
+    return (
+      <div>
+        <div class="alert alert-warning" role="alert">
+          <b>You&apos;re not actually signed in.</b> Yet. <br />
+          Sorry, can&apos;t submit feedback anonymously.
+        </div>
+        <p>
+          <Link href="/signin" class="btn btn-primary">
+            Sign in properly &rarr;
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

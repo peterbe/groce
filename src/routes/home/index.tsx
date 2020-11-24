@@ -18,6 +18,10 @@ interface Props {
 const Home: FunctionalComponent<Props> = (props: Props) => {
   const { user, auth, lists, db } = props;
 
+  useEffect(() => {
+    document.title = "That's Groce!";
+  }, []);
+
   // If set, this string will be something like `<ID_OF_LIST>/<ID_OF_INVITATION>`
   const [invitationIdentifier, setInvitationIdentifier] = useState<
     string | null
@@ -116,10 +120,14 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
 
         {user && (
           <div class="login">
-            <p>
-              Logged in as <b>{user.displayName}</b>{" "}
-              {user.email && <span>({user.email})</span>}
-            </p>
+            {user.isAnonymous ? (
+              <p>(temporarily signed in)</p>
+            ) : (
+              <p>
+                Logged in as <b>{user.displayName}</b>{" "}
+                {user.email && <span>({user.email})</span>}
+              </p>
+            )}
           </div>
         )}
 
@@ -192,7 +200,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
             <p>
               <button
                 type="button"
-                class="btn btn-primary"
+                class="btn btn-primary btn-lg"
                 onClick={async () => {
                   const provider = new firebase.auth.GoogleAuthProvider();
                   try {
@@ -204,6 +212,23 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 }}
               >
                 Sign in with Google
+              </button>
+            </p>
+            <p>
+              <button
+                type="button"
+                class="btn btn-secondary btn-lg"
+                onClick={async () => {
+                  // const provider = new firebase.auth.GoogleAuthProvider();
+                  try {
+                    await auth.signInAnonymously();
+                  } catch (error) {
+                    console.error("Error signing in anonymously", error);
+                    setSigninError(error);
+                  }
+                }}
+              >
+                Get started without signing in
               </button>
             </p>
           </div>
@@ -305,7 +330,7 @@ function ShowInvitation({ invitation }: { invitation: Invitation }) {
 }
 
 function AboutAbout() {
-  const [closed, setClosed] = useState(
+  const [closed] = useState(
     Boolean(JSON.parse(sessionStorage.getItem("hide-about-about") || "false"))
   );
   if (closed) {
