@@ -154,16 +154,15 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
 
         {user && (
           <div class="options">
-            <p>
-              <Link href="/shopping" class="btn btn-primary btn-lg btn-block">
+            <div class="d-grid gap-2">
+              <Link href="/shopping" class="btn btn-primary btn-lg">
                 Shopping lists
                 {lists && ` (${lists.length})`}
               </Link>
-            </p>
-            <p>
+
               <Link
                 href="#"
-                class="btn btn-secondary btn-lg btn-block"
+                class="btn btn-secondary btn-lg"
                 disabled
                 title="Not working yet"
               >
@@ -172,7 +171,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               <i>
                 <small>Under construction</small>
               </i>
-            </p>
+            </div>
           </div>
         )}
 

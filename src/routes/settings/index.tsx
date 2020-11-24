@@ -21,10 +21,10 @@ const Settings: FunctionalComponent = () => {
 
       <button
         type="button"
-        class="btn btn-success btn-block"
+        class="btn btn-success"
         onClick={() => {
           setReloading(true);
-          window.location.reload(true);
+          window.location.reload();
         }}
       >
         {reloading && (

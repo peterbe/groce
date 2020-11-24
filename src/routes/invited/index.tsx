@@ -238,10 +238,10 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
               <small>({invitation.about.notes})</small>
             )}
           </p>
-          <p>
+          <div class="d-grid gap-2">
             <button
               type="button"
-              class="btn btn-primary btn-lg btn-block"
+              class="btn btn-primary btn-lg"
               onClick={() => {
                 acceptInvite();
               }}
@@ -255,10 +255,10 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
               )}
               {waiting && <span class="sr-only">Loading...</span>} Accept
             </button>
-            <Link href="/" class="btn btn-info btn-block">
+            <Link href="/" class="btn btn-info">
               Cancel/Ignore
             </Link>
-          </p>
+          </div>
           <ShowAcceptedUsers accepted={invitation.accepted} user={user} />
         </div>
       );
@@ -313,17 +313,19 @@ function ShowYourLists({ lists }: { lists: List[] }) {
   return (
     <div>
       <h4>Your lists</h4>
-      {lists.map((list) => {
-        return (
-          <a
-            key={list.id}
-            href={`/shopping/${list.id}`}
-            class="btn btn-block btn-outline-info"
-          >
-            {list.name}
-          </a>
-        );
-      })}
+      <div class="d-grid gap-2">
+        {lists.map((list) => {
+          return (
+            <a
+              key={list.id}
+              href={`/shopping/${list.id}`}
+              class="btn btn-outline-info"
+            >
+              {list.name}
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 }

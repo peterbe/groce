@@ -607,10 +607,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
       !editGroups &&
       !popularityContest &&
       !!doneItems.length ? (
-        <div class={style.clearitems}>
+        <div class={`${style.clearitems} d-grid gap-2`}>
           <button
             type="button"
-            class="btn btn-success btn-lg btn-block"
+            class="btn btn-success btn-lg"
             onClick={(event) => {
               event.preventDefault();
               clearDoneItems();
@@ -625,10 +625,10 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editGroups &&
         !popularityContest &&
         !!clearedItems.length && (
-          <div class={style.clearitems}>
+          <div class={`${style.clearitems} d-grid gap-2`}>
             <button
               type="button"
-              class="btn btn-secondary btn-sm btn-block"
+              class="btn btn-secondary btn-sm"
               onClick={(event) => {
                 event.preventDefault();
                 undoClearDoneItems();
@@ -670,7 +670,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      <GoBack url="/shopping" name="all lists" />
+      <GoBack url="/shopping" name="lists" />
     </div>
   );
 };
