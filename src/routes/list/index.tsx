@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import { FunctionalComponent, h, Fragment } from "preact";
 import { Link } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
@@ -14,12 +14,13 @@ import { ListItem } from "./list-item";
 import { NewItemForm } from "./new-item-form";
 import { PopularityContest } from "./popularity-contest";
 import { GROUP_SUGGESTIONS } from "./default-suggestions";
-import { FirestoreItem, Item, List } from "../../types";
+import { FirestoreItem, Item, List, StorageSpec } from "../../types";
 import { stripEmojis } from "../../utils";
 
 interface Props {
   user: firebase.User | false | null;
   db: firebase.firestore.Firestore | null;
+  storage: firebase.storage.Storage | null;
   id: string;
   lists: List[] | null;
 }
@@ -27,6 +28,7 @@ interface Props {
 const ShoppingList: FunctionalComponent<Props> = ({
   user,
   db,
+  storage,
   id,
   lists,
 }: Props) => {
@@ -86,7 +88,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           const newItems: Item[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as FirestoreItem;
-            newItems.push({
+            const item = {
               id: doc.id,
               text: data.text,
               description: data.description,
@@ -96,7 +98,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
               removed: data.removed,
               added: data.added,
               times_added: data.times_added || 1,
-            });
+              images: data.images || [],
+            };
+            newItems.push(item);
           });
 
           newItems.sort((a, b) => {
@@ -121,6 +125,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
               const newRecentlyModifiedItems = new Map();
               newRecentlyModifiedItems.set(change.doc.id, new Date());
               setRecentlyModifiedItems(newRecentlyModifiedItems);
+              // console.log("RECENTLY UPDATED", change.doc.data().text);
             }
           });
         },
@@ -135,7 +140,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         ref();
       }
     };
-  }, [id, list, user, db]);
+  }, [id, list, user, db, storage]);
 
   const [clearedItems, setClearedItems] = useState<Item[]>([]);
 
@@ -376,6 +381,53 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
   }
 
+  function updateItemImage(item: Item, spec: StorageSpec) {
+    if (db) {
+      let operation: firebase.firestore.FieldValue;
+      if (spec.add) {
+        operation = firebase.firestore.FieldValue.arrayUnion(spec.add);
+      } else if (spec.remove) {
+        operation = firebase.firestore.FieldValue.arrayRemove(spec.remove);
+      } else {
+        throw new Error("Invalid spec!");
+      }
+      if (db) {
+        const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
+        itemRef
+          .update({
+            images: operation,
+          })
+          .then(() => {
+            if (spec.remove && storage) {
+              // Create a reference to the file to delete
+              const storageRef = storage.ref();
+              storageRef
+                .child(spec.remove)
+                .delete()
+                .then(() => {
+                  // TODO: Delete all the thumbnails too some day.
+                })
+                .catch((error) => {
+                  console.log("Unknown error deleting image", error);
+                });
+            }
+          })
+          .catch((error) => {
+            // XXX Deal with this better.
+            console.error(`Error trying to update item ${item.id}:`, error);
+          });
+      }
+    }
+  }
+
+  const [modalImageURL, setModalImageURL] = useState("");
+  function openImageModal(url: string) {
+    setModalImageURL(url);
+  }
+  function closeImageModal() {
+    setModalImageURL("");
+  }
+
   if (user === false) {
     return (
       <div class={style.list}>
@@ -559,49 +611,69 @@ const ShoppingList: FunctionalComponent<Props> = ({
           <p class={style.empty_list}>List is empty at the moment.</p>
         )}
 
-      {!editAction && !editGroups && !popularityContest && !!todoItems.length && (
-        <ul class="list-group shadow-sm bg-white rounded">
-          {todoItems
-            .filter((item) => !item.done)
-            .map((item) => {
-              return (
-                <ListItem
-                  key={item.id}
-                  item={item}
-                  modified={recentlyModifiedItems.get(item.id) || null}
-                  groupOptions={groupOptions}
-                  disableGroups={list ? list.config.disableGroups : false}
-                  disableQuantity={list ? list.config.disableQuantity : false}
-                  toggleDone={updateItemDoneToggle}
-                  updateItem={updateItem}
-                />
-              );
-            })}
-        </ul>
-      )}
-      {!editAction && !editGroups && !popularityContest && !!doneItems.length && (
-        <div class={style.done_items}>
-          <h5>Done and dusted</h5>
+      {list &&
+        !editAction &&
+        !editGroups &&
+        !popularityContest &&
+        !!todoItems.length && (
           <ul class="list-group shadow-sm bg-white rounded">
-            {doneItems
-              .filter((item) => item.done)
+            {todoItems
+              .filter((item) => !item.done)
               .map((item) => {
                 return (
                   <ListItem
                     key={item.id}
                     item={item}
+                    list={list}
+                    db={db}
+                    storage={storage}
                     modified={recentlyModifiedItems.get(item.id) || null}
                     groupOptions={groupOptions}
                     disableGroups={list ? list.config.disableGroups : false}
                     disableQuantity={list ? list.config.disableQuantity : false}
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}
+                    updateItemImage={updateItemImage}
+                    openImageModal={openImageModal}
                   />
                 );
               })}
           </ul>
-        </div>
-      )}
+        )}
+      {list &&
+        !editAction &&
+        !editGroups &&
+        !popularityContest &&
+        !!doneItems.length && (
+          <div class={style.done_items}>
+            <h5>Done and dusted</h5>
+            <ul class="list-group shadow-sm bg-white rounded">
+              {doneItems
+                .filter((item) => item.done)
+                .map((item) => {
+                  return (
+                    <ListItem
+                      key={item.id}
+                      item={item}
+                      list={list}
+                      db={db}
+                      storage={storage}
+                      modified={recentlyModifiedItems.get(item.id) || null}
+                      groupOptions={groupOptions}
+                      disableGroups={list ? list.config.disableGroups : false}
+                      disableQuantity={
+                        list ? list.config.disableQuantity : false
+                      }
+                      toggleDone={updateItemDoneToggle}
+                      updateItem={updateItem}
+                      updateItemImage={updateItemImage}
+                      openImageModal={openImageModal}
+                    />
+                  );
+                })}
+            </ul>
+          </div>
+        )}
 
       {!editAction &&
       !editGroups &&
@@ -671,8 +743,79 @@ const ShoppingList: FunctionalComponent<Props> = ({
       )}
 
       <GoBack url="/shopping" name="lists" />
+
+      <ImageModal url={modalImageURL} close={closeImageModal} />
     </div>
   );
 };
 
 export default ShoppingList;
+
+function ImageModal({ url, close }: { url: string; close: () => void }) {
+  function keydownHandler(event: KeyboardEvent) {
+    console.log(event);
+
+    if (event.code === "Escape") {
+      close();
+    }
+  }
+  useEffect(() => {
+    if (url) {
+      document.body.classList.add("modal-open");
+      document.addEventListener("keydown", keydownHandler);
+    } else {
+      document.body.classList.remove("modal-open");
+      document.removeEventListener("keydown", keydownHandler);
+    }
+    return () => {
+      document.removeEventListener("keydown", keydownHandler);
+    };
+  }, [url]);
+  if (!url) {
+    return null;
+  }
+  return (
+    <Fragment>
+      <div
+        class="modal fade show"
+        // id="exampleModal"
+        tabIndex={-1}
+        style={{ display: "block" }}
+        // aria-labelledby="exampleModalLabel"
+        // aria-hidden="true"
+        role="dialog"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              {/* <h5 class="modal-title" id="exampleModalLabel">
+              Modal title
+            </h5> */}
+              <button
+                type="button"
+                class="btn-close"
+                data-dismiss="modal"
+                aria-label="Close"
+                onClick={() => close()}
+              ></button>
+            </div>
+            <div class="modal-body">
+              <img src={url} style={{ maxWidth: "100%" }} />
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                data-dismiss="modal"
+                onClick={() => close()}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-backdrop fade show"></div>
+    </Fragment>
+  );
+}
