@@ -35,6 +35,7 @@ const App: FunctionalComponent = () => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
   const [user, setUser] = useState<firebase.User | null | false>(null);
   const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);
+  const [storage, setStorage] = useState<firebase.storage.Storage | null>(null);
   const [perf, setPerf] = useState<firebase.performance.Performance | null>(
     null
   );
@@ -80,6 +81,14 @@ const App: FunctionalComponent = () => {
       })
       .catch((error) => {
         console.error("Unable to lazy-load firebase/firestore:", error);
+      });
+
+    import("firebase/storage")
+      .then(() => {
+        setStorage(firebase.storage());
+      })
+      .catch((error) => {
+        console.error("Unable to lazy-load firebase/storage:", error);
       });
 
     import("firebase/analytics")
@@ -252,6 +261,7 @@ const App: FunctionalComponent = () => {
             lists={lists}
             user={user}
             db={db}
+            storage={storage}
           />
           <Route
             path="/invited/:listID/:invitationID"

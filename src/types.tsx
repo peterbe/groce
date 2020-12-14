@@ -1,9 +1,15 @@
 import firebase from "firebase/app";
 
+// I don't know if this is right! But it works. Now I can use `error.code`
+export interface StorageErrorType extends Error {
+  code: string;
+}
+
 export interface ItemGroup {
   order: number;
   text: string;
 }
+
 
 export interface FirestoreItem {
   text: string;
@@ -14,6 +20,7 @@ export interface FirestoreItem {
   removed: boolean;
   added: firebase.firestore.Timestamp[];
   times_added: number;
+  images?: string[];
 }
 
 export interface Item extends FirestoreItem {
@@ -88,4 +95,13 @@ export interface Invitation extends FirestoreInvitation {
 export interface SearchSuggestion {
   text: string;
   popularity: number;
+}
+
+export interface StorageSpec {
+  add?: string;
+  remove?: string;
+  downloadURL?: string;
+  size?: number;
+  type?: string;
+  error?: string;
 }

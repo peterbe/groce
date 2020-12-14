@@ -1,11 +1,17 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
+import firebase from "firebase/app";
 
+import { FileUpload } from "../../components/file-upload";
 import * as style from "./style.css";
-import { Item } from "../../types";
+import { Item, List, StorageSpec } from "../../types";
+import { useDownloadImageURL } from "./hooks";
 
 interface Props {
   item: Item;
+  list: List;
+  storage: firebase.storage.Storage | null;
+  db: firebase.firestore.Firestore | null;
   groupOptions: string[];
   toggleDone: (item: Item) => void;
   updateItem: (
@@ -15,32 +21,39 @@ interface Props {
     group: string,
     quantity: number
   ) => void;
+  updateItemImage: (item: Item, spec: StorageSpec) => void;
   modified: null | Date;
   disableGroups: boolean;
   disableQuantity: boolean;
+  openImageModal: (url: string) => void;
 }
 
 export const ListItem: FunctionalComponent<Props> = ({
   item,
+  list,
+  db,
+  storage,
   groupOptions,
   toggleDone,
   updateItem,
+  updateItemImage,
   modified,
   disableGroups,
   disableQuantity,
+  openImageModal,
 }: Props) => {
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
   const [group, setGroup] = useState("");
   const [quantity, setQuantity] = useState<string | number>("");
-  // const [editMode, setEditMode] = useState(false);
   const [editMode, setEditMode] = useState<
     "" | "text" | "description" | "group"
   >("");
+  const [enableFileUpload, setEnableFileUpload] = useState(false);
 
   const recentlyAdded = new Date().getTime() / 1000 - item.added[0].seconds < 3;
   const recentlyModified =
-    modified && (new Date().getTime() - modified.getTime()) / 1000 < 3;
+    modified && (new Date().getTime() - modified.getTime()) / 1000 < 2;
 
   useEffect(() => {
     setText(item.text);
@@ -87,11 +100,14 @@ export const ListItem: FunctionalComponent<Props> = ({
   if (editMode) {
     return (
       <li class={`list-group-item ${style.list_item_edit_mode}`}>
-        {recentlyModified && (
+        {/* Commented out because it rarely works.
+        It would be better to only show this if SOMEONE ELSE
+        did the recent modification. */}
+        {/* {recentlyModified && (
           <div class="alert alert-info" role="alert">
             <small>This was recently modified.</small>
           </div>
-        )}
+        )} */}
         <form
           class="mb-3"
           onSubmit={(event) => {
@@ -199,8 +215,43 @@ export const ListItem: FunctionalComponent<Props> = ({
               </datalist>
             </div>
           )}
+          {storage && item.images && item.images.length > 0 && (
+            <div class="mb-2">
+              <DisplayFilesEditMode
+                item={item}
+                images={item.images}
+                updateItemImage={updateItemImage}
+                openImageModal={openImageModal}
+              />
+            </div>
+          )}
+
+          {enableFileUpload && storage && db && (
+            <div class="mb-2">
+              <FileUpload
+                db={db}
+                storage={storage}
+                list={list}
+                item={item}
+                onClose={() => {
+                  setEnableFileUpload(false);
+                }}
+              />
+            </div>
+          )}
 
           <div class="mb-2">
+            <div class="float-right">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onClick={() => {
+                  setEnableFileUpload((p) => !p);
+                }}
+              >
+                Picture
+              </button>
+            </div>
             <button
               type="submit"
               class="btn btn-primary"
@@ -268,6 +319,14 @@ export const ListItem: FunctionalComponent<Props> = ({
             <b class="align-middle">x{item.quantity}</b>
           )}{" "}
           {/* <br/> */}
+          {storage && item.images && item.images.length > 0 && (
+            <span class="align-middle">
+              <DisplayFilesViewMode
+                images={item.images}
+                openImageModal={openImageModal}
+              />
+            </span>
+          )}
           {item.description && (
             <small
               class={`align-middle ${style.item_description} ${style.click_to_edit}`}
@@ -296,3 +355,132 @@ export const ListItem: FunctionalComponent<Props> = ({
     </li>
   );
 };
+
+function DisplayFilesViewMode({
+  images,
+  openImageModal,
+}: {
+  images: string[];
+  openImageModal: (url: string) => void;
+}) {
+  return (
+    <span>
+      {images.map((path) => {
+        return (
+          <span key={path} style={{ paddingRight: 5 }}>
+            <Image
+              path={path}
+              openImageModal={openImageModal}
+              maxWidth={30}
+              maxHeight={30}
+            />
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+function DisplayFilesEditMode({
+  images,
+  item,
+  updateItemImage,
+  openImageModal,
+}: {
+  images: string[];
+  item: Item;
+  updateItemImage: (item: Item, spec: StorageSpec) => void;
+  openImageModal: (url: string) => void;
+}) {
+  return (
+    <ul class="list-group list-group-flush">
+      {images.map((path) => {
+        return (
+          <li
+            key={path}
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <Image
+              path={path}
+              openImageModal={openImageModal}
+              maxWidth={80}
+              maxHeight={80}
+            />
+
+            <button
+              type="button"
+              class="btn btn-warning btn-sm"
+              onClick={() => {
+                updateItemImage(item, { remove: path });
+              }}
+            >
+              Delete
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function Image({
+  path,
+  openImageModal,
+  maxWidth,
+  maxHeight,
+}: {
+  path: string;
+  openImageModal: (url: string) => void;
+  maxWidth: number;
+  maxHeight: number;
+}) {
+  const { url: downloadURL } = useDownloadImageURL(path, 1000, false);
+  const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
+    path,
+    100,
+    true
+  );
+
+  if (thumbnailError) {
+    <img alt={thumbnailError.toString()} style={{ maxWidth, maxHeight }} />;
+  }
+
+  const preloaded = new Map<string, boolean>();
+
+  return (
+    <a
+      href={downloadURL || thumbnailURL}
+      onClick={(event) => {
+        event.preventDefault();
+        openImageModal(downloadURL || thumbnailURL);
+      }}
+      onMouseOver={() => {
+        if (!preloaded.has(downloadURL)) {
+          preloaded.set(downloadURL, false);
+          const preloadImg = new window.Image();
+          preloadImg.src = downloadURL;
+          if (preloadImg.decode) {
+            preloadImg
+              .decode()
+              .then(() => {
+                preloaded.set(downloadURL, true);
+              })
+              .catch(() => {
+                preloaded.set(downloadURL, false);
+              });
+          } else {
+            preloadImg.onload = () => {
+              preloaded.set(downloadURL, true);
+            };
+          }
+        }
+      }}
+    >
+      <img
+        class="img-thumbnail"
+        style={{ maxWidth, maxHeight, width: maxWidth, height: maxHeight }}
+        src={thumbnailURL}
+      />
+    </a>
+  );
+}
