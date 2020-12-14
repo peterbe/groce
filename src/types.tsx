@@ -10,7 +10,6 @@ export interface ItemGroup {
   text: string;
 }
 
-
 export interface FirestoreItem {
   text: string;
   description: string;
