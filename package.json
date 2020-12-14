@@ -28,7 +28,7 @@
     "bootstrap": "5.0.0-alpha3",
     "copy-to-clipboard": "3.3.1",
     "dayjs": "1.9.6",
-    "firebase": "8.1.1",
+    "firebase": "8.2.0",
     "node-sass": "4.14.1",
     "preact": "^10.5.7",
     "preact-cli-plugin-env-vars": "1.2.1",
