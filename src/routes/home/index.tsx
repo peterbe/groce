@@ -156,8 +156,8 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
           <div class="options">
             <div class="d-grid gap-2">
               <Link href="/shopping" class="btn btn-primary btn-lg">
-                Shopping lists
-                {lists && ` (${lists.length})`}
+                Shopping list{lists && lists.length > 1 && "s"}
+                {lists && lists.length > 1 && ` (${lists.length})`}
               </Link>
 
               <Link

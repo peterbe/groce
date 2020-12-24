@@ -57,15 +57,13 @@ function ShowTip({ close }: { close: () => void }) {
     >
       <button
         type="button"
-        class="close"
-        data-dismiss="alert"
+        class="btn-close"
+        data-bs-dismiss="alert"
         aria-label="Close"
         onClick={() => {
           close();
         }}
-      >
-        <span aria-hidden="true">&times;</span>
-      </button>
+      ></button>
       <h4 class="alert-heading">Pro tip!</h4>
       <p>
         Before you sign in, press the share icon in your browser and select
