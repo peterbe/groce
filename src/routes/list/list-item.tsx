@@ -241,17 +241,19 @@ export const ListItem: FunctionalComponent<Props> = ({
           )}
 
           <div class="mb-2">
-            <div class="float-right">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                onClick={() => {
-                  setEnableFileUpload((p) => !p);
-                }}
-              >
-                Picture
-              </button>
-            </div>
+            {!(!item.images || item.images.length >= 3) && (
+              <div class="float-right">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  onClick={() => {
+                    setEnableFileUpload((p) => !p);
+                  }}
+                >
+                  Picture
+                </button>
+              </div>
+            )}
             <button
               type="submit"
               class="btn btn-primary"
