@@ -331,7 +331,7 @@ export const ListItem: FunctionalComponent<Props> = ({
           )}
           {item.description && (
             <small
-              class={`align-middle ${style.item_description} ${style.click_to_edit}`}
+              class={`align-bottom ${style.item_description} ${style.click_to_edit}`}
               onClick={() => {
                 setEditMode("description");
               }}
