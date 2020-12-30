@@ -239,6 +239,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           text: previousItem.text,
           description: "",
           group: previousItem.group,
+          images: previousItem.images || [],
           quantity: 0,
           done: false,
           removed: false,
@@ -753,8 +754,6 @@ export default ShoppingList;
 
 function ImageModal({ url, close }: { url: string; close: () => void }) {
   function keydownHandler(event: KeyboardEvent) {
-    console.log(event);
-
     if (event.code === "Escape") {
       close();
     }
@@ -778,19 +777,13 @@ function ImageModal({ url, close }: { url: string; close: () => void }) {
     <Fragment>
       <div
         class="modal fade show"
-        // id="exampleModal"
         tabIndex={-1}
         style={{ display: "block" }}
-        // aria-labelledby="exampleModalLabel"
-        // aria-hidden="true"
         role="dialog"
       >
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              {/* <h5 class="modal-title" id="exampleModalLabel">
-              Modal title
-            </h5> */}
               <button
                 type="button"
                 class="btn-close"

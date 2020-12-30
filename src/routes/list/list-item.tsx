@@ -480,7 +480,7 @@ function Image({
     >
       <img
         class="img-thumbnail"
-        style={{ maxWidth, maxHeight, width: maxWidth, height: maxHeight }}
+        style={{ width: maxWidth, height: maxHeight, "object-fit": "cover" }}
         src={thumbnailURL}
       />
     </a>
