@@ -78,6 +78,7 @@ export const downloadAndResize = functions
 
         const contentType = extension === "png" ? "image/png" : "image/jpeg";
         sharp(contents)
+          .rotate() // auto-rotates based on EXIF
           .resize(width)
           .toBuffer()
           .then((buffer) => {
