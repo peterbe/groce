@@ -440,7 +440,7 @@ function Image({
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
     path,
     100,
-    true
+    false
   );
 
   if (thumbnailError) {

@@ -108,10 +108,10 @@ const About: FunctionalComponent = () => {
         sent to the cloud, backed up to{" "}
         <a href="https://firebase.google.com/" rel="noopener noreferrer">
           Firebase
-        </a>
-        back by{" "}
+        </a>{" "}
+        backed by{" "}
         <a href="https://cloud.google.com/" rel="noopener noreferrer">
-          Google Cloud Platform
+          Google Cloud
         </a>
         .
       </p>
@@ -134,6 +134,36 @@ const About: FunctionalComponent = () => {
         <figcaption class="figure-caption">
           Screenshot showing offline warning.
         </figcaption>
+      </figure>
+
+      <h4>A picture says more than a thousand words</h4>
+
+      <p>
+        You can attach picture(s) to each item. This is especially helpful when
+        your partner puts something on your list but you&apos;re the one sent to the
+        store.
+      </p>
+
+      <figure class="figure" style={{ marginRight: 10 }}>
+        <img
+          src="/lazy-assets/edit-with-picture.png"
+          class="figure-img img-fluid rounded shadow"
+          alt="Screenshot edit mode with a picture uploaded"
+          loading="lazy"
+        />
+        <figcaption class="figure-caption">
+          Screenshot edit mode with a picture uploaded.
+        </figcaption>
+      </figure>
+
+      <figure class="figure">
+        <img
+          src="/lazy-assets/picture-modal.png"
+          class="figure-img img-fluid rounded shadow"
+          alt="Picture modal window"
+          loading="lazy"
+        />
+        <figcaption class="figure-caption">Picture modal window.</figcaption>
       </figure>
 
       <h3 class="display-3">Frequently asked questions</h3>

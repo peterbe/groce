@@ -3,19 +3,10 @@ import { useState, useEffect } from "preact/hooks";
 
 const preloadCache = new Map<string, boolean>();
 
-export function getThumbnailPath(path: string, width: number): string {
-  const imageBasename = path.split("/").slice(-1)[0];
-  const withoutExtension = imageBasename.split(".").slice(0, -1).join(".");
-  const extension = imageBasename.split(".").slice(-1)[0];
-  const thumbnailsFolderPath = [
-    ...path.split("/").slice(0, -1),
-    "thumbnails",
-  ].join("/");
-  return `${thumbnailsFolderPath}/${withoutExtension}_${width}x${width}.${extension}`;
-}
-
+// const THUMBNAL_CLOUD_FUNCTION_BASE_URL =
+//   "https://us-central1-thatsgroce.cloudfunctions.net/downloadAndResize/";
 const THUMBNAL_CLOUD_FUNCTION_BASE_URL =
-  "https://us-central1-thatsgroce.cloudfunctions.net/downloadAndResize/";
+  "https://us-central1-thatsgroce.cloudfunctions.net/downloadAndResizeAndStore/";
 
 function getThumbnailURL(image: string, width: number): string {
   const sp = new URLSearchParams();
@@ -53,7 +44,11 @@ export function useDownloadImageURL(
           .then(cb, cb)
           .catch((err) => {
             if (mounted) {
-              setError(err);
+              if (typeof err === "string") {
+                setError(new Error(err));
+              } else {
+                setError(new Error(`error preloading ${url}`));
+              }
             }
           });
       } else {
@@ -74,7 +69,7 @@ export function useDownloadImageURL(
     return () => {
       mounted = false;
     };
-  }, [preload]);
+  }, [preload, url]);
 
   return { url, preloaded, error };
 }
