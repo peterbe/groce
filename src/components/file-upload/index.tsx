@@ -18,9 +18,11 @@ function getImageFullPath(id: string, file: File) {
   else if (file.type === "image/png") ext = "png";
   else throw new Error(`Unrecognized type (${file.type})`);
   const ts = Math.floor(new Date().getTime());
-  return `image-uploads/${yyyy}/${zeroPad(mm)}/${zeroPad(dd)}/${id}-${ts}.${ext}`;
+  return `image-uploads/${yyyy}/${zeroPad(mm)}/${zeroPad(
+    dd
+  )}/${id}-${ts}.${ext}`;
 }
-function zeroPad(num: number, places: number = 2): string {
+function zeroPad(num: number, places = 2): string {
   return `${num}`.padStart(places, "0");
 }
 
