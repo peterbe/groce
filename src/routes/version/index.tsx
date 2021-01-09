@@ -33,7 +33,7 @@ const Version: FunctionalComponent = () => {
           {shaShort}
         </a>
         <br />
-        and it was released ({parsed.toLocaleDateString()})
+        and it was released ({parsed.toDateString()})
       </p>
     </div>
   );
