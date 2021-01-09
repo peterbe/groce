@@ -140,8 +140,8 @@ const About: FunctionalComponent = () => {
 
       <p>
         You can attach picture(s) to each item. This is especially helpful when
-        your partner puts something on your list but you&apos;re the one sent to the
-        store.
+        your partner puts something on your list but you&apos;re the one sent to
+        the store.
       </p>
 
       <figure class="figure" style={{ marginRight: 10 }}>
