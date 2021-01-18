@@ -8,6 +8,7 @@ import firebase from "firebase/app";
 import Home from "../routes/home";
 import Invited from "../routes/invited";
 import Signin from "../routes/signin";
+import Menus from "../routes/menus";
 import Shopping from "../routes/shopping";
 import ShoppingList from "../routes/list";
 import NotFoundPage from "../routes/notfound";
@@ -110,6 +111,7 @@ const App: FunctionalComponent = () => {
   }, []);
 
   const [lists, setLists] = useState<List[] | null>(null);
+  const [menus, setMenus] = useState<Menu[] | null>(null);
 
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 
@@ -247,6 +249,13 @@ const App: FunctionalComponent = () => {
             user={user}
             auth={auth}
             lists={lists}
+          />
+          <Route
+            path="/menus"
+            component={Menus}
+            user={user}
+            db={db}
+            menus={menus}
           />
           <Route
             path="/shopping"

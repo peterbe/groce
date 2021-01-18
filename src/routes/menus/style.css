@@ -1,0 +1,44 @@
+.shopping {
+  padding-top: 10px;
+  /*
+  This makes it so the whole screen is expanded
+  min-height: 100%; */
+  width: 100%;
+}
+.card {
+  margin-top: 20px;
+  cursor: pointer;
+}
+.list_preview_items {
+  margin-top: 15px;
+  list-style-type: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.add_new_group {
+  margin-top: 40px;
+}
+
+.sign_in_reminder {
+  margin-top: 40px;
+}
+
+.list_preview {
+  margin-bottom: 0;
+}
+
+.list_owners {
+  font-size: 70%;
+  text-align: right;
+  margin-bottom: 0;
+}
+.list_owners img {
+  margin-left: 3px;
+  border-radius: 1rem !important;
+}
+
+.preview_item {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

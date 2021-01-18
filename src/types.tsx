@@ -70,6 +70,37 @@ export interface List extends FirestoreList {
   metadata: FirestoreDocumentMetadata;
 }
 
+export interface RecentMeals {
+  text: string;
+  description: string;
+  date: firebase.firestore.Timestamp;
+}
+
+export interface MenuConfig {
+  // disableGroups: boolean;
+  // disableQuantity: boolean;
+  // disableDefaultSuggestions: boolean;
+}
+
+export interface FirestoreMenu {
+  name: string;
+  notes: string;
+  order: number;
+  added: firebase.firestore.Timestamp;
+  owners: string[];
+  ownersMetadata: Record<string, OwnerMetadata>;
+  config: MenuConfig;
+  recent_meals: RecentMeals[];
+  active_meals_count: number;
+  modified: firebase.firestore.Timestamp;
+}
+
+
+export interface Menu extends FirestoreMenu {
+  id: string;
+  metadata: FirestoreDocumentMetadata;
+}
+
 export interface AboutInvitation {
   id: string;
   inviter: string;
