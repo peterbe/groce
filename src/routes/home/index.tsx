@@ -155,10 +155,20 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         {user && (
           <div class="options">
             <div class="d-grid gap-2">
-              <Link href="/shopping" class="btn btn-primary btn-lg">
-                Shopping list{lists && lists.length > 1 && "s"}
-                {lists && lists.length > 1 && ` (${lists.length})`}
-              </Link>
+              {/* Most people only have 1 list */}
+              {lists && lists.length === 1 ? (
+                <Link
+                  href={`/shopping/${lists[0].id}`}
+                  class="btn btn-primary btn-lg"
+                >
+                  {lists[0].name}
+                </Link>
+              ) : (
+                <Link href="/shopping" class="btn btn-primary btn-lg">
+                  Shopping list{lists && lists.length > 1 && "s"}
+                  {lists && lists.length > 1 && ` (${lists.length})`}
+                </Link>
+              )}
 
               <Link
                 href="#"
