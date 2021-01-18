@@ -15,8 +15,8 @@ export interface FirestoreItem {
   description: string;
   group: ItemGroup;
   quantity: number;
-  done: boolean;
-  removed: boolean;
+  done: boolean | firebase.firestore.Timestamp;
+  removed: boolean | firebase.firestore.Timestamp;
   added: firebase.firestore.Timestamp[];
   times_added: number;
   images?: string[];
