@@ -1,11 +1,15 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
 import firebase from "firebase/app";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import { FileUpload } from "../../components/file-upload";
 import * as style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
 import { useDownloadImageURL } from "./hooks";
+
+dayjs.extend(relativeTime);
 
 interface Props {
   item: Item;
@@ -109,7 +113,7 @@ export const ListItem: FunctionalComponent<Props> = ({
           </div>
         )} */}
         <form
-          class="mb-3"
+          // class="mb-3"
           onSubmit={(event) => {
             event.preventDefault();
             if (!text.trim()) {
@@ -272,6 +276,17 @@ export const ListItem: FunctionalComponent<Props> = ({
               Cancel
             </button>
           </div>
+
+          {!item.done && (
+            <small class="fw-light">
+              added {dayjs(item.added[0].toDate()).fromNow()}
+            </small>
+          )}
+          {item.done && typeof item.done !== "boolean" && (
+            <small class="fw-light">
+              done {dayjs(item.done.toDate()).fromNow()}
+            </small>
+          )}
         </form>
       </li>
     );
@@ -289,7 +304,7 @@ export const ListItem: FunctionalComponent<Props> = ({
           class="form-check-input list-item"
           id={`checkbox${item.id}`}
           type="checkbox"
-          checked={item.done}
+          checked={!!item.done}
           onClick={(event) => {
             // Because the whole <li> (that this is contained in) has an
             // onClick, we have to use this line otherwise the "parent"

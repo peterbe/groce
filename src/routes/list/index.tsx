@@ -108,6 +108,15 @@ const ShoppingList: FunctionalComponent<Props> = ({
               return 1;
             } else if (!a.done && b.done) {
               return -1;
+            } else if (a.done && b.done) {
+              // For legacy, some old items might be boolean "true" here
+              // and not a date.
+              const aDate = (typeof a.done === "boolean" ? a.added[0] : a.done)
+                .seconds;
+              const bDate = (typeof b.done === "boolean" ? b.added[0] : b.done)
+                .seconds;
+              // descending order. Most recently done first.
+              return bDate - aDate;
             } else {
               if (a.group.order !== b.group.order) {
                 return a.group.order - b.group.order;
@@ -169,7 +178,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         .forEach((item) => {
           const itemDoc = collectionRef.doc(item.id);
           batch.update(itemDoc, {
-            removed: true,
+            removed: firebase.firestore.Timestamp.fromDate(new Date()),
           });
           cleared.push(item);
         });
@@ -281,7 +290,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
       const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
       itemRef
         .update({
-          done: !item.done,
+          done: item.done
+            ? false
+            : firebase.firestore.Timestamp.fromDate(new Date()),
         })
         // .then(() => {
         //   console.log("Updated", item.id);
@@ -333,12 +344,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
           quantity,
         })
         .then(() => {
-          // console.log("Updated", item.id);
-
           if (items && groupItem.text) {
             // If the groupItem.text was changed, make sure all the other
             // items' groupItem.text reflects that.
-            console.log({ GROUP: groupItem.text });
             const correctGroupText = groupItem.text;
 
             const normalizedGroupText = normalizeGroupText(groupItem.text);
@@ -485,13 +493,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
     );
   }
 
-  let todoItems: Item[] = [];
-  let doneItems: Item[] = [];
+  const todoItems: Item[] = [];
+  const doneItems: Item[] = [];
   const groupOptions: string[] = [];
   const groupOptionsSet: Set<string> = new Set();
   if (items) {
-    todoItems = items.filter((item) => !item.done && !item.removed);
-    doneItems = items.filter((item) => item.done && !item.removed);
+    todoItems.push(...items.filter((item) => !item.done && !item.removed));
+    doneItems.push(...items.filter((item) => item.done && !item.removed));
 
     for (const item of items) {
       if (item.group && item.group.text) {
@@ -649,29 +657,25 @@ const ShoppingList: FunctionalComponent<Props> = ({
           <div class={style.done_items}>
             <h5>Done and dusted</h5>
             <ul class="list-group shadow-sm bg-white rounded">
-              {doneItems
-                .filter((item) => item.done)
-                .map((item) => {
-                  return (
-                    <ListItem
-                      key={item.id}
-                      item={item}
-                      list={list}
-                      db={db}
-                      storage={storage}
-                      modified={recentlyModifiedItems.get(item.id) || null}
-                      groupOptions={groupOptions}
-                      disableGroups={list ? list.config.disableGroups : false}
-                      disableQuantity={
-                        list ? list.config.disableQuantity : false
-                      }
-                      toggleDone={updateItemDoneToggle}
-                      updateItem={updateItem}
-                      updateItemImage={updateItemImage}
-                      openImageModal={openImageModal}
-                    />
-                  );
-                })}
+              {doneItems.map((item) => {
+                return (
+                  <ListItem
+                    key={item.id}
+                    item={item}
+                    list={list}
+                    db={db}
+                    storage={storage}
+                    modified={recentlyModifiedItems.get(item.id) || null}
+                    groupOptions={groupOptions}
+                    disableGroups={list ? list.config.disableGroups : false}
+                    disableQuantity={list ? list.config.disableQuantity : false}
+                    toggleDone={updateItemDoneToggle}
+                    updateItem={updateItem}
+                    updateItemImage={updateItemImage}
+                    openImageModal={openImageModal}
+                  />
+                );
+              })}
             </ul>
           </div>
         )}
