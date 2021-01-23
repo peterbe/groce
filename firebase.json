@@ -52,6 +52,15 @@
         ]
       },
       {
+        "source": "/*.chunk.*.esm.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=315360000"
+          }
+        ]
+      },
+      {
         "source": "/assets/**/*.*",
         "headers": [
           {
