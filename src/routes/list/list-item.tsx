@@ -4,6 +4,7 @@ import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
+import * as pyrostyles from "./pyro.css";
 import { FileUpload } from "../../components/file-upload";
 import * as style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
@@ -100,6 +101,8 @@ export const ListItem: FunctionalComponent<Props> = ({
       (text) => rex.test(text) && text.toLowerCase() !== group.toLowerCase()
     );
   }
+
+  const [checked, setChecked] = useState(false);
 
   if (editMode) {
     return (
@@ -292,6 +295,18 @@ export const ListItem: FunctionalComponent<Props> = ({
     );
   }
 
+  function toggleDoneWrapper(item: Item) {
+    if (item.done) {
+      toggleDone(item);
+    } else {
+      setChecked(true);
+      setTimeout(() => {
+        toggleDone(item);
+        setChecked(false);
+      }, 500);
+    }
+  }
+
   return (
     <li
       class="list-group-item d-flex justify-content-between align-items-center"
@@ -304,17 +319,22 @@ export const ListItem: FunctionalComponent<Props> = ({
           class="form-check-input list-item"
           id={`checkbox${item.id}`}
           type="checkbox"
-          checked={!!item.done}
+          checked={!!item.done || checked}
           onClick={(event) => {
             // Because the whole <li> (that this is contained in) has an
             // onClick, we have to use this line otherwise the "parent"
             // onClick handler will also fire.
             event.stopPropagation();
-
-            toggleDone(item);
+            toggleDoneWrapper(item);
           }}
           aria-label={item.text}
         />{" "}
+        {checked && (
+          <span class={pyrostyles.pyro}>
+            <span class={pyrostyles.before} />
+            <span class={pyrostyles.after} />
+          </span>
+        )}
         <span
           class={
             item.done

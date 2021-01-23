@@ -1,6 +1,6 @@
 {
   "name": "That's Groce!",
-  "short_name": "That's Groce!",
+  "short_name": "ThatsGroce",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
