@@ -11651,10 +11651,10 @@ preact-jsx-chai@^3.0.0:
   dependencies:
     preact-render-to-string "^5.0.4"
 
-preact-markup@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/preact-markup/-/preact-markup-2.0.0.tgz#4889d1cc4340abf80155bf4d9c89cddecc53d4a6"
-  integrity sha512-1yPS+IuqJI6k9CoOLDj5x68W9rYp6cY4UqRNCXKt2QSRFcWhGrAZhv3fyz8i8urMu2zLuOrMJIxV4lhpVHHF/w==
+preact-markup@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/preact-markup/-/preact-markup-2.1.1.tgz#0451e7eed1dac732d7194c34a7f16ff45a2cfdd7"
+  integrity sha512-8JL2p36mzK8XkspOyhBxUSPjYwMxDM0L5BWBZWxsZMVW8WsGQrYQDgVuDKkRspt2hwrle+Cxr/053hpc9BJwfw==
 
 preact-render-to-string@^5.0.4:
   version "5.1.11"
