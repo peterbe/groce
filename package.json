@@ -46,7 +46,7 @@
     "@types/enzyme": "^3.10.8",
     "@types/jest": "^26.0.20",
     "@types/webpack-env": "^1.16.0",
-    "@typescript-eslint/eslint-plugin": "^4.13.0",
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.13.0",
     "cheerio": "1.0.0-rc.5",
     "css-loader": "^5.0.1",
