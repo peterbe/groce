@@ -110,7 +110,7 @@ export const Loading: FunctionalComponent<Props> = ({
                 class="spinner-border spinner-border-sm"
                 role="status"
                 aria-hidden="true"
-              ></span>
+              />
             )}
             Try reloading
           </a>

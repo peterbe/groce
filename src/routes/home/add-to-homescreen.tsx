@@ -63,7 +63,7 @@ function ShowTip({ close }: { close: () => void }) {
         onClick={() => {
           close();
         }}
-      ></button>
+      />
       <h4 class="alert-heading">Pro tip!</h4>
       <p>
         Before you sign in, press the share icon in your browser and select

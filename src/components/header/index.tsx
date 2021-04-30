@@ -53,7 +53,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
             setShowNavbar(!showNavbar);
           }}
         >
-          <span class="navbar-toggler-icon"></span>
+          <span class="navbar-toggler-icon" />
         </button>
         <div
           class={

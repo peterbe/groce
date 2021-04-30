@@ -117,13 +117,12 @@ const ShoppingList: FunctionalComponent<Props> = ({
                 .seconds;
               // descending order. Most recently done first.
               return bDate - aDate;
-            } else {
-              if (a.group.order !== b.group.order) {
-                return a.group.order - b.group.order;
-              }
-              // Descending order. More recent additions on top.
-              return b.added[0].seconds - a.added[0].seconds;
             }
+            if (a.group.order !== b.group.order) {
+              return a.group.order - b.group.order;
+            }
+            // Descending order. More recent additions on top.
+            return b.added[0].seconds - a.added[0].seconds;
           });
 
           setItems(newItems);
@@ -794,7 +793,7 @@ function ImageModal({ url, close }: { url: string; close: () => void }) {
                 data-dismiss="modal"
                 aria-label="Close"
                 onClick={() => close()}
-              ></button>
+              />
             </div>
             <div class="modal-body">
               <img src={url} style={{ maxWidth: "100%" }} />
@@ -812,7 +811,7 @@ function ImageModal({ url, close }: { url: string; close: () => void }) {
           </div>
         </div>
       </div>
-      <div class="modal-backdrop fade show"></div>
+      <div class="modal-backdrop fade show" />
     </Fragment>
   );
 }

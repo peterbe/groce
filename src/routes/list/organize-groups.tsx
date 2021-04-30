@@ -130,9 +130,8 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
   groups.sort((a: Group, b: Group) => {
     if (a.order === b.order) {
       return a.text.localeCompare(b.text);
-    } else {
-      return a.order - b.order;
     }
+    return a.order - b.order;
   });
 
   return (

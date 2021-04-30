@@ -74,9 +74,8 @@ export function getItemsSummary(
       return reverse * (a.frequency - b.frequency);
     } else if (sortBy === "added") {
       return reverse * (b.times_added - a.times_added);
-    } else {
-      return reverse * a.text.localeCompare(b.text);
     }
+    return reverse * a.text.localeCompare(b.text);
   });
   return itemsSummary;
 }
