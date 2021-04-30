@@ -232,7 +232,7 @@ function Form({
           onInput={(event) => {
             setText(event.currentTarget.value);
           }}
-        ></textarea>
+        />
       </div>
 
       {lists && lists.length && (

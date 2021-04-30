@@ -45,7 +45,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
       const newSuggestionsSet: Set<string> = new Set();
 
       if (items) {
-        items.forEach((item, i) => {
+        items.forEach((item) => {
           if (item.removed) {
             const normalized = stripEmojis(item.text.toLowerCase());
             if (

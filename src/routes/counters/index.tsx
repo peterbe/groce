@@ -82,7 +82,7 @@ const Counters: FunctionalComponent<Props> = (props: Props) => {
       >
         <thead>
           <tr>
-            <th scope="col"></th>
+            <th scope="col" />
             <th scope="col" style={{ width: "20%" }}>
               Today
             </th>

@@ -32,7 +32,7 @@ const Settings: FunctionalComponent = () => {
             class="spinner-border spinner-border-sm"
             role="status"
             aria-hidden="true"
-          ></span>
+          />
         )}
         {reloading && <span class="sr-only">Loading...</span>}
         Perform a full reload

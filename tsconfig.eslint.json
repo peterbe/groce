@@ -1,6 +1,0 @@
-// see https://github.com/typescript-eslint/typescript-eslint/issues/890
-{
-    "extends": "./tsconfig.json",
-    "include": ["*.config.js", "src/**/*", "!functions/src/*.ts"],
-    "exclude": ["functions/src/*.ts"]
-}

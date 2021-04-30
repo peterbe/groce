@@ -41,7 +41,7 @@ export const Alert: FunctionalComponent<Props> = ({
                 class="spinner-grow spinner-grow-sm"
                 role="status"
                 aria-hidden="true"
-              ></span>
+              />
             )}
             {reloading ? " Reloading..." : "Try reloading"}
           </button>

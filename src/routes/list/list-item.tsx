@@ -80,11 +80,9 @@ export const ListItem: FunctionalComponent<Props> = ({
         if (groupInputRef.current) {
           groupInputRef.current.focus();
         }
-      } else {
+      } else if (textInputRef.current) {
         // Default is to focus on the text input
-        if (textInputRef.current) {
-          textInputRef.current.focus();
-        }
+        textInputRef.current.focus();
       }
     }
   }, [editMode]);
@@ -122,9 +120,9 @@ export const ListItem: FunctionalComponent<Props> = ({
             if (!text.trim()) {
               return;
             }
-            const quantityNumber: number = isNaN(parseInt(`${quantity}`))
+            const quantityNumber: number = isNaN(parseInt(`${quantity}`, 10))
               ? 0
-              : parseInt(`${quantity}`);
+              : parseInt(`${quantity}`, 10);
             updateItem(item, text, description, group, quantityNumber);
             setEditMode("");
           }}
@@ -162,9 +160,8 @@ export const ListItem: FunctionalComponent<Props> = ({
                     setQuantity((prev) => {
                       if (!prev) {
                         return 2;
-                      } else {
-                        return parseInt(`${prev}`) + 1;
                       }
+                      return parseInt(`${prev}`, 10) + 1;
                     });
                   }}
                 >
@@ -175,7 +172,7 @@ export const ListItem: FunctionalComponent<Props> = ({
                   type="button"
                   onClick={() => {
                     setQuantity((prev) => {
-                      const prevNumber = parseInt(`${prev}`);
+                      const prevNumber = parseInt(`${prev}`, 10);
                       if (isNaN(prevNumber) || prevNumber === 2) {
                         return "";
                       }
@@ -200,7 +197,7 @@ export const ListItem: FunctionalComponent<Props> = ({
                 setDescription(event.currentTarget.value);
               }}
               rows={2}
-            ></textarea>
+            />
           </div>
 
           {!disableGroups && (

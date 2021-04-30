@@ -251,7 +251,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
                   class="spinner-border spinner-border-sm"
                   role="status"
                   aria-hidden="true"
-                ></span>
+                />
               )}
               {waiting && <span class="sr-only">Loading...</span>} Accept
             </button>
