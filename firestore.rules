@@ -39,6 +39,26 @@ service cloud.firestore {
       }
 
     }
+    match /menus/{menuID} {
+    	allow create: if request.auth != null;
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.owners;
+
+      match /meals/{mealID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/menus/$(menuID)).data.owners;
+      }
+
+      match /invitations/{invitationID} {
+	    	allow create: if request.auth != null;
+	      allow read: if request.auth != null;
+        allow delete: if request.auth != null && (
+          request.auth.uid == resource.data.inviter_uid ||
+          request.auth.token.email == resource.data.email
+        );
+        allow update: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == resource.data.inviter_uid;
+      }
+
+    }
 
 
 //     match /shoppingitems/{itemID} {
@@ -46,7 +66,6 @@ service cloud.firestore {
 //         request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(request.)).data.owners;
 //     	allow write: if request.auth != null &&
 //         request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(request.resource.data.shoppinglist)).data.owners;
-
 //     }
   }
 }

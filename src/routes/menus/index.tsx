@@ -4,10 +4,10 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
+import { ShowOwners } from "../../components/show-owners";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
-import { Menu, ListConfig, OwnerMetadata } from "../../types";
-// import { list } from "../list/style.css";
+import { Menu, MenuConfig } from "../../types";
 
 interface Props {
   user: firebase.User | false | null;
@@ -16,28 +16,28 @@ interface Props {
 }
 
 const Menus: FunctionalComponent<Props> = ({ user, db, menus }: Props) => {
-  const [addNewList, toggleAddNewList] = useState(false);
+  const [addNewMenu, toggleAddNewMenu] = useState(false);
 
   useEffect(() => {
     document.title = "Menus";
   }, []);
 
-  async function createNewGroup(
+  async function createNewMenu(
     name: string,
     notes: string,
-    config: ListConfig
+    config: MenuConfig
   ) {
-    if (db && user && lists) {
+    if (db && user && menus) {
       if (
-        lists
-          .map((list) => list.name.toLowerCase())
+        menus
+          .map((menu) => menu.name.toLowerCase())
           .includes(name.toLowerCase())
       ) {
-        console.warn("List already exists by that name.");
+        console.warn("Menu already exists by that name.");
         return;
       }
       try {
-        await db.collection("shoppinglists").add({
+        await db.collection("menus").add({
           name,
           notes,
           owners: [user.uid],
@@ -45,26 +45,26 @@ const Menus: FunctionalComponent<Props> = ({ user, db, menus }: Props) => {
           modified: firebase.firestore.Timestamp.fromDate(new Date()),
           order:
             1 +
-            ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
+            ((menus && Math.max(...menus.map((menu) => menu.order || 0))) || 0),
           recent_items: [],
           active_items_count: 0,
           config,
         });
-        toggleAddNewList(false);
+        toggleAddNewMenu(false);
       } catch (error) {
-        console.error("Error creating shopping list:", error);
+        console.error("Error creating new menu:", error);
       }
     }
   }
 
-  function getShoppingHref(list: List) {
-    return `/shopping/${list.id}`;
+  function getMenuHref(menu: Menu) {
+    return `/menus/${menu.id}`;
   }
 
   // Auth as loaded and determined that the user is not signed in
   if (user === false) {
     return (
-      <div class={style.shopping}>
+      <div class={style.menus}>
         <Alert
           heading={"You're not signed in"}
           message={<p>Use the menu bar below to sign in first.</p>}
@@ -74,56 +74,56 @@ const Menus: FunctionalComponent<Props> = ({ user, db, menus }: Props) => {
   }
 
   return (
-    <div class={style.shopping}>
+    <div class={style.menus}>
       <h2>
-        Menu lists{" "}
-        {lists && lists.length ? (
-          <small class="text-muted">({lists.length})</small>
+        Menus{" "}
+        {menus && menus.length ? (
+          <small class="text-muted">({menus.length})</small>
         ) : null}
       </h2>
 
-      {!lists && db && user && <div>Loading shopping lists...</div>}
+      {!menus && db && user && <div>Loading menus...</div>}
 
-      {lists && !lists.length && (
-        <p>You currently don&apos;t have any lists.</p>
+      {menus && !menus.length && (
+        <p>You currently don&apos;t have any menus.</p>
       )}
 
-      {lists &&
-        lists.map((list) => {
+      {menus &&
+        menus.map((menu) => {
           return (
             <div
-              key={list.id}
+              key={menu.id}
               class={`card ${style.card} shadow bg-white rounded`}
               onClick={() => {
-                route(getShoppingHref(list), true);
+                route(getMenuHref(menu), false);
               }}
             >
               <div class="card-body">
-                <h5 class="card-title">{list.name}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{list.notes}</h6>
-                <div class={`card-text ${style.list_preview}`}>
-                  {db && <PreviewList list={list} db={db} />}
+                <h5 class="card-title">{menu.name}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{menu.notes}</h6>
+                <div class={`card-text ${style.menu_preview}`}>
+                  {db && <PreviewMenu menu={menu} db={db} />}
                 </div>
-                <ShowOwners uids={list.owners} metadata={list.ownersMetadata} />
+                <ShowOwners uids={menu.owners} metadata={menu.ownersMetadata} />
               </div>
             </div>
           );
         })}
 
       {db && user && !user.isAnonymous && (
-        <div class={style.add_new_group}>
+        <div class={style.add_new_menu}>
           <button
             type="button"
             class="btn btn-sm btn-outline-primary"
             onClick={() => {
-              toggleAddNewList((prev) => !prev);
+              toggleAddNewMenu((prev) => !prev);
             }}
           >
-            {addNewList
+            {addNewMenu
               ? "Close"
-              : lists && !lists.length
-              ? "Create list"
-              : "Create new list"}
+              : menus && !menus.length
+              ? "Create menu"
+              : "Create new menu"}
           </button>
         </div>
       )}
@@ -131,16 +131,16 @@ const Menus: FunctionalComponent<Props> = ({ user, db, menus }: Props) => {
       {db && user && user.isAnonymous && (
         <div class={`${style.sign_in_reminder} text-right`}>
           <Link href="/signin" class="btn btn-sm btn-outline-primary">
-            Sign in to not lose your list &rarr;
+            Sign in to not lose your menu &rarr;
           </Link>
         </div>
       )}
 
-      {db && addNewList && lists && (
-        <NewList
-          lists={lists}
-          create={async (name: string, notes: string, config: ListConfig) => {
-            await createNewGroup(name, notes, config);
+      {db && addNewMenu && menus && (
+        <NewMenu
+          menus={menus}
+          create={async (name: string, notes: string, config: MenuConfig) => {
+            await createNewMenu(name, notes, config);
           }}
         />
       )}
@@ -150,52 +150,23 @@ const Menus: FunctionalComponent<Props> = ({ user, db, menus }: Props) => {
   );
 };
 
-export default Menu;
+export default Menus;
 
-function ShowOwners({
-  uids,
-  metadata,
-}: {
-  uids: string[];
-  metadata: Record<string, OwnerMetadata>;
-}) {
-  if (uids.length === 1) {
-    return <p class={style.list_owners}>Owners: just you</p>;
-  }
-  const images = uids.map((uid) => {
-    const data = metadata[uid] || {};
-    if (data.photoURL) {
-      return (
-        <img
-          key={uid}
-          class="rounded"
-          width="30"
-          src={data.photoURL || "/assets/icons/avatar.svg"}
-          alt={data.displayName || data.email || uid}
-        />
-      );
-    }
-  });
-  if (uids.length !== images.length) {
-    return <p class={style.list_owners}>{uids.length} co-owners</p>;
-  }
-  return <p class={style.list_owners}>{images}</p>;
-}
-
-function NewList({
+function NewMenu({
   create,
-  lists,
+  menus,
 }: {
-  create: (name: string, notes: string, config: ListConfig) => void;
-  lists: List[];
+  create: (name: string, notes: string, config: MenuConfig) => void;
+  menus: Menu[];
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
-  const [disableGroups, setDisableGroups] = useState(false);
-  const [disableQuantity, setDisableQuantity] = useState(false);
-  const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
-    false
-  );
+  const [startsOnAMonday, setStartsOnAMonday] = useState(false);
+  // const [disableGroups, setDisableGroups] = useState(false);
+  // const [disableQuantity, setDisableQuantity] = useState(false);
+  // const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
+  //   false
+  // );
   const newNameRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -209,8 +180,8 @@ function NewList({
 
   const submittable =
     name.trim() &&
-    !lists
-      .map((list) => list.name.toLowerCase())
+    !menus
+      .map((menu) => menu.name.toLowerCase())
       .includes(name.trim().toLowerCase());
 
   return (
@@ -221,14 +192,12 @@ function NewList({
         if (submittable) {
           setSubmitting(true);
           create(name.trim(), notes.trim(), {
-            disableGroups,
-            disableQuantity,
-            disableDefaultSuggestions,
+            startsOnAMonday
           });
         }
       }}
     >
-      <h4>New shopping list</h4>
+      <h4>New menu</h4>
 
       <div class="mb-3">
         <label htmlFor="newName" class="form-label">
@@ -242,7 +211,7 @@ function NewList({
           }}
           type="text"
           class="form-control"
-          placeholder="for example: Hardware store"
+          placeholder={`for example: Christmas ${new Date().getFullYear()}`}
           id="newName"
           aria-describedby="nameHelp"
         />
@@ -271,125 +240,90 @@ function NewList({
       </div>
 
       <div class="mb-3">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            checked={disableGroups}
-            onClick={() => {
-              setDisableGroups((prev) => !prev);
-            }}
-            id="newDisableGroups"
-            aria-describedby="newDisableGroupsHelp"
-          />
-          <label class="form-check-label" htmlFor="newDisableGroups">
-            Disable groups
-          </label>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              checked={startsOnAMonday}
+              onClick={() => {
+                setStartsOnAMonday((prev) => !prev);
+              }}
+              id="newStartsOnAMonday"
+              aria-describedby="newStartsOnAMonday"
+            />
+            <label class="form-check-label" htmlFor="newStartsOnAMonday">
+              Week starts on the Monday
+            </label>
+          </div>
+          {/* <div id="newStartsOnAMonday" class="form-text">
+            Allows you to <i>group</i> items and sort by that.
+          </div> */}
         </div>
-        <div id="newDisableGroupsHelp" class="form-text">
-          Allows you to <i>group</i> items and sort by that.
-        </div>
-      </div>
 
-      <div class="mb-3">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            checked={disableQuantity}
-            onClick={() => {
-              setDisableQuantity((prev) => !prev);
-            }}
-            id="newDisableQuantity"
-            aria-describedby="newDisableQuantityHelp"
-          />
-          <label class="form-check-label" htmlFor="newDisableQuantity">
-            Disable quantity
-          </label>
-        </div>
-        <div id="newDisableQuantityHelp" class="form-text">
-          A <i>quantity</i> doesn&apos;t make sense for all lists.
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            checked={disableDefaultSuggestions}
-            onClick={() => {
-              setDisableDefaultSuggestions((prev) => !prev);
-            }}
-            id="newDisableDefaultSuggestions"
-            aria-describedby="newDisableDefaultSuggestionsHelp"
-          />
-          <label
-            class="form-check-label"
-            htmlFor="newDisableDefaultSuggestions"
-          >
-            Disable default suggestions
-          </label>
-        </div>
-        <div id="newDisableDefaultSuggestionsHelp" class="form-text">
-          Default suggestions are <i>food words</i> that help suggest when
-          adding new items.
-        </div>
-      </div>
 
       <button type="submit" class="btn btn-primary" disabled={!submittable}>
-        {submitting ? "Creating..." : "Create list"}
+        {submitting ? "Creating..." : "Create menu"}
       </button>
     </form>
   );
 }
 
-function PreviewList({
-  list,
+
+// WHAT'S THIS FOR?!
+function PreviewMenu({
+  menu,
 }: {
-  list: List;
+  menu: Menu;
   db: firebase.firestore.Firestore;
 }) {
-  const items = list.recent_items || [];
-  const activeItemsCount = list.active_items_count || 0;
+  const meals = menu.recent_meals || [];
+  // const activeItemsCount = list.active_items_count || 0;
 
-  if (!items.length) {
+  if (!meals.length) {
     return (
       <p>
-        <i>List empty at the moment.</i>
+        <i>Menu empty at the moment.</i>
       </p>
     );
   }
 
-  const count = activeItemsCount || items.length;
-  const CUTOFF = 5;
+  // const count = activeItemsCount || items.length;
+  // const CUTOFF = 5;
 
   return (
-    <ul class={`text-muted ${style.list_preview_items}`}>
-      {items.slice(0, CUTOFF).map((item) => {
-        return (
-          <li key={item.text} class={`overflow-hidden ${style.preview_item}`}>
-            <input
-              class="form-check-input"
-              type="checkbox"
-              value=""
-              disabled={true}
-              checked={item.done}
-            />{" "}
-            {item.text}{" "}
-            {!list.config.disableQuantity &&
-              !!item.quantity &&
-              item.quantity !== 1 && <b>x{item.quantity}</b>}
-          </li>
-        );
-      })}
-      {count > CUTOFF && (
-        <li>
-          <i>
-            and {count - CUTOFF} more item{count - CUTOFF > 1 ? "s" : ""}...
-          </i>
-        </li>
-      )}
+    <ul>
+      <li>Work</li>
+      <li>Harder</li>
+      <li>On</li>
+      <li>This</li>
     </ul>
   );
+  // return (
+  //   <ul class={`text-muted ${style.list_preview_items}`}>
+  //     {items.slice(0, CUTOFF).map((item) => {
+  //       return (
+  //         <li key={item.text} class={`overflow-hidden ${style.preview_item}`}>
+  //           <input
+  //             class="form-check-input"
+  //             type="checkbox"
+  //             value=""
+  //             disabled={true}
+  //             checked={item.done}
+  //           />{" "}
+  //           {item.text}{" "}
+  //           {!list.config.disableQuantity &&
+  //             !!item.quantity &&
+  //             item.quantity !== 1 && <b>x{item.quantity}</b>}
+  //         </li>
+  //       );
+  //     })}
+  //     {count > CUTOFF && (
+  //       <li>
+  //         <i>
+  //           and {count - CUTOFF} more item{count - CUTOFF > 1 ? "s" : ""}...
+  //         </i>
+  //       </li>
+  //     )}
+  //   </ul>
+  // );
 }

@@ -89,10 +89,9 @@ export const downloadAndResize = functions
           .toBuffer()
           .then((buffer) => {
             res.setHeader("content-type", contentType);
-            // TODO increase some day
             res.setHeader(
               "cache-control",
-              `public,max-age=${60 * 60 * 24 * 7}`
+              `public,max-age=${60 * 60 * 24 * 30}`
             );
             res.send(buffer);
           })

@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
 
+import { ShowOwners } from "../../components/show-owners";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
-import { List, ListConfig, OwnerMetadata } from "../../types";
+import { List, ListConfig } from "../../types";
 // import { list } from "../list/style.css";
 
 interface Props {
@@ -95,7 +96,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
               key={list.id}
               class={`card ${style.card} shadow bg-white rounded`}
               onClick={() => {
-                route(getShoppingHref(list), true);
+                route(getShoppingHref(list), false);
               }}
             >
               <div class="card-body">
@@ -152,35 +153,35 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
 
 export default Shopping;
 
-function ShowOwners({
-  uids,
-  metadata,
-}: {
-  uids: string[];
-  metadata: Record<string, OwnerMetadata>;
-}) {
-  if (uids.length === 1) {
-    return <p class={style.list_owners}>Owners: just you</p>;
-  }
-  const images = uids.map((uid) => {
-    const data = metadata[uid] || {};
-    if (data.photoURL) {
-      return (
-        <img
-          key={uid}
-          class="rounded"
-          width="30"
-          src={data.photoURL || "/assets/icons/avatar.svg"}
-          alt={data.displayName || data.email || uid}
-        />
-      );
-    }
-  });
-  if (uids.length !== images.length) {
-    return <p class={style.list_owners}>{uids.length} co-owners</p>;
-  }
-  return <p class={style.list_owners}>{images}</p>;
-}
+// function ShowOwners({
+//   uids,
+//   metadata,
+// }: {
+//   uids: string[];
+//   metadata: Record<string, OwnerMetadata>;
+// }) {
+//   if (uids.length === 1) {
+//     return <p class={style.list_owners}>Owners: just you</p>;
+//   }
+//   const images = uids.map((uid) => {
+//     const data = metadata[uid] || {};
+//     if (data.photoURL) {
+//       return (
+//         <img
+//           key={uid}
+//           class="rounded"
+//           width="30"
+//           src={data.photoURL || "/assets/icons/avatar.svg"}
+//           alt={data.displayName || data.email || uid}
+//         />
+//       );
+//     }
+//   });
+//   if (uids.length !== images.length) {
+//     return <p class={style.list_owners}>{uids.length} co-owners</p>;
+//   }
+//   return <p class={style.list_owners}>{images}</p>;
+// }
 
 function NewList({
   create,

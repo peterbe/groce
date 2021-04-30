@@ -9,6 +9,7 @@ import Home from "../routes/home";
 import Invited from "../routes/invited";
 import Signin from "../routes/signin";
 import Menus from "../routes/menus";
+import MenuRoute from "../routes/menu";
 import Shopping from "../routes/shopping";
 import ShoppingList from "../routes/list";
 import NotFoundPage from "../routes/notfound";
@@ -27,7 +28,14 @@ if ((module as any).hot) {
   require("preact/debug");
 }
 
-import { List, FirestoreList, ListConfig } from "../types";
+import {
+  List,
+  FirestoreList,
+  ListConfig,
+  Menu,
+  FirestoreMenu,
+  MenuConfig,
+} from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
@@ -111,7 +119,6 @@ const App: FunctionalComponent = () => {
   }, []);
 
   const [lists, setLists] = useState<List[] | null>(null);
-  const [menus, setMenus] = useState<Menu[] | null>(null);
 
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 
@@ -203,7 +210,7 @@ const App: FunctionalComponent = () => {
                 modified: firebase.firestore.Timestamp.fromDate(new Date()),
               })
               .then(() => {
-                console.log("Initial sample list created");
+                console.log("Initial list created");
               })
               .catch((error) => {
                 console.error("Error creating first sample list", error);
@@ -226,6 +233,117 @@ const App: FunctionalComponent = () => {
     return () => {
       if (shoppinglistsDbRef) {
         shoppinglistsDbRef();
+      }
+    };
+  }, [db, user]);
+
+  const [menus, setMenus] = useState<Menu[] | null>(null);
+
+  useEffect(() => {
+    let dbRef: () => void;
+    if (db && user) {
+      // This is needed because it's added late. And instead of migrating
+      // all/any lists, we rely on a fallback default.
+      const defaultMenuConfig: MenuConfig = {
+        startsOnAMonday: false,
+        // disableGroups: false,
+        // disableQuantity: false,
+        // disableDefaultSuggestions: false,
+      };
+
+      dbRef = db
+        .collection("menus")
+        .where("owners", "array-contains", user.uid)
+        .orderBy("order")
+        .onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
+          if (
+            snapshot.metadata.fromCache &&
+            snapshot.metadata.hasPendingWrites
+          ) {
+            toggleSnapshotsOffline(true);
+          } else {
+            toggleSnapshotsOffline(false);
+          }
+          const newMenus: Menu[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreMenu;
+            const config = data.config || Object.assign({}, defaultMenuConfig);
+
+            newMenus.push({
+              id: doc.id,
+              name: data.name,
+              notes: data.notes,
+              order: data.order,
+              added:
+                data.added || firebase.firestore.Timestamp.fromDate(new Date()),
+              owners: data.owners,
+              ownersMetadata: data.ownersMetadata || {},
+              metadata: doc.metadata,
+              config,
+              recent_meals: data.recent_meals || [],
+              // active_items_count: data.active_items_count || 0,
+              modified:
+                data.modified ||
+                data.added ||
+                // For legacy reasons, if it doesn't have a .added or
+                // .modified make it something old.
+                firebase.firestore.Timestamp.fromMillis(
+                  // Just make it really really old if it doesn't have a
+                  // .modified attribute.
+                  new Date().getTime() - 1000 * 60 * 60 * 24 * 90
+                ),
+            });
+          });
+
+          if (!newMenus.length) {
+            const eatingEmojis = [
+              "🍜",
+              "🍝",
+              "🍲",
+              "🍛",
+              "🍱",
+              "🍔",
+              "🍽",
+              "🍽",
+              "🍽",
+              "🍽",
+              "🍴",
+              "🥘",
+            ];
+            const randomEatingEmoji =
+              eatingEmojis[Math.floor(Math.random() * eatingEmojis.length)];
+            // Manually create their first ever list
+            db.collection("menus")
+              .add({
+                name: `Family Dinners ${randomEatingEmoji}`,
+                notes: "",
+                owners: [user.uid],
+                order: 0,
+                recent_items: [],
+                active_items_count: 0,
+                config: Object.assign({}, defaultMenuConfig),
+                added: firebase.firestore.Timestamp.fromDate(new Date()),
+                modified: firebase.firestore.Timestamp.fromDate(new Date()),
+              })
+              .then(() => {
+                console.log("Initial menu created");
+              })
+              .catch((error) => {
+                console.error("Error creating first sample list", error);
+              });
+          } else if (newMenus.length > 1) {
+            newMenus.sort((a, b) => {
+              return (
+                b.modified.toDate().getTime() - a.modified.toDate().getTime()
+              );
+            });
+          }
+          setMenus(newMenus);
+        });
+    }
+    return () => {
+      if (dbRef) {
+        dbRef();
       }
     };
   }, [db, user]);
@@ -256,6 +374,14 @@ const App: FunctionalComponent = () => {
             user={user}
             db={db}
             menus={menus}
+          />
+          <Route
+            path="/menus/:id"
+            component={MenuRoute}
+            user={user}
+            db={db}
+            menus={menus}
+            storage={storage}
           />
           <Route
             path="/shopping"

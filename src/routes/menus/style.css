@@ -1,4 +1,4 @@
-.shopping {
+.menus {
   padding-top: 10px;
   /*
   This makes it so the whole screen is expanded
@@ -9,14 +9,14 @@
   margin-top: 20px;
   cursor: pointer;
 }
-.list_preview_items {
+.menu_preview_meals {
   margin-top: 15px;
   list-style-type: none;
   padding-left: 0;
   margin-bottom: 0;
 }
 
-.add_new_group {
+.add_new_menu {
   margin-top: 40px;
 }
 
@@ -24,21 +24,21 @@
   margin-top: 40px;
 }
 
-.list_preview {
+.menu_preview {
   margin-bottom: 0;
 }
 
-.list_owners {
+.menu_owners {
   font-size: 70%;
   text-align: right;
   margin-bottom: 0;
 }
-.list_owners img {
+.menu_owners img {
   margin-left: 3px;
   border-radius: 1rem !important;
 }
 
-.preview_item {
+.preview_meal {
   white-space: nowrap;
   text-overflow: ellipsis;
 }

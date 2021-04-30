@@ -77,7 +77,7 @@ export interface RecentMeals {
 }
 
 export interface MenuConfig {
-  // disableGroups: boolean;
+  startsOnAMonday: boolean;
   // disableQuantity: boolean;
   // disableDefaultSuggestions: boolean;
 }
@@ -91,14 +91,33 @@ export interface FirestoreMenu {
   ownersMetadata: Record<string, OwnerMetadata>;
   config: MenuConfig;
   recent_meals: RecentMeals[];
-  active_meals_count: number;
+  // active_meals_count: number;
   modified: firebase.firestore.Timestamp;
 }
-
 
 export interface Menu extends FirestoreMenu {
   id: string;
   metadata: FirestoreDocumentMetadata;
+}
+
+export interface RecipeSource {
+  cookbook?: string;
+  page?: string;
+  url?: string;
+}
+
+export interface FirestoreMeal {
+  date: Date;
+  text: string;
+  favorite: boolean;
+  recipeSources: RecipeSource[];
+  images?: string[];
+  added: firebase.firestore.Timestamp;
+}
+
+export interface Meal extends FirestoreMeal {
+  id: string;
+  // metadata: FirestoreDocumentMetadata;
 }
 
 export interface AboutInvitation {

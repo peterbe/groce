@@ -6,17 +6,18 @@ import { useEffect, useState } from "preact/hooks";
 import { Alert } from "../../components/alerts";
 import { Loading } from "../../components/loading";
 import { AddToHomeScreen } from "./add-to-homescreen";
-import { List, FirestoreInvitation, Invitation } from "../../types";
+import { List, Menu, FirestoreInvitation, Invitation } from "../../types";
 
 interface Props {
   user: firebase.User | false | null;
   auth: firebase.auth.Auth | null;
   db: firebase.firestore.Firestore | null;
   lists: List[] | null;
+  menus: Menu[] | null;
 }
 
 const Home: FunctionalComponent<Props> = (props: Props) => {
-  const { user, auth, lists, db } = props;
+  const { user, auth, lists, menus, db } = props;
 
   useEffect(() => {
     document.title = "That's Groce!";
@@ -170,17 +171,20 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               )}
 
-              <Link
-                href="#"
-                class="btn btn-secondary btn-lg"
-                disabled
-                title="Not working yet"
-              >
-                Meal planning
-              </Link>
-              <i>
-                <small>Under construction</small>
-              </i>
+              {/* Most people only have 1 menu */}
+              {menus && menus.length === 1 ? (
+                <Link
+                  href={`/menus/${menus[0].id}`}
+                  class="btn btn-primary btn-lg"
+                >
+                  {menus[0].name}
+                </Link>
+              ) : (
+                <Link href="/menus" class="btn btn-primary btn-lg">
+                  Menu{lists && lists.length > 1 && "s"}
+                  {menus && menus.length > 1 && ` (${menus.length})`}
+                </Link>
+              )}
             </div>
           </div>
         )}

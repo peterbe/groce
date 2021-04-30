@@ -7,6 +7,7 @@ import firebase from "firebase/app";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
 import { Loading } from "../../components/loading";
+import { SignInReminder } from "../../components/sign-in-reminder";
 import { OfflineWarning } from "../../components/offline-warning";
 import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
@@ -609,7 +610,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!items && <Loading text="Loading shopping list..." />}
+      {!items && !itemsError && <Loading text="Loading shopping list..." />}
 
       {items &&
         !editAction &&
@@ -739,12 +740,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
           </div>
         )}
 
-      {db && user && user.isAnonymous && (
-        <div class={`${style.sign_in_reminder} text-right`}>
-          <Link href="/signin" class="btn btn-sm btn-outline-primary">
-            Sign in to not lose your list &rarr;
-          </Link>
-        </div>
+      {db && user && (
+        <SignInReminder user={user} message="Sign in to not lose your list" />
       )}
 
       <GoBack url="/shopping" name="lists" />

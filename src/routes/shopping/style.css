@@ -28,16 +28,6 @@
   margin-bottom: 0;
 }
 
-.list_owners {
-  font-size: 70%;
-  text-align: right;
-  margin-bottom: 0;
-}
-.list_owners img {
-  margin-left: 3px;
-  border-radius: 1rem !important;
-}
-
 .preview_item {
   white-space: nowrap;
   text-overflow: ellipsis;
