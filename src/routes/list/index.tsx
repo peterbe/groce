@@ -1,5 +1,4 @@
 import { FunctionalComponent, h, Fragment } from "preact";
-import { Link } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
 import * as style from "./style.css";
 import firebase from "firebase/app";
