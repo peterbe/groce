@@ -128,6 +128,7 @@ const App: FunctionalComponent = () => {
         disableGroups: false,
         disableQuantity: false,
         disableDefaultSuggestions: false,
+        disableFireworks: false,
       };
 
       shoppinglistsDbRef = db

@@ -4,14 +4,11 @@ import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import * as party from "party-js";
+
 import { FileUpload } from "../../components/file-upload";
 import * as style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
 import { useDownloadImageURL } from "./hooks";
-
-// Not sure why but this needs CommonJS import.
-// https://github.com/yiliansource/party-js/issues/48
-// const party = require("party-js");
 
 dayjs.extend(relativeTime);
 
