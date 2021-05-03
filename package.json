@@ -30,6 +30,7 @@
     "dayjs": "1.10.4",
     "firebase": "8.4.3",
     "node-sass": "5.0.0",
+    "party-js": "2.0.0-0",
     "preact": "^10.5.13",
     "preact-cli-plugin-env-vars": "1.2.1",
     "preact-jsx-chai": "^3.0.0",

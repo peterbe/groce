@@ -34,6 +34,9 @@ export const ListOptions: FunctionalComponent<Props> = ({
   const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
     !!list.config.disableDefaultSuggestions
   );
+  const [disableFireworks, setDisableFireworks] = useState(
+    !!list.config.disableFireworks
+  );
   const [updateError, setUpdateError] = useState<Error | null>(null);
 
   return (
@@ -47,6 +50,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
             disableGroups,
             disableQuantity,
             disableDefaultSuggestions,
+            disableFireworks,
           };
           const doc = db.collection("shoppinglists").doc(list.id);
           doc
@@ -174,6 +178,30 @@ export const ListOptions: FunctionalComponent<Props> = ({
           <div id="newDisableDefaultSuggestionsHelp" class="form-text">
             Default suggestions are <i>food words</i> that help suggest when
             adding new items.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              checked={disableFireworks}
+              onClick={() => {
+                setDisableFireworks((prev) => !prev);
+              }}
+              id="newDisableFireworks"
+              aria-describedby="newDisableFireworksHelp"
+            />
+            <label
+              class="form-check-label"
+              htmlFor="newDisableFireworks"
+            >
+              Disable fireworks
+            </label>
+          </div>
+          <div id="newDisableFireworksHelp" class="form-text">
+            <i>I don't like sparkles!</i>
           </div>
         </div>
 

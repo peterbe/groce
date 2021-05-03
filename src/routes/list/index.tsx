@@ -639,6 +639,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     groupOptions={groupOptions}
                     disableGroups={list ? list.config.disableGroups : false}
                     disableQuantity={list ? list.config.disableQuantity : false}
+                    disableFireworks={list ? list.config.disableFireworks : false}
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}
                     updateItemImage={updateItemImage}
