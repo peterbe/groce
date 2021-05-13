@@ -3,7 +3,8 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import * as party from "party-js";
+// import * as party from "party-js";
+import party from "party-js";
 
 import { FileUpload } from "../../components/file-upload";
 import * as style from "./style.css";
