@@ -325,7 +325,7 @@ export const ListItem: FunctionalComponent<Props> = ({
             // onClick handler will also fire.
             event.stopPropagation();
             if (!item.done && !disableFireworks && event.target) {
-              party.sparkles(event.target, {
+              party.sparkles(event.target as HTMLElement, {
                 // Defaults: Click "Configuration" on
                 // https://party.js.org/docs/templates#sparkles
                 // size: party.variation.range(0.5, 1.5),

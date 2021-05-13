@@ -224,6 +224,7 @@ function NewList({
             disableGroups,
             disableQuantity,
             disableDefaultSuggestions,
+            disableFireworks: false,
           });
         }
       }}
