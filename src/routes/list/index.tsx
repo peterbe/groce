@@ -528,7 +528,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     <div class={style.list}>
       {snapshotsOffline && <OfflineWarning />}
 
-      <p class="float-right hide-in-print">
+      <p class="float-end hide-in-print">
         <button
           type="button"
           class={editAction ? "btn btn-sm btn-info" : "btn btn-sm"}
