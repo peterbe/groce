@@ -57,7 +57,7 @@
     "firebase-tools": "9.10.2",
     "got": "11.8.2",
     "http-server": "0.12.3",
-    "husky": "^4.3.8",
+    "husky": "^6.0.0",
     "jest": "^26.6.3",
     "jest-preset-preact": "^4.0.2",
     "jest-puppeteer": "4.4.0",
