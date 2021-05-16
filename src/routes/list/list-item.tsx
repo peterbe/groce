@@ -246,7 +246,7 @@ export const ListItem: FunctionalComponent<Props> = ({
 
           <div class="mb-2">
             {!(!item.images || item.images.length >= 3) && (
-              <div class="float-right">
+              <div class="float-end">
                 <button
                   type="button"
                   class="btn btn-outline-secondary"

@@ -142,6 +142,9 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
           create={async (name: string, notes: string, config: ListConfig) => {
             await createNewGroup(name, notes, config);
           }}
+          close={() => {
+            toggleAddNewList(false);
+          }}
         />
       )}
 
@@ -185,17 +188,18 @@ function ShowOwners({
 function NewList({
   create,
   lists,
+  close,
 }: {
   create: (name: string, notes: string, config: ListConfig) => void;
   lists: List[];
+  close: () => void;
 }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [disableGroups, setDisableGroups] = useState(false);
   const [disableQuantity, setDisableQuantity] = useState(false);
-  const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
-    false
-  );
+  const [disableDefaultSuggestions, setDisableDefaultSuggestions] =
+    useState(false);
   const newNameRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
@@ -229,7 +233,6 @@ function NewList({
       }}
     >
       <h4>New shopping list</h4>
-
       <div class="mb-3">
         <label htmlFor="newName" class="form-label">
           Name
@@ -250,7 +253,6 @@ function NewList({
           You can change the name later.
         </div>
       </div>
-
       <div class="mb-3">
         <label htmlFor="newNotes" class="form-label">
           Notes/Description
@@ -269,7 +271,6 @@ function NewList({
           Just in case you need it and it helps.
         </div>
       </div>
-
       <div class="mb-3">
         <div class="form-check">
           <input
@@ -290,7 +291,6 @@ function NewList({
           Allows you to <i>group</i> items and sort by that.
         </div>
       </div>
-
       <div class="mb-3">
         <div class="form-check">
           <input
@@ -311,7 +311,6 @@ function NewList({
           A <i>quantity</i> doesn&apos;t make sense for all lists.
         </div>
       </div>
-
       <div class="mb-3">
         <div class="form-check">
           <input
@@ -336,9 +335,17 @@ function NewList({
           adding new items.
         </div>
       </div>
-
       <button type="submit" class="btn btn-primary" disabled={!submittable}>
         {submitting ? "Creating..." : "Create list"}
+      </button>{" "}
+      <button
+        type="button"
+        class="btn btn-secondary"
+        onClick={() => {
+          close();
+        }}
+      >
+        Cancel
       </button>
     </form>
   );
