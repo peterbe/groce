@@ -41,7 +41,7 @@
     "sortablejs": "1.13.0"
   },
   "devDependencies": {
-    "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
+    "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@types/cheerio": "0.22.28",
     "@types/enzyme": "^3.10.8",
     "@types/jest": "^26.0.23",
