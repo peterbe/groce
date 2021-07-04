@@ -67,9 +67,9 @@ export const ListItem: FunctionalComponent<Props> = ({
     setQuantity(item.quantity || "");
   }, [item]);
 
-  const textInputRef = useRef<HTMLInputElement>();
-  const descriptionInputRef = useRef<HTMLTextAreaElement>();
-  const groupInputRef = useRef<HTMLInputElement>();
+  const textInputRef = useRef<HTMLInputElement>(null);
+  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
+  const groupInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (editMode) {
       if (editMode === "description") {

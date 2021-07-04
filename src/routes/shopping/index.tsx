@@ -200,7 +200,7 @@ function NewList({
   const [disableQuantity, setDisableQuantity] = useState(false);
   const [disableDefaultSuggestions, setDisableDefaultSuggestions] =
     useState(false);
-  const newNameRef = useRef<HTMLInputElement>();
+  const newNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (newNameRef.current) {
