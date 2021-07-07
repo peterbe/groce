@@ -37,6 +37,7 @@ export interface ListConfig {
   disableGroups: boolean;
   disableQuantity: boolean;
   disableDefaultSuggestions: boolean;
+  disableFireworks: boolean;
 }
 
 export interface OwnerMetadata {

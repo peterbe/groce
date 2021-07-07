@@ -3,8 +3,9 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+// import * as party from "party-js";
+import party from "party-js";
 
-import pyrostyles from "./pyro.css";
 import { FileUpload } from "../../components/file-upload";
 import style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
@@ -30,6 +31,7 @@ interface Props {
   modified: null | Date;
   disableGroups: boolean;
   disableQuantity: boolean;
+  disableFireworks: boolean;
   openImageModal: (url: string) => void;
 }
 
@@ -45,6 +47,7 @@ export const ListItem: FunctionalComponent<Props> = ({
   modified,
   disableGroups,
   disableQuantity,
+  disableFireworks,
   openImageModal,
 }: Props) => {
   const [text, setText] = useState("");
@@ -300,7 +303,7 @@ export const ListItem: FunctionalComponent<Props> = ({
       setTimeout(() => {
         toggleDone(item);
         setChecked(false);
-      }, 500);
+      }, 300);
     }
   }
 
@@ -322,16 +325,19 @@ export const ListItem: FunctionalComponent<Props> = ({
             // onClick, we have to use this line otherwise the "parent"
             // onClick handler will also fire.
             event.stopPropagation();
+            if (!item.done && !disableFireworks && event.target) {
+              party.sparkles(event.target as HTMLElement, {
+                // Defaults: Click "Configuration" on
+                // https://party.js.org/docs/templates#sparkles
+                // size: party.variation.range(0.5, 1.5),
+                // speed: party.variation.range(200, 400),
+                // count: party.variation.range(5, 15)
+              });
+            }
             toggleDoneWrapper(item);
           }}
           aria-label={item.text}
         />{" "}
-        {checked && (
-          <span class={pyrostyles.pyro}>
-            <span class={pyrostyles.before} />
-            <span class={pyrostyles.after} />
-          </span>
-        )}
         <span
           class={
             item.done
