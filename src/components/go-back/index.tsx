@@ -1,6 +1,6 @@
 import { FunctionalComponent, h } from "preact";
 import { Link } from "preact-router";
-import * as style from "./style.css";
+import style from "./style.css";
 
 interface Props {
   name?: string;

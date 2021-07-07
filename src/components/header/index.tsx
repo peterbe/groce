@@ -1,7 +1,6 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import { Link, route } from "preact-router";
-// import * as style from "./style.css";
 import firebase from "firebase/app";
 
 interface Props {
