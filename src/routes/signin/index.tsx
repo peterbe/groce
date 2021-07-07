@@ -1,7 +1,7 @@
 import { FunctionalComponent, Fragment, h } from "preact";
 import { useState } from "preact/hooks";
 import { route } from "preact-router";
-import * as style from "./style.css";
+import style from "./style.css";
 import firebase from "firebase/app";
 
 import { GoBack } from "../../components/go-back";

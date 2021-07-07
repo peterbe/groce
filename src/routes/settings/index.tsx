@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import * as style from "./style.css";
+import style from "./style.css";
 import { useEffect, useState } from "preact/hooks";
 
 import { GoBack } from "../../components/go-back";

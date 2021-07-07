@@ -4,9 +4,9 @@ import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-import * as pyrostyles from "./pyro.css";
+import pyrostyles from "./pyro.css";
 import { FileUpload } from "../../components/file-upload";
-import * as style from "./style.css";
+import style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
 import { useDownloadImageURL } from "./hooks";
 

@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect, useMemo } from "preact/hooks";
 
-import * as style from "./style.css";
+import style from "./style.css";
 import { ITEM_SUGGESTIONS } from "./default-suggestions";
 import { Item, SearchSuggestion } from "../../types";
 import { stripEmojis } from "../../utils";

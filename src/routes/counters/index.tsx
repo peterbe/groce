@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import * as style from "./style.css";
+import style from "./style.css";
 import { useEffect, useRef, useState } from "preact/hooks";
 import firebase from "firebase/app";
 import rv from "rough-viz/dist/roughviz.min";

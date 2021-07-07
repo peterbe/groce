@@ -3,7 +3,7 @@ import { Link, route } from "preact-router";
 import { useEffect, useState } from "preact/hooks";
 import firebase from "firebase/app";
 
-import * as style from "./style.css";
+import style from "./style.css";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
 import { List, Invitation, FirestoreInvitation } from "../../types";
