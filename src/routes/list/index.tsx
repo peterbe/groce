@@ -1,7 +1,7 @@
 import { FunctionalComponent, h, Fragment } from "preact";
 import { Link } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
-import * as style from "./style.css";
+import style from "./style.css";
 import firebase from "firebase/app";
 
 import { Alert } from "../../components/alerts";
@@ -528,7 +528,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     <div class={style.list}>
       {snapshotsOffline && <OfflineWarning />}
 
-      <p class="float-right hide-in-print">
+      <p class="float-end hide-in-print">
         <button
           type="button"
           class={editAction ? "btn btn-sm btn-info" : "btn btn-sm"}

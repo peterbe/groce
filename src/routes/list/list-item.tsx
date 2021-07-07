@@ -7,7 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import party from "party-js";
 
 import { FileUpload } from "../../components/file-upload";
-import * as style from "./style.css";
+import style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
 import { useDownloadImageURL } from "./hooks";
 
@@ -70,9 +70,9 @@ export const ListItem: FunctionalComponent<Props> = ({
     setQuantity(item.quantity || "");
   }, [item]);
 
-  const textInputRef = useRef<HTMLInputElement>();
-  const descriptionInputRef = useRef<HTMLTextAreaElement>();
-  const groupInputRef = useRef<HTMLInputElement>();
+  const textInputRef = useRef<HTMLInputElement>(null);
+  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
+  const groupInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (editMode) {
       if (editMode === "description") {
@@ -249,7 +249,7 @@ export const ListItem: FunctionalComponent<Props> = ({
 
           <div class="mb-2">
             {!(!item.images || item.images.length >= 3) && (
-              <div class="float-right">
+              <div class="float-end">
                 <button
                   type="button"
                   class="btn btn-outline-secondary"

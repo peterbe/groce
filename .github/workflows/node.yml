@@ -12,22 +12,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2.1.5
+      - uses: actions/setup-node@v2
         with:
-          node-version: "12"
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v2.1.5
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          node-version: '16'
+          cache: 'yarn'
 
       - name: Install
         run: yarn --frozen-lockfile
@@ -54,3 +42,22 @@ jobs:
           # Remember, these tests depend on the build!
           # It's for the headless tests's server.
           yarn test
+
+      - name: Run dev server
+        run: |
+          yarn dev > /tmp/stdout.log 2> /tmp/stderr.log &
+
+      - name: Wait for dev server
+        run: |
+          # Just a slight delay to wait until the dev server is ready.
+          sleep 15
+          curl --retry-connrefused --retry 10 http://localhost:8080 > /dev/null
+
+      - name: Debug server's stdout and stderr if tests failed
+        if: failure()
+        run: |
+          echo "STDOUT..................................................."
+          cat /tmp/stdout.log
+          echo ""
+          echo "STDERR..................................................."
+          cat /tmp/stderr.log

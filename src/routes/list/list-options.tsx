@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import { Alert } from "../../components/alerts";
 import { InvitationsForm } from "./invites-form";
 import { List, ListConfig } from "../../types";
-import * as style from "./style.css";
+import style from "./style.css";
 
 interface Props {
   db: firebase.firestore.Firestore;

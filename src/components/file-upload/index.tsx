@@ -3,7 +3,7 @@ import { useState, useEffect } from "preact/hooks";
 import firebase from "firebase/app";
 
 import { Item, List } from "../../types";
-import * as style from "./style.css";
+import style from "./style.css";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // ~10MB
 

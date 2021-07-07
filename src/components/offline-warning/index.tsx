@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 
-import * as style from "./style.css";
+import style from "./style.css";
 
 interface Props {
   delay?: number;

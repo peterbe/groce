@@ -23,9 +23,8 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
   }, []);
 
   // If set, this string will be something like `<ID_OF_LIST>/<ID_OF_INVITATION>`
-  const [invitationIdentifier, setInvitationIdentifier] = useState<
-    string | null
-  >(null);
+  const [invitationIdentifier, setInvitationIdentifier] =
+    useState<string | null>(null);
   useEffect(() => {
     if (db) {
       try {
@@ -281,15 +280,13 @@ function PendingInvitation({
       )}
       <button
         type="button"
-        class="close"
-        data-dismiss="alert"
+        class="btn-close"
+        data-bs-dismiss="alert"
         aria-label="Close"
         onClick={() => {
           close();
         }}
-      >
-        <span aria-hidden="true">&times;</span>
-      </button>
+      />
     </div>
   );
 }

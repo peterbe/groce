@@ -2,7 +2,7 @@ import { FunctionalComponent, h } from "preact";
 import { Link } from "preact-router";
 import { useEffect } from "preact/hooks";
 
-import * as style from "./style.css";
+import style from "./style.css";
 import { GoBack } from "../../components/go-back";
 
 const About: FunctionalComponent = () => {

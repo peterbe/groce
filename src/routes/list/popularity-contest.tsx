@@ -316,7 +316,7 @@ function ExpandedRow({
     <tr>
       <td colSpan={3}>
         <button
-          class="btn btn-sm btn-outline-primary float-right"
+          class="btn btn-sm btn-outline-primary float-end"
           onClick={() => {
             close();
           }}

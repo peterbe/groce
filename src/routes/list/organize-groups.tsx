@@ -4,7 +4,7 @@ import Sortable from "sortablejs";
 import firebase from "firebase/app";
 
 import { List, Item } from "../../types";
-import * as style from "./style.css";
+import style from "./style.css";
 
 interface Props {
   db: firebase.firestore.Firestore;
