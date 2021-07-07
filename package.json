@@ -39,7 +39,7 @@
     "rough-viz": "1.0.6",
     "sass": "1.35.1",
     "sass-loader": "10.1.1",
-    "sortablejs": "1.13.0"
+    "sortablejs": "1.14.0"
   },
   "devDependencies": {
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
