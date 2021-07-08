@@ -8,6 +8,7 @@ declare namespace StyleCssNamespace {
     edit_groups_action: string;
     editaction: string;
     empty_list: string;
+    fadeOut: string;
     item_description: string;
     list: string;
     list_item_edit_mode: string;
@@ -15,6 +16,7 @@ declare namespace StyleCssNamespace {
     listoptions_section: string;
     loading_list_items: string;
     organize_groups: string;
+    poisoned: string;
     quantity_button: string;
     rainbow_animation: string;
     rainbow_text_animated: string;
