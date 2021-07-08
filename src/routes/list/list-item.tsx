@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-// import * as party from "party-js";
 import party from "party-js";
 
 import { FileUpload } from "../../components/file-upload";
@@ -54,9 +53,8 @@ export const ListItem: FunctionalComponent<Props> = ({
   const [description, setDescription] = useState("");
   const [group, setGroup] = useState("");
   const [quantity, setQuantity] = useState<string | number>("");
-  const [editMode, setEditMode] = useState<
-    "" | "text" | "description" | "group"
-  >("");
+  const [editMode, setEditMode] =
+    useState<"" | "text" | "description" | "group">("");
   const [enableFileUpload, setEnableFileUpload] = useState(false);
 
   const recentlyAdded = new Date().getTime() / 1000 - item.added[0].seconds < 3;
@@ -302,18 +300,17 @@ export const ListItem: FunctionalComponent<Props> = ({
       setChecked(true);
       setTimeout(() => {
         toggleDone(item);
-        setChecked(false);
-      }, 300);
+      }, 400);
     }
   }
 
+  let cls = "list-group-item d-flex justify-content-between align-items-center";
+  if (checked) {
+    cls += ` ${style.poisoned}`;
+  }
+
   return (
-    <li
-      class="list-group-item d-flex justify-content-between align-items-center"
-      // onClick={() => {
-      //   setEditMode(true);
-      // }}
-    >
+    <li class={cls}>
       <span>
         <input
           class="form-check-input list-item"

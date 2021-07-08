@@ -108,3 +108,19 @@
 .sign_in_reminder {
   margin-top: 60px;
 }
+
+.poisoned {
+  /* This timeout number needs to be close but still marginally more
+  than the timeout used for toggling the 'done' state.
+  See the setTimeout in the toggleDoneWrapper() function. */
+  animation: fadeOut 0.5s 1;
+}
+
+@keyframes fadeOut {
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
