@@ -18,6 +18,7 @@ import About from "../routes/about";
 import Version from "../routes/version";
 import Counters from "../routes/counters";
 import Share from "../routes/share";
+import Scan from "../routes/scan";
 import { OfflineWarning } from "./offline-warning";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
@@ -285,6 +286,7 @@ const App: FunctionalComponent = () => {
           <Route path="/version" component={Version} />
           <Route path="/counters" component={Counters} db={db} />
           <Route path="/share" component={Share} />
+          <Route path="/scan" component={Scan} />
           <NotFoundPage default />
         </Router>
         {/* {process.env.NODE_ENV === "development" && db && (
