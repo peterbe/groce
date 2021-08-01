@@ -2,7 +2,6 @@ import { FunctionalComponent, h } from "preact";
 import style from "./style.css";
 import { useEffect, useState } from "preact/hooks";
 import Tesseract from "tesseract.js";
-import heic2any from "heic2any";
 
 import { GoBack } from "../../components/go-back";
 
@@ -26,38 +25,11 @@ const Scan: FunctionalComponent = () => {
     document.title = "Scan from photo";
   }, []);
 
-  useEffect(() => {
-    if (imageFile) {
-      console.log("NEW imageFile:", imageFile);
-      if (imageFile.type === "image/heic") {
-        console.time("heic");
-        // const toType = 'image/jpeg'
-        const toType = "image/png";
-        heic2any({ blob: imageFile, toType })
-          .then((blob) => {
-            console.timeEnd("heic");
-            const actualBlob = Array.isArray(blob) ? blob[0] : blob;
-
-            setImageFile(
-              new File([actualBlob], imageFile.name, {
-                type: toType,
-              })
-            );
-          })
-          .catch((err) => {
-            console.log("Unable to convert");
-
-            console.error(err);
-          });
-      } else {
-        console.log({ type: imageFile.type });
-      }
-    }
-  }, [imageFile]);
-
-  const [pageData, setPageData] = useState<null | Tesseract.Page>(null);
+  const [pageData, setPageData] = useState<null | false | Tesseract.Page>(null);
 
   const [progress, setProgress] = useState<null | number>(null);
+
+  const [tesseractError, setTesseractError] = useState<Error | null>(null);
 
   async function getText(imageFile: File) {
     Tesseract.recognize(imageFile, "eng", {
@@ -70,6 +42,7 @@ const Scan: FunctionalComponent = () => {
     })
       .catch((err) => {
         console.error(err);
+        setTesseractError(err);
       })
       .then((result) => {
         // Get Confidence score
@@ -80,6 +53,7 @@ const Scan: FunctionalComponent = () => {
           setPageData(data);
         } else {
           console.log("NO RESULT!");
+          setPageData(false);
         }
         // let confidence = result.confidence;
         // let text = result.text;
@@ -94,6 +68,8 @@ const Scan: FunctionalComponent = () => {
     <div>
       <input
         type="file"
+        accept="image/jpeg, image/png"
+        // XXX should this be onInput??
         onChange={(event) => {
           const input = event.target as HTMLInputElement;
 
@@ -106,6 +82,19 @@ const Scan: FunctionalComponent = () => {
         }}
       />
       <br />
+
+      {tesseractError && (
+        <div class="alert alert-danger" role="alert">
+          Scan error: <code>{tesseractError.toString()}</code>
+        </div>
+      )}
+
+      {pageData === false && (
+        <div class="alert alert-warning" role="alert">
+          Scan found nothing ☹️
+        </div>
+      )}
+
       {imageFile && (
         <p>
           {(imageFile.type === "image/jpeg" ||
@@ -114,7 +103,7 @@ const Scan: FunctionalComponent = () => {
               <img
                 src={URL.createObjectURL(imageFile)}
                 // width={600}
-                style={{maxWidth: 600, maxHeight: 500}}
+                style={{ maxWidth: 600, maxHeight: 500 }}
                 class="figure-img img-fluid rounded"
                 alt="..."
               />
@@ -124,7 +113,6 @@ const Scan: FunctionalComponent = () => {
             </figure>
           )}
           <br />
-
           <button
             class="btn btn-primary"
             onClick={() => {
@@ -133,9 +121,19 @@ const Scan: FunctionalComponent = () => {
             }}
           >
             Scan now
-          </button>
+          </button>{" "}
+          {(imageFile || pageData) && (
+            <button
+              class="btn btn-secondary"
+              onClick={() => {
+                setImageFile(null);
+                setPageData(null);
+              }}
+            >
+              Reset
+            </button>
+          )}
           <br />
-
           {progress !== null && progress < 100 && (
             <div class="progress">
               <div
@@ -167,7 +165,7 @@ const Scan: FunctionalComponent = () => {
               }
               if (word.text.length <= 1) {
                 // Too short to ever be useful
-                return null
+                return null;
               }
               return (
                 <button
