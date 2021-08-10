@@ -31,6 +31,8 @@ import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
 
+const USE_EMULATOR = process.env.PREACT_APP_USE_EMULATOR;
+
 const App: FunctionalComponent = () => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
   const [user, setUser] = useState<firebase.User | null | false>(null);
@@ -39,19 +41,24 @@ const App: FunctionalComponent = () => {
   const [perf, setPerf] = useState<firebase.performance.Performance | null>(
     null
   );
-  const [
-    persistenceError,
-    setPersistenceError,
-  ] = useState<firebase.firestore.FirestoreError | null>(null);
+  const [persistenceError, setPersistenceError] =
+    useState<firebase.firestore.FirestoreError | null>(null);
 
   function authStateChanged(user: firebase.User | null) {
     setUser(user || false);
   }
 
   useEffect(() => {
+    const useEmulator = USE_EMULATOR
+      ? Boolean(JSON.parse(USE_EMULATOR))
+      : location.hostname === "localhost";
+
     import("firebase/auth")
       .then(() => {
         const appAuth = app.auth();
+        if (useEmulator) {
+          appAuth.useEmulator("http://localhost:9099");
+        }
         setAuth(appAuth);
         appAuth.onAuthStateChanged(authStateChanged);
       })
@@ -62,6 +69,9 @@ const App: FunctionalComponent = () => {
     import("firebase/firestore")
       .then(() => {
         const db = firebase.firestore();
+        if (useEmulator) {
+          db.useEmulator("localhost", 9999);
+        }
 
         // Enable offline-ness
         // It's important that this is done *before* you use the `db`.
@@ -85,7 +95,12 @@ const App: FunctionalComponent = () => {
 
     import("firebase/storage")
       .then(() => {
-        setStorage(firebase.storage());
+        const storage = firebase.storage();
+        if (useEmulator) {
+          storage.useEmulator("localhost", 9199);
+        }
+
+        setStorage(storage);
       })
       .catch((error) => {
         console.error("Unable to lazy-load firebase/storage:", error);

@@ -527,16 +527,6 @@ export const onShoppinglistItemUpdateCounter = functions.firestore
     const newValue = change.after.data();
     // ...or the previous value before this update
     const previousValue = change.before.data();
-    // console.log(
-    //   "DONE BEFORE?",
-    //   previousValue.done,
-    //   "DONE NOW?",
-    //   newValue.done,
-    //   "REMOVED BEFORE?",
-    //   previousValue.removed,
-    //   "REMOVED NOW?",
-    //   newValue.removed
-    // );
     if (!previousValue.done && newValue.done) {
       const now = new Date();
       const [year, month, day] = now.toISOString().split("T")[0].split("-");
