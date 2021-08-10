@@ -34,7 +34,7 @@ const app = firebase.initializeApp(firebaseConfig);
 const useEmulator = () => {
   const envVar = process.env.PREACT_APP_USE_EMULATOR;
   if (envVar) {
-    return Boolean(JSON.parse(envVar))
+    return Boolean(JSON.parse(envVar));
   }
   return location.hostname === "localhost";
 };
