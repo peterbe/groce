@@ -13,7 +13,7 @@ import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { NewItemForm } from "./new-item-form";
 import { PopularityContest } from "./popularity-contest";
-import { GROUP_SUGGESTIONS } from "./default-suggestions";
+import { GROUP_SUGGESTIONS, ITEM_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List, StorageSpec } from "../../types";
 import { stripEmojis } from "../../utils";
 
@@ -262,6 +262,20 @@ const ShoppingList: FunctionalComponent<Props> = ({
           throw error;
         });
     } else {
+      if (!list?.config.disableDefaultSuggestions) {
+        // Perhaps what you typed was almost like one of the suggestions.
+        // E.g you typed 'steak' but there's a suggestion, which is spelled
+        // "nicer" and it's 'Steak 🥩'
+        const suggestion = ITEM_SUGGESTIONS.find(
+          (itemText) =>
+            itemText.toLowerCase() === textLC ||
+            stripEmojis(itemText).toLowerCase() === textLC
+        );
+        if (suggestion) {
+          text = suggestion;
+        }
+      }
+
       // A fresh add
       db.collection(`shoppinglists/${id}/items`)
         .add({
@@ -639,7 +653,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     groupOptions={groupOptions}
                     disableGroups={list ? list.config.disableGroups : false}
                     disableQuantity={list ? list.config.disableQuantity : false}
-                    disableFireworks={list ? list.config.disableFireworks : false}
+                    disableFireworks={
+                      list ? list.config.disableFireworks : false
+                    }
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}
                     updateItemImage={updateItemImage}
@@ -669,7 +685,9 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     groupOptions={groupOptions}
                     disableGroups={list ? list.config.disableGroups : false}
                     disableQuantity={list ? list.config.disableQuantity : false}
-                    disableFireworks={list ? list.config.disableFireworks : false}
+                    disableFireworks={
+                      list ? list.config.disableFireworks : false
+                    }
                     toggleDone={updateItemDoneToggle}
                     updateItem={updateItem}
                     updateItemImage={updateItemImage}

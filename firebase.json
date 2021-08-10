@@ -4,11 +4,16 @@
     "indexes": "firestore.indexes.json"
   },
   "functions": {
-    "runtime": "nodejs12"
+    "runtime": "nodejs12",
+    "source": "functions"
   },
   "hosting": {
     "public": "build",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "rewrites": [
       {
         "source": "/shopping{,/**}",
@@ -90,14 +95,17 @@
     "firestore": {
       "port": 9999
     },
-    "database": {
-      "port": 9000
-    },
     "hosting": {
       "port": 5000
     },
     "ui": {
       "enabled": true
+    },
+    "auth": {
+      "port": 9099
+    },
+    "storage": {
+      "port": 9199
     }
   }
 }
