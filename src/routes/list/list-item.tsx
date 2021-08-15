@@ -32,6 +32,7 @@ interface Props {
   disableQuantity: boolean;
   disableFireworks: boolean;
   openImageModal: (url: string) => void;
+  deleteItem: (item: Item) => void;
 }
 
 export const ListItem: FunctionalComponent<Props> = ({
@@ -48,6 +49,7 @@ export const ListItem: FunctionalComponent<Props> = ({
   disableQuantity,
   disableFireworks,
   openImageModal,
+  deleteItem,
 }: Props) => {
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
@@ -295,6 +297,17 @@ export const ListItem: FunctionalComponent<Props> = ({
               }}
             >
               Cancel
+            </button>{" "}
+            <button
+              type="button"
+              class="btn btn-danger"
+              title="Will delete this item from list"
+              onClick={() => {
+                deleteItem(item);
+                setEditMode("");
+              }}
+            >
+              Delete
             </button>
           </div>
 
