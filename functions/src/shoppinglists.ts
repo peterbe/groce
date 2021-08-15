@@ -150,11 +150,17 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
       owners.map(uid => admin.auth().getUser(uid))
     );
     for (const user of users) {
-      ownersMetadata[user.uid] = {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      };
+      const owner: OwnerMetadata = {};
+      if (user.email) {
+        owner.email = user.email;
+      }
+      if (user.displayName) {
+        owner.displayName = user.displayName;
+      }
+      if (user.photoURL) {
+        owner.photoURL = user.photoURL;
+      }
+      ownersMetadata[user.uid] = owner;
     }
     if (
       JSON.stringify(ownersMetadata) !== JSON.stringify(ownersMetadataBefore)
