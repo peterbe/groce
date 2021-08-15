@@ -317,6 +317,15 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
   }
 
+  function deleteItem(item: Item) {
+    if (!db) {
+      return;
+    }
+    const collectionRef = db.collection(`shoppinglists/${id}/items`);
+    const itemRef = collectionRef.doc(item.id);
+    itemRef.delete()
+  }
+
   function updateItem(
     item: Item,
     text: string,
@@ -660,6 +669,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     updateItem={updateItem}
                     updateItemImage={updateItemImage}
                     openImageModal={openImageModal}
+                    deleteItem={deleteItem}
                   />
                 );
               })}
@@ -692,6 +702,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
                     updateItem={updateItem}
                     updateItemImage={updateItemImage}
                     openImageModal={openImageModal}
+                    deleteItem={deleteItem}
                   />
                 );
               })}
