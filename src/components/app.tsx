@@ -31,7 +31,9 @@ import { firebaseConfig } from "../firebaseconfig";
 
 const app = firebase.initializeApp(firebaseConfig);
 
-const USE_EMULATOR = process.env.PREACT_APP_USE_EMULATOR;
+const USE_EMULATOR = process.env.PREACT_APP_USE_EMULATOR
+  ? Boolean(JSON.parse(process.env.PREACT_APP_USE_EMULATOR))
+  : false;
 
 const App: FunctionalComponent = () => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
@@ -49,14 +51,10 @@ const App: FunctionalComponent = () => {
   }
 
   useEffect(() => {
-    const useEmulator = USE_EMULATOR
-      ? Boolean(JSON.parse(USE_EMULATOR))
-      : location.hostname === "localhost";
-
     import("firebase/auth")
       .then(() => {
         const appAuth = app.auth();
-        if (useEmulator) {
+        if (USE_EMULATOR) {
           appAuth.useEmulator("http://localhost:9099");
         }
         setAuth(appAuth);
@@ -69,7 +67,7 @@ const App: FunctionalComponent = () => {
     import("firebase/firestore")
       .then(() => {
         const db = firebase.firestore();
-        if (useEmulator) {
+        if (USE_EMULATOR) {
           db.useEmulator("localhost", 9999);
         }
 
@@ -96,7 +94,7 @@ const App: FunctionalComponent = () => {
     import("firebase/storage")
       .then(() => {
         const storage = firebase.storage();
-        if (useEmulator) {
+        if (USE_EMULATOR) {
           storage.useEmulator("localhost", 9199);
         }
 
