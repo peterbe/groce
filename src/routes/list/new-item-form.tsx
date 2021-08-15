@@ -157,7 +157,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
         ) : (
           // This min-height number I got from using the Web Inspector
           // when the p tag has buttons in it.
-          <p style={{ minHeight: 31 }}>&nbsp;</p>
+          <p style={{ minHeight: 37 }}>&nbsp;</p>
         )}
       </div>
     </form>
