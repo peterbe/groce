@@ -53,13 +53,33 @@ export const ListItem: FunctionalComponent<Props> = ({
   const [description, setDescription] = useState("");
   const [group, setGroup] = useState("");
   const [quantity, setQuantity] = useState<string | number>("");
-  const [editMode, setEditMode] =
-    useState<"" | "text" | "description" | "group">("");
+  const [editMode, setEditMode] = useState<
+    "" | "text" | "description" | "group"
+  >("");
   const [enableFileUpload, setEnableFileUpload] = useState(false);
 
   const recentlyAdded = new Date().getTime() / 1000 - item.added[0].seconds < 3;
   const recentlyModified =
     modified && (new Date().getTime() - modified.getTime()) / 1000 < 2;
+
+  const [recentAddition, setRecentAddition] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    if (recentlyAdded || recentlyModified) {
+      setRecentAddition(true);
+    }
+    // After a little while, update `recentAddition` because otherwise
+    // the DOM element is wrapped in a `<span class="rainbox_text_animated">
+    // more or less "forever" which doesn't print well.
+    setTimeout(() => {
+      if (mounted) {
+        setRecentAddition(false);
+      }
+    }, 3000);
+    return () => {
+      mounted = false;
+    };
+  }, [recentlyAdded, recentlyModified]);
 
   useEffect(() => {
     setText(item.text);
@@ -339,7 +359,7 @@ export const ListItem: FunctionalComponent<Props> = ({
           class={
             item.done
               ? style.done_item
-              : recentlyAdded || recentlyModified
+              : recentAddition
               ? style.rainbow_text_animated
               : undefined
           }
