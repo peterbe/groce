@@ -30,6 +30,7 @@ export interface FirestoreListPicture {
   filePath: string;
   notes: string;
   created: firebase.firestore.Timestamp;
+  modified: firebase.firestore.Timestamp;
   deleted?: firebase.firestore.Timestamp;
   // texts: ListPictureTexts
 }

@@ -31,6 +31,7 @@ interface Props {
   list: List;
   prefix?: string;
   onClose: () => void;
+  disabled?: boolean;
 }
 
 export const FileUpload: FunctionalComponent<Props> = ({
@@ -40,6 +41,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
   list,
   prefix = "image-uploads",
   onClose,
+  disabled = false
 }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [fileValidationError, setFileValidationError] = useState<Error | null>(
@@ -119,9 +121,9 @@ export const FileUpload: FunctionalComponent<Props> = ({
                 filePath,
                 notes: "",
                 created: firebase.firestore.Timestamp.fromDate(new Date()),
+                modified: firebase.firestore.Timestamp.fromDate(new Date()),
               })
               .then(() => {
-                // onClose();
                 setFile(null)
                 setFileValidationError(null)
                 setUploadError(null)
@@ -148,6 +150,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
         class="form-control"
         type="file"
         id="formFile"
+        disabled={disabled}
         // Maybe change this to list image/png, image/jpeg, ...
         accept="image/jpeg, image/png"
         onInput={({

@@ -1,14 +1,15 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect, useMemo } from "preact/hooks";
 import firebase from "firebase/app";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import style from "./style.css";
 import { FileUpload } from "../../../components/file-upload";
-// import { ITEM_SUGGESTIONS } from "./default-suggestions";
 import { List, Item, ListPicture, FirestoreListPicture } from "../../../types";
 import { useDownloadImageURL } from "../hooks";
-// import { stripEmojis } from "../../utils";
-// import { getItemsSummary } from "./popularity-contest";
+
+dayjs.extend(relativeTime);
 
 interface Props {
   db: firebase.firestore.Firestore;
@@ -48,8 +49,6 @@ export const Pictures: FunctionalComponent<Props> = ({
         const newListPictures: ListPicture[] = [];
         snapshot.forEach((doc) => {
           const data = doc.data() as FirestoreListPicture;
-          console.log(data);
-
           if (data.deleted) {
             return;
           }
@@ -58,6 +57,7 @@ export const Pictures: FunctionalComponent<Props> = ({
             notes: data.notes,
             filePath: data.filePath,
             created: data.created,
+            modified: data.modified,
           };
           newListPictures.push(item);
         });
@@ -99,7 +99,7 @@ export const Pictures: FunctionalComponent<Props> = ({
     }
     return () => {
       mounted = false;
-    }
+    };
   }, [undoableDelete]);
 
   const [saveListPictureError, setSaveListPictureError] =
@@ -111,6 +111,7 @@ export const Pictures: FunctionalComponent<Props> = ({
       .doc(id)
       .update({
         notes,
+        modified: firebase.firestore.Timestamp.fromDate(new Date()),
       })
       .catch((error) => {
         console.error(
@@ -152,21 +153,13 @@ export const Pictures: FunctionalComponent<Props> = ({
       });
   }
 
-  const [undoingDelete, setUndoingDelete] = useState(false);
-
   return (
-    <form
-      class={style.pictures}
-      onSubmit={(event) => {
-        event.preventDefault();
-        // saveHandler(newText);
-        // setNewText("");
-      }}
-    >
+    <div class={style.pictures}>
       <FileUpload
         db={db}
         storage={storage}
         list={list}
+        disabled={!ready}
         item={null}
         prefix="list-pictures"
         onClose={() => {
@@ -193,42 +186,13 @@ export const Pictures: FunctionalComponent<Props> = ({
       )}
 
       {undoableDelete && (
-        <div
-          class="alert alert-warning alert-dismissible fade show"
-          role="alert"
-        >
-          <button
-            type="button"
-            class="btn btn-secondary"
-            disabled={undoingDelete}
-            onClick={() => {
-              setUndoingDelete(true);
-              undeleteListPicture(undoableDelete).then(() => {
-                setUndoableDelete(null);
-                setUndoingDelete(false);
-              });
-            }}
-          >
-            {undoingDelete && (
-              <span
-                class="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              />
-            )}
-            {undoingDelete ? " Undoing" : "Undo delete"}
-          </button>
-          <button
-            type="button"
-            class="btn-close btn-small"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            onClick={() => {
-              setUndoableDelete(null);
-              setUndoingDelete(false);
-            }}
-          />
-        </div>
+        <UndoListPictureDelete
+          undoableDelete={undoableDelete}
+          undeleteListPicture={undeleteListPicture}
+          removeUndoableDelete={() => {
+            setUndoableDelete(null);
+          }}
+        />
       )}
 
       {listPictures && (
@@ -239,9 +203,58 @@ export const Pictures: FunctionalComponent<Props> = ({
           openImageModal={openImageModal}
         />
       )}
-    </form>
+    </div>
   );
 };
+
+function UndoListPictureDelete({
+  undoableDelete,
+  undeleteListPicture,
+  removeUndoableDelete,
+}: {
+  undoableDelete: string;
+  undeleteListPicture: (id: string) => Promise<void>;
+  removeUndoableDelete: () => void;
+}) {
+  const [undoingDelete, setUndoingDelete] = useState(false);
+  return (
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        disabled={undoingDelete}
+        onClick={() => {
+          setUndoingDelete(true);
+          undeleteListPicture(undoableDelete).then(() => {
+            // setUndoableDelete(null);
+            removeUndoableDelete();
+            // setUndoingDelete(false);
+          });
+        }}
+      >
+        {undoingDelete && (
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          />
+        )}
+        {undoingDelete ? " Undoing" : "Undo delete"}
+      </button>
+      <button
+        type="button"
+        class="btn-close btn-small"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+        onClick={() => {
+          // setUndoableDelete(null);
+          removeUndoableDelete();
+          // setUndoingDelete(false);
+        }}
+      />
+    </div>
+  );
+}
 
 function ShowListPictures({
   listPictures,
@@ -250,45 +263,12 @@ function ShowListPictures({
   openImageModal,
 }: {
   listPictures: ListPicture[];
-  saveListPictureNotes: (id: string, notes: string) => void;
+  saveListPictureNotes: (id: string, notes: string) => Promise<void>;
   deleteListPicture: (id: string) => void;
   openImageModal: (url: string) => void;
 }) {
   return (
     <div class={style.list_pictures}>
-      {/* <div class="row">
-        <div class="col-sm-6">
-          <div class="card" style="width: 18rem;">
-            <img
-              src="http://localhost:5001/thatsgroce/us-central1/downloadAndResizeAndStore/?image=list-pictures%2F2021%2F08%2F24%2FY2OxTTyEuzTqvwIxkuUU-1629821815674.jpg&width=100"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="card" style="width: 18rem;">
-            <img
-              src="http://localhost:5001/thatsgroce/us-central1/downloadAndResizeAndStore/?image=list-pictures%2F2021%2F08%2F24%2FY2OxTTyEuzTqvwIxkuUU-1629821815674.jpg&width=100"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
       <ul class="list-group list-group-flush">
         {listPictures.map((listPicture) => {
           return (
@@ -301,30 +281,15 @@ function ShowListPictures({
               />
               <div class="row">
                 <div class="col">
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Notes"
-                    aria-label="Notes"
-                    value={listPicture.notes}
-                    onInput={(event) => {
-                      console.log("Notes changed", [
-                        event.currentTarget.value,
-                        listPicture.notes,
-                      ]);
-                    }}
-                    onChange={(event) => {
-                      saveListPictureNotes(
-                        listPicture.id,
-                        event.currentTarget.value
-                      );
-                    }}
+                  <NotesForm
+                    listPicture={listPicture}
+                    saveListPictureNotes={saveListPictureNotes}
                   />
                 </div>
                 <div class="col">
-                  <button class="btn btn-primary">Save</button>
                   <button
-                    class="btn btn-danger"
+                    type="button"
+                    class="btn btn-danger btn-sm"
                     onClick={() => {
                       deleteListPicture(listPicture.id);
                     }}
@@ -332,12 +297,71 @@ function ShowListPictures({
                     Delete
                   </button>
                 </div>
+                <p>
+                  <small class="fw-light">
+                    Added: {dayjs(listPicture.created.toDate()).fromNow()}
+                  </small>{" "}
+                  {listPicture.created.seconds !==
+                    listPicture.modified.seconds && (
+                    <small class="fw-light" style={{ marginLeft: 20 }}>
+                      Modified: {dayjs(listPicture.modified.toDate()).fromNow()}
+                    </small>
+                  )}
+                </p>
               </div>
             </li>
           );
         })}
       </ul>
     </div>
+  );
+}
+
+function NotesForm({
+  listPicture,
+  saveListPictureNotes,
+}: {
+  listPicture: ListPicture;
+  saveListPictureNotes: (id: string, notes: string) => Promise<void>;
+}) {
+  const [notes, setNotes] = useState(listPicture.notes);
+  const [hasChanged, setHasChanged] = useState(false)
+  useEffect(() => {
+    if (notes !== listPicture.notes) {
+      setHasChanged(true)
+    } else {
+      setHasChanged(false)
+    }
+  }, [notes, listPicture.notes])
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        saveListPictureNotes(listPicture.id, notes.trim());
+      }}
+    >
+      <div class="input-group input-group-sm mb-3">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Notes"
+          aria-label="Notes"
+          aria-describedby="button-addon2"
+          value={notes}
+          onInput={(event) => {
+            setNotes(event.currentTarget.value);
+          }}
+        />
+        <button
+          class="btn btn-outline-secondary"
+          type="submit"
+          disabled={!hasChanged}
+          id="button-addon2"
+        >
+          Save
+        </button>
+      </div>
+    </form>
   );
 }
 
