@@ -26,6 +26,17 @@ export interface Item extends FirestoreItem {
   id: string;
 }
 
+export interface FirestoreListPicture {
+  filePath: string;
+  notes: string;
+  created: firebase.firestore.Timestamp;
+  deleted?: firebase.firestore.Timestamp;
+  // texts: ListPictureTexts
+}
+export interface ListPicture extends FirestoreListPicture {
+  id: string;
+}
+
 export interface ListRecentItems {
   text: string;
   description: string;

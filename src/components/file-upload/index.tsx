@@ -7,7 +7,7 @@ import style from "./style.css";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // ~10MB
 
-function getImageFullPath(id: string, file: File) {
+function getImageFullPath(prefix: string, id: string, file: File) {
   const t = new Date();
   const yyyy = t.getFullYear();
   const mm = t.getMonth() + 1;
@@ -18,9 +18,7 @@ function getImageFullPath(id: string, file: File) {
   else if (file.type === "image/png") ext = "png";
   else throw new Error(`Unrecognized type (${file.type})`);
   const ts = Math.floor(new Date().getTime());
-  return `image-uploads/${yyyy}/${zeroPad(mm)}/${zeroPad(
-    dd
-  )}/${id}-${ts}.${ext}`;
+  return `${prefix}/${yyyy}/${zeroPad(mm)}/${zeroPad(dd)}/${id}-${ts}.${ext}`;
 }
 function zeroPad(num: number, places = 2): string {
   return `${num}`.padStart(places, "0");
@@ -29,8 +27,9 @@ function zeroPad(num: number, places = 2): string {
 interface Props {
   db: firebase.firestore.Firestore;
   storage: firebase.storage.Storage;
-  item: Item;
+  item: Item | null;
   list: List;
+  prefix?: string;
   onClose: () => void;
 }
 
@@ -39,6 +38,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
   storage,
   item,
   list,
+  prefix = "image-uploads",
   onClose,
 }: Props) => {
   const [file, setFile] = useState<File | null>(null);
@@ -48,10 +48,8 @@ export const FileUpload: FunctionalComponent<Props> = ({
   const [uploadingPercentage, setUploadingPercentage] = useState<number | null>(
     null
   );
-  const [
-    uploadError,
-    setUploadError,
-  ] = useState<firebase.storage.FirebaseStorageError | null>(null);
+  const [uploadError, setUploadError] =
+    useState<firebase.storage.FirebaseStorageError | null>(null);
 
   function validateFile(file: File) {
     if (!["image/jpeg", "image/png"].includes(file.type)) {
@@ -74,7 +72,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
         contentType: file.type,
       };
 
-      const filePath = getImageFullPath(item.id, file);
+      const filePath = getImageFullPath(prefix, item ? item.id : list.id, file);
       const storageRef = storage.ref();
 
       uploadTask = storageRef.child(filePath).put(file, metadata);
@@ -100,29 +98,46 @@ export const FileUpload: FunctionalComponent<Props> = ({
         },
         () => {
           // updateItemImage(item, { add: filePath });
-          const itemRef = db
-            .collection(`shoppinglists/${list.id}/items`)
-            .doc(item.id);
-          itemRef
-            .update({
-              images: firebase.firestore.FieldValue.arrayUnion(filePath),
-            })
-            .then(() => {
-              onClose();
-            })
-            .catch((error) => {
-              // XXX Deal with this better.
-              console.error(`Error trying to update item ${item.id}:`, error);
-            });
+          if (item) {
+            const itemRef = db
+              .collection(`shoppinglists/${list.id}/items`)
+              .doc(item.id);
+            itemRef
+              .update({
+                images: firebase.firestore.FieldValue.arrayUnion(filePath),
+              })
+              .then(() => {
+                onClose();
+              })
+              .catch((error) => {
+                // XXX Deal with this better.
+                console.error(`Error trying to update item ${item.id}:`, error);
+              });
+          } else {
+            db.collection(`shoppinglists/${list.id}/pictures`)
+              .add({
+                filePath,
+                notes: "",
+                created: firebase.firestore.Timestamp.fromDate(new Date()),
+              })
+              .then(() => {
+                // onClose();
+                setFile(null)
+                setFileValidationError(null)
+                setUploadError(null)
+                setUploadingPercentage(null)
+              })
+              .catch((error) => {
+                console.error("Error trying to save picture", error);
+                throw error;
+              });
+
+            // onClose()
+          }
         }
       );
     }
-    return () => {
-      // if (uploadTask) {
-      //   uploadTask.cancel();
-      // }
-    };
-  }, [file, list.id, item.id, storage, db]);
+  }, [prefix, file, list.id, item, storage, db]);
 
   return (
     <div class={`${style.file_upload}`}>

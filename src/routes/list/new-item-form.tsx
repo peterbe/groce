@@ -136,7 +136,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
       </div>
 
       <div class={style.search_suggestions}>
-        {suggestions.length ? (
+        {suggestions.length > 0 ? (
           <p>
             {suggestions.map((suggestion) => {
               return (

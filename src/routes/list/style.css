@@ -87,6 +87,10 @@
   text-align: right;
 }
 
+.camera_mode {
+  margin-top: 30px;
+}
+
 .organize_groups {
   margin-top: 20px;
 }

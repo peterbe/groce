@@ -12,6 +12,7 @@ import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { NewItemForm } from "./new-item-form";
+import { Pictures } from "./pictures";
 import { PopularityContest } from "./popularity-contest";
 import { GROUP_SUGGESTIONS, ITEM_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List, StorageSpec } from "../../types";
@@ -44,6 +45,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   const [editAction, toggleEditAction] = useState(false);
   const [editGroups, toggleEditGroups] = useState(false);
   const [popularityContest, setPopularityContest] = useState(false);
+  const [cameraMode, setCameraMode] = useState(false);
 
   useEffect(() => {
     if (listNotFound) {
@@ -323,7 +325,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
     const collectionRef = db.collection(`shoppinglists/${id}/items`);
     const itemRef = collectionRef.doc(item.id);
-    itemRef.delete()
+    itemRef.delete();
   }
 
   function updateItem(
@@ -620,7 +622,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && !editGroups && !popularityContest && (
+      {!editAction && !editGroups && !popularityContest && !cameraMode && (
         <NewItemForm
           ready={!!items}
           items={items}
@@ -628,6 +630,19 @@ const ShoppingList: FunctionalComponent<Props> = ({
             addNewText(text);
           }}
           disableDefaultSuggestions={!!list?.config.disableDefaultSuggestions}
+        />
+      )}
+
+      {!editAction && !editGroups && !popularityContest && cameraMode && db && storage && list &&  (
+        <Pictures
+          db={db}
+          storage={storage}
+          list={list}
+          ready={!!items}
+          items={items}
+          saveHandler={(text: string) => {
+            addNewText(text);
+          }}
         />
       )}
 
@@ -768,6 +783,19 @@ const ShoppingList: FunctionalComponent<Props> = ({
             </button>
           </div>
         )}
+
+      {!editAction && !editGroups && !popularityContest && !cameraMode && (
+        <div class={style.camera_mode}>
+          <button
+            class="btn btn-outline-secondary"
+            onClick={() => {
+              setCameraMode(true);
+            }}
+          >
+            📸 Pictures
+          </button>
+        </div>
+      )}
 
       {db && user && user.isAnonymous && (
         <div class={`${style.sign_in_reminder} text-right`}>
