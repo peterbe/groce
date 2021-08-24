@@ -512,6 +512,7 @@ function Image({
   );
 
   if (thumbnailError) {
+    // XXX this isn't working!
     <img alt={thumbnailError.toString()} style={{ maxWidth, maxHeight }} />;
   }
 

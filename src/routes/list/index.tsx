@@ -643,6 +643,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           saveHandler={(text: string) => {
             addNewText(text);
           }}
+          openImageModal={openImageModal}
         />
       )}
 

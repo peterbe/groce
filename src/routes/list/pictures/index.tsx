@@ -17,6 +17,7 @@ interface Props {
   list: List;
   items: Item[] | null;
   saveHandler: (text: string) => void;
+  openImageModal: (url: string) => void;
 }
 
 export const Pictures: FunctionalComponent<Props> = ({
@@ -26,6 +27,7 @@ export const Pictures: FunctionalComponent<Props> = ({
   items,
   list,
   saveHandler,
+  openImageModal,
 }: Props) => {
   const [listPictures, setListPictures] = useState<ListPicture[] | null>(null);
   const [listPicturesError, setListPicturesError] = useState<Error | null>(
@@ -95,13 +97,17 @@ export const Pictures: FunctionalComponent<Props> = ({
         }
       }, 9000);
     }
+    return () => {
+      mounted = false;
+    }
   }, [undoableDelete]);
 
   const [saveListPictureError, setSaveListPictureError] =
     useState<Error | null>(null);
 
   function saveListPictureNotes(id: string, notes: string) {
-    return db.collection(`shoppinglists/${list.id}/pictures`)
+    return db
+      .collection(`shoppinglists/${list.id}/pictures`)
       .doc(id)
       .update({
         notes,
@@ -182,7 +188,7 @@ export const Pictures: FunctionalComponent<Props> = ({
             onClick={() => {
               setSaveListPictureError(null);
             }}
-          ></button>
+          />
         </div>
       )}
 
@@ -208,7 +214,7 @@ export const Pictures: FunctionalComponent<Props> = ({
                 class="spinner-border spinner-border-sm"
                 role="status"
                 aria-hidden="true"
-              ></span>
+              />
             )}
             {undoingDelete ? " Undoing" : "Undo delete"}
           </button>
@@ -220,12 +226,8 @@ export const Pictures: FunctionalComponent<Props> = ({
             onClick={() => {
               setUndoableDelete(null);
               setUndoingDelete(false);
-              // setUndoingDelete(true);
-              // setUndoableDelete(null).then(() => {
-              //   setUndoingDelete(false);
-              // });
             }}
-          ></button>
+          />
         </div>
       )}
 
@@ -234,6 +236,7 @@ export const Pictures: FunctionalComponent<Props> = ({
           listPictures={listPictures}
           saveListPictureNotes={saveListPictureNotes}
           deleteListPicture={deleteListPicture}
+          openImageModal={openImageModal}
         />
       )}
     </form>
@@ -244,10 +247,12 @@ function ShowListPictures({
   listPictures,
   saveListPictureNotes,
   deleteListPicture,
+  openImageModal,
 }: {
   listPictures: ListPicture[];
   saveListPictureNotes: (id: string, notes: string) => void;
   deleteListPicture: (id: string) => void;
+  openImageModal: (url: string) => void;
 }) {
   return (
     <div class={style.list_pictures}>
@@ -292,6 +297,7 @@ function ShowListPictures({
                 filePath={listPicture.filePath}
                 maxWidth={100}
                 maxHeight={100}
+                openImageModal={openImageModal}
               />
               <div class="row">
                 <div class="col">
@@ -339,10 +345,12 @@ function Image({
   filePath,
   maxWidth,
   maxHeight,
+  openImageModal,
 }: {
   filePath: string;
   maxWidth: number;
   maxHeight: number;
+  openImageModal: (url: string) => void;
 }) {
   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
@@ -351,7 +359,13 @@ function Image({
     false
   );
   return (
-    <a href={downloadURL}>
+    <a
+      href={downloadURL}
+      onClick={(event) => {
+        event.preventDefault();
+        openImageModal(downloadURL || thumbnailURL);
+      }}
+    >
       <img
         class="rounded float-start"
         style={{
