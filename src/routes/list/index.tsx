@@ -654,7 +654,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
           />
         )}
 
-      {!items && <Loading text="Loading shopping list..." />}
+      {!items && <Loading text="Loading shopping list..." minHeight={200} />}
 
       {items &&
         !editAction &&
@@ -739,6 +739,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
       !editGroups &&
       !popularityContest &&
+      !picturesMode &&
       !!doneItems.length ? (
         <div class={`${style.clearitems} d-grid gap-2`}>
           <button
@@ -757,6 +758,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !!clearedItems.length && (
           <div class={`${style.clearitems} d-grid gap-2`}>
             <button
@@ -781,6 +783,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         hasOrganizableGroups &&
         !editAction &&
         !popularityContest &&
+        !picturesMode &&
         !editGroups && (
           <div class={`${style.edit_groups_action} hide-in-print`}>
             <button

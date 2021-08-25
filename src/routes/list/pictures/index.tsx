@@ -265,7 +265,6 @@ function ShowListPictures({
 }) {
   return (
     <div class={style.list_pictures}>
-
       {/* <div class="toast-container position-absolute p-3 top-0 end-0" style="z-index: 1100">
         <div
           id="liveToast"
@@ -292,7 +291,7 @@ function ShowListPictures({
         {listPictures.map((listPicture) => {
           return (
             <li class="list-group-item" key={listPicture.id}>
-              <Image
+              <DisplayImage
                 filePath={listPicture.filePath}
                 maxWidth={100}
                 maxHeight={100}
@@ -384,7 +383,12 @@ function NotesForm({
   );
 }
 
-function Image({
+const preloadedImageURLsCache = new Set();
+
+const PLACEHOLDER_IMAGE =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABGElEQVRoge2ZywrDIBBFb5YhbSHd9f9/tJsOSDDqvLQDcyBLnXuSkKgD+PC5ucKQAqtJAUsOAG8AG2OMVmD71XwwxlQ5iuIcCY0AhacxYokyPFdCKnANL5aohedISATuwoskWhONSHAFeuGp5jAbgFMhwRHQ1nKRGBVwCz+jgHv4slDv/dwF8+6dOU3CE6279VLM+7yZ0zQ8UZPQhCeuEi7hiVLCIjxBEq7hiQ2yd77Hjgnhk6RC61vMXZAtyZMCKZACwQWSZDKhF3Ohl9OhNzSht5ShN/WjJ2Z/eayiCT/613Q9ldPcec5v30Ui/OHuquP11pMw6RHMaHDUJEy6NDNbTKWESZ9sRZPvhEF4KVqB5aTAalJglC/2HDhQqwo8YAAAAABJRU5ErkJggg==";
+
+function DisplayImage({
   filePath,
   maxWidth,
   maxHeight,
@@ -401,6 +405,43 @@ function Image({
     100,
     false
   );
+  const [loaded, setLoaded] = useState(preloadedImageURLsCache.has(thumbnailURL));
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (preloadedImageURLsCache.has(thumbnailURL)) {
+      return;
+    }
+
+    if (thumbnailURL && !thumbnailError) {
+      const preloadImg = new Image();
+      preloadImg.src = thumbnailURL;
+
+      const callback = () => {
+        if (mounted) {
+          setLoaded(true);
+          preloadedImageURLsCache.add(thumbnailURL);
+        }
+      };
+      if (preloadImg.decode) {
+        preloadImg.decode().then(callback, callback);
+      } else {
+        preloadImg.onload = callback;
+      }
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [thumbnailURL, thumbnailError]);
+
+  useEffect(() => {
+    if (downloadURL && !preloadedImageURLsCache.has(downloadURL)) {
+      preloadedImageURLsCache.add(downloadURL);
+      new Image().src = downloadURL;
+    }
+  }, [downloadURL]);
+
   return (
     <a
       href={downloadURL}
@@ -417,7 +458,7 @@ function Image({
           "object-fit": "cover",
           marginRight: 20,
         }}
-        src={thumbnailURL}
+        src={loaded ? thumbnailURL : PLACEHOLDER_IMAGE}
       />
     </a>
   );

@@ -5,6 +5,7 @@ interface Props {
   text?: string;
   delay?: number;
   reloadDelay?: number;
+  minHeight?: number;
 }
 
 const COLORS = [
@@ -19,6 +20,7 @@ export const Loading: FunctionalComponent<Props> = ({
   text = "Loading app...",
   delay = 1500,
   reloadDelay = 0,
+  minHeight = 0,
 }: Props) => {
   const [stall, setStalled] = useState(delay > 0);
   useEffect(() => {
@@ -71,16 +73,21 @@ export const Loading: FunctionalComponent<Props> = ({
     };
   }, [color]);
 
+  const style: h.JSX.CSSProperties = {};
+  if (minHeight > 0) {
+    style.minHeight = minHeight;
+  }
+
   if (stall) {
     return (
-      <div class="loading">
+      <div class="loading" style={style}>
         <p>&nbsp;</p>
       </div>
     );
   }
 
   return (
-    <div class="loading">
+    <div class="loading" style={style}>
       <div class="text-center">
         <div
           class={`spinner-border ${color} m-5`}
