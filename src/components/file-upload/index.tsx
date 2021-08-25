@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import firebase from "firebase/app";
 
 import { Item, List } from "../../types";
@@ -41,7 +41,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
   list,
   prefix = "image-uploads",
   onClose,
-  disabled = false
+  disabled = false,
 }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [fileValidationError, setFileValidationError] = useState<Error | null>(
@@ -65,6 +65,8 @@ export const FileUpload: FunctionalComponent<Props> = ({
       );
     }
   }
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let uploadTask: null | firebase.storage.UploadTask = null;
@@ -124,10 +126,13 @@ export const FileUpload: FunctionalComponent<Props> = ({
                 modified: firebase.firestore.Timestamp.fromDate(new Date()),
               })
               .then(() => {
-                setFile(null)
-                setFileValidationError(null)
-                setUploadError(null)
-                setUploadingPercentage(null)
+                setFile(null);
+                setFileValidationError(null);
+                setUploadError(null);
+                setUploadingPercentage(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = "";
+                }
               })
               .catch((error) => {
                 console.error("Error trying to save picture", error);
@@ -150,6 +155,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
         class="form-control"
         type="file"
         id="formFile"
+        ref={fileInputRef}
         disabled={disabled}
         // Maybe change this to list image/png, image/jpeg, ...
         accept="image/jpeg, image/png"

@@ -68,14 +68,14 @@ export const Pictures: FunctionalComponent<Props> = ({
 
         setListPictures(newListPictures);
 
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "modified") {
-            // const newRecentlyModifiedItems = new Map();
-            // newRecentlyModifiedItems.set(change.doc.id, new Date());
-            // setRecentlyModifiedItems(newRecentlyModifiedItems);
-            console.log("RECENTLY UPDATED", change.doc.data().filePath);
-          }
-        });
+        // snapshot.docChanges().forEach((change) => {
+        //   if (change.type === "modified") {
+        //     // const newRecentlyModifiedItems = new Map();
+        //     // newRecentlyModifiedItems.set(change.doc.id, new Date());
+        //     // setRecentlyModifiedItems(newRecentlyModifiedItems);
+        //     console.log("RECENTLY UPDATED", change.doc.data().filePath);
+        //   }
+        // });
       },
       (error) => {
         console.error("Snapshot error:", error);
@@ -163,7 +163,7 @@ export const Pictures: FunctionalComponent<Props> = ({
         item={null}
         prefix="list-pictures"
         onClose={() => {
-          // console.warn("CLOSE!");
+          // nothing
         }}
       />
 
@@ -226,9 +226,7 @@ function UndoListPictureDelete({
         onClick={() => {
           setUndoingDelete(true);
           undeleteListPicture(undoableDelete).then(() => {
-            // setUndoableDelete(null);
             removeUndoableDelete();
-            // setUndoingDelete(false);
           });
         }}
       >
@@ -247,9 +245,7 @@ function UndoListPictureDelete({
         data-bs-dismiss="alert"
         aria-label="Close"
         onClick={() => {
-          // setUndoableDelete(null);
           removeUndoableDelete();
-          // setUndoingDelete(false);
         }}
       />
     </div>
@@ -269,6 +265,29 @@ function ShowListPictures({
 }) {
   return (
     <div class={style.list_pictures}>
+
+      {/* <div class="toast-container position-absolute p-3 top-0 end-0" style="z-index: 1100">
+        <div
+          id="liveToast"
+          class="toast fade show"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="toast-header">
+            <strong class="me-auto">Bootstrap</strong>
+            <small>11 mins ago</small>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body">Hello, world! This is a toast message.</div>
+        </div>
+      </div> */}
+
       <ul class="list-group list-group-flush">
         {listPictures.map((listPicture) => {
           return (
@@ -325,14 +344,14 @@ function NotesForm({
   saveListPictureNotes: (id: string, notes: string) => Promise<void>;
 }) {
   const [notes, setNotes] = useState(listPicture.notes);
-  const [hasChanged, setHasChanged] = useState(false)
+  const [hasChanged, setHasChanged] = useState(false);
   useEffect(() => {
     if (notes !== listPicture.notes) {
-      setHasChanged(true)
+      setHasChanged(true);
     } else {
-      setHasChanged(false)
+      setHasChanged(false);
     }
-  }, [notes, listPicture.notes])
+  }, [notes, listPicture.notes]);
   return (
     <form
       onSubmit={(event) => {

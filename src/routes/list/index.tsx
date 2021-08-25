@@ -24,6 +24,7 @@ interface Props {
   storage: firebase.storage.Storage | null;
   id: string;
   lists: List[] | null;
+  picturesMode: boolean;
 }
 
 const ShoppingList: FunctionalComponent<Props> = ({
@@ -32,6 +33,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   storage,
   id,
   lists,
+  picturesMode,
 }: Props) => {
   const [items, setItems] = useState<Item[] | null>(null);
 
@@ -45,7 +47,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
   const [editAction, toggleEditAction] = useState(false);
   const [editGroups, toggleEditGroups] = useState(false);
   const [popularityContest, setPopularityContest] = useState(false);
-  const [cameraMode, setCameraMode] = useState(false);
 
   useEffect(() => {
     if (listNotFound) {
@@ -622,7 +623,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && !editGroups && !popularityContest && !cameraMode && (
+      {!editAction && !editGroups && !popularityContest && !picturesMode && (
         <NewItemForm
           ready={!!items}
           items={items}
@@ -633,19 +634,25 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && !editGroups && !popularityContest && cameraMode && db && storage && list &&  (
-        <Pictures
-          db={db}
-          storage={storage}
-          list={list}
-          ready={!!items}
-          items={items}
-          saveHandler={(text: string) => {
-            addNewText(text);
-          }}
-          openImageModal={openImageModal}
-        />
-      )}
+      {!editAction &&
+        !editGroups &&
+        !popularityContest &&
+        picturesMode &&
+        db &&
+        storage &&
+        list && (
+          <Pictures
+            db={db}
+            storage={storage}
+            list={list}
+            ready={!!items}
+            items={items}
+            saveHandler={(text: string) => {
+              addNewText(text);
+            }}
+            openImageModal={openImageModal}
+          />
+        )}
 
       {!items && <Loading text="Loading shopping list..." />}
 
@@ -653,6 +660,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !todoItems.length &&
         !doneItems.length && (
           <p class={style.empty_list}>List is empty at the moment.</p>
@@ -662,6 +670,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !!todoItems.length && (
           <ul class="list-group shadow-sm bg-white rounded">
             {todoItems
@@ -695,6 +704,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !!doneItems.length && (
           <div class={style.done_items}>
             <h5>Done and dusted</h5>
@@ -785,16 +795,14 @@ const ShoppingList: FunctionalComponent<Props> = ({
           </div>
         )}
 
-      {!editAction && !editGroups && !popularityContest && !cameraMode && (
+      {!editAction && !editGroups && !popularityContest && !picturesMode && (
         <div class={style.camera_mode}>
-          <button
+          <Link
+            href={`/shopping/${id}/pictures`}
             class="btn btn-outline-secondary"
-            onClick={() => {
-              setCameraMode(true);
-            }}
           >
             📸 Pictures
-          </button>
+          </Link>
         </div>
       )}
 
@@ -806,7 +814,11 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      <GoBack url="/shopping" name="lists" />
+      {picturesMode ? (
+        <GoBack url={`/shopping/${id}`} name="shopping list" />
+      ) : (
+        <GoBack url="/shopping" name="lists" />
+      )}
 
       <ImageModal url={modalImageURL} close={closeImageModal} />
     </div>

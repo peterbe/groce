@@ -270,8 +270,18 @@ const App: FunctionalComponent = () => {
             lists={lists}
           />
           <Route
+            path="/shopping/:id/pictures"
+            component={ShoppingList}
+            picturesMode={true}
+            lists={lists}
+            user={user}
+            db={db}
+            storage={storage}
+          />
+          <Route
             path="/shopping/:id"
             component={ShoppingList}
+            picturesMode={false}
             lists={lists}
             user={user}
             db={db}
