@@ -1,5 +1,5 @@
 import { FunctionalComponent, h } from "preact";
-import { useState, useEffect, useMemo } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -7,7 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import style from "./style.css";
 import { FileUpload } from "../../../components/file-upload";
 import { List, Item, ListPicture, FirestoreListPicture } from "../../../types";
-import { useDownloadImageURL } from "../hooks";
+import {DisplayImage} from '../../../components/display-image'
 
 dayjs.extend(relativeTime);
 
@@ -153,6 +153,10 @@ export const Pictures: FunctionalComponent<Props> = ({
       });
   }
 
+  const [uploadedFiles, setUploadedFiles] = useState<Map<string, File>>(
+    new Map()
+  );
+
   return (
     <div class={style.pictures}>
       <FileUpload
@@ -162,8 +166,10 @@ export const Pictures: FunctionalComponent<Props> = ({
         disabled={!ready}
         item={null}
         prefix="list-pictures"
-        onClose={() => {
-          // nothing
+        onClose={({ file, filePath }: { file: File; filePath: string }) => {
+          const newMap: Map<string, File> = new Map(uploadedFiles)
+          newMap.set(filePath, file);
+          setUploadedFiles(newMap);
         }}
       />
 
@@ -201,6 +207,7 @@ export const Pictures: FunctionalComponent<Props> = ({
           saveListPictureNotes={saveListPictureNotes}
           deleteListPicture={deleteListPicture}
           openImageModal={openImageModal}
+          uploadedFiles={uploadedFiles}
         />
       )}
     </div>
@@ -257,11 +264,13 @@ function ShowListPictures({
   saveListPictureNotes,
   deleteListPicture,
   openImageModal,
+  uploadedFiles,
 }: {
   listPictures: ListPicture[];
   saveListPictureNotes: (id: string, notes: string) => Promise<void>;
   deleteListPicture: (id: string) => void;
   openImageModal: (url: string) => void;
+  uploadedFiles: Map<string, File>;
 }) {
   return (
     <div class={style.list_pictures}>
@@ -293,9 +302,11 @@ function ShowListPictures({
             <li class="list-group-item" key={listPicture.id}>
               <DisplayImage
                 filePath={listPicture.filePath}
-                maxWidth={100}
-                maxHeight={100}
+                file={uploadedFiles.get(listPicture.filePath)}
+                maxWidth={200}
+                maxHeight={200}
                 openImageModal={openImageModal}
+                className="rounded float-start"
               />
               <div class="row">
                 <div class="col">
@@ -383,83 +394,94 @@ function NotesForm({
   );
 }
 
-const preloadedImageURLsCache = new Set();
+// const preloadedImageURLsCache = new Set();
 
-const PLACEHOLDER_IMAGE =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABGElEQVRoge2ZywrDIBBFb5YhbSHd9f9/tJsOSDDqvLQDcyBLnXuSkKgD+PC5ucKQAqtJAUsOAG8AG2OMVmD71XwwxlQ5iuIcCY0AhacxYokyPFdCKnANL5aohedISATuwoskWhONSHAFeuGp5jAbgFMhwRHQ1nKRGBVwCz+jgHv4slDv/dwF8+6dOU3CE6279VLM+7yZ0zQ8UZPQhCeuEi7hiVLCIjxBEq7hiQ2yd77Hjgnhk6RC61vMXZAtyZMCKZACwQWSZDKhF3Ohl9OhNzSht5ShN/WjJ2Z/eayiCT/613Q9ldPcec5v30Ui/OHuquP11pMw6RHMaHDUJEy6NDNbTKWESZ9sRZPvhEF4KVqB5aTAalJglC/2HDhQqwo8YAAAAABJRU5ErkJggg==";
+// const PLACEHOLDER_IMAGE =
+//   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABGElEQVRoge2ZywrDIBBFb5YhbSHd9f9/tJsOSDDqvLQDcyBLnXuSkKgD+PC5ucKQAqtJAUsOAG8AG2OMVmD71XwwxlQ5iuIcCY0AhacxYokyPFdCKnANL5aohedISATuwoskWhONSHAFeuGp5jAbgFMhwRHQ1nKRGBVwCz+jgHv4slDv/dwF8+6dOU3CE6279VLM+7yZ0zQ8UZPQhCeuEi7hiVLCIjxBEq7hiQ2yd77Hjgnhk6RC61vMXZAtyZMCKZACwQWSZDKhF3Ohl9OhNzSht5ShN/WjJ2Z/eayiCT/613Q9ldPcec5v30Ui/OHuquP11pMw6RHMaHDUJEy6NDNbTKWESZ9sRZPvhEF4KVqB5aTAalJglC/2HDhQqwo8YAAAAABJRU5ErkJggg==";
 
-function DisplayImage({
-  filePath,
-  maxWidth,
-  maxHeight,
-  openImageModal,
-}: {
-  filePath: string;
-  maxWidth: number;
-  maxHeight: number;
-  openImageModal: (url: string) => void;
-}) {
-  const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
-  const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
-    filePath,
-    100,
-    false
-  );
-  const [loaded, setLoaded] = useState(preloadedImageURLsCache.has(thumbnailURL));
+// function DisplayImage({
+//   filePath,
+//   file,
+//   maxWidth,
+//   maxHeight,
+//   openImageModal,
+// }: {
+//   filePath: string;
+//   file: File | undefined;
+//   maxWidth: number;
+//   maxHeight: number;
+//   openImageModal: (url: string) => void;
+// }) {
+//   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
+//   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
+//     filePath,
+//     200,
+//     false
+//   );
+//   const [loaded, setLoaded] = useState(
+//     preloadedImageURLsCache.has(thumbnailURL)
+//   );
 
-  useEffect(() => {
-    let mounted = true;
+//   useEffect(() => {
+//     let mounted = true;
 
-    if (preloadedImageURLsCache.has(thumbnailURL)) {
-      return;
-    }
+//     if (preloadedImageURLsCache.has(thumbnailURL)) {
+//       return;
+//     }
 
-    if (thumbnailURL && !thumbnailError) {
-      const preloadImg = new Image();
-      preloadImg.src = thumbnailURL;
+//     if (thumbnailURL && !thumbnailError) {
+//       const preloadImg = new Image();
+//       preloadImg.src = thumbnailURL;
 
-      const callback = () => {
-        if (mounted) {
-          setLoaded(true);
-          preloadedImageURLsCache.add(thumbnailURL);
-        }
-      };
-      if (preloadImg.decode) {
-        preloadImg.decode().then(callback, callback);
-      } else {
-        preloadImg.onload = callback;
-      }
-    }
-    return () => {
-      mounted = false;
-    };
-  }, [thumbnailURL, thumbnailError]);
+//       const callback = () => {
+//         if (mounted) {
+//           setLoaded(true);
+//           preloadedImageURLsCache.add(thumbnailURL);
+//         }
+//       };
+//       if (preloadImg.decode) {
+//         preloadImg.decode().then(callback, callback);
+//       } else {
+//         preloadImg.onload = callback;
+//       }
+//     }
+//     return () => {
+//       mounted = false;
+//     };
+//   }, [thumbnailURL, thumbnailError]);
 
-  useEffect(() => {
-    if (downloadURL && !preloadedImageURLsCache.has(downloadURL)) {
-      preloadedImageURLsCache.add(downloadURL);
-      new Image().src = downloadURL;
-    }
-  }, [downloadURL]);
+//   useEffect(() => {
+//     if (downloadURL && !preloadedImageURLsCache.has(downloadURL)) {
+//       preloadedImageURLsCache.add(downloadURL);
+//       new Image().src = downloadURL;
+//     }
+//   }, [downloadURL]);
 
-  return (
-    <a
-      href={downloadURL}
-      onClick={(event) => {
-        event.preventDefault();
-        openImageModal(downloadURL || thumbnailURL);
-      }}
-    >
-      <img
-        class="rounded float-start"
-        style={{
-          width: maxWidth,
-          height: maxHeight,
-          "object-fit": "cover",
-          marginRight: 20,
-        }}
-        src={loaded ? thumbnailURL : PLACEHOLDER_IMAGE}
-      />
-    </a>
-  );
-}
+//   return (
+//     <a
+//       href={downloadURL}
+//       onClick={(event) => {
+//         event.preventDefault();
+//         openImageModal(downloadURL || thumbnailURL);
+//       }}
+//     >
+//       <img
+//         class="rounded float-start"
+//         style={{
+//           width: maxWidth,
+//           height: maxHeight,
+//           "object-fit": "cover",
+//           marginRight: 20,
+//         }}
+//         // src={loaded ? thumbnailURL : PLACEHOLDER_IMAGE}
+//         src={
+//           loaded
+//             ? thumbnailURL
+//             : file
+//             ? URL.createObjectURL(file)
+//             : PLACEHOLDER_IMAGE
+//         }
+//       />
+//     </a>
+//   );
+// }

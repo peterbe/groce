@@ -30,7 +30,7 @@ interface Props {
   item: Item | null;
   list: List;
   prefix?: string;
-  onClose: () => void;
+  onClose: ({ file, filePath }: { file: File; filePath: string }) => void;
   disabled?: boolean;
 }
 
@@ -43,6 +43,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
   onClose,
   disabled = false,
 }: Props) => {
+
   const [file, setFile] = useState<File | null>(null);
   const [fileValidationError, setFileValidationError] = useState<Error | null>(
     null
@@ -106,12 +107,17 @@ export const FileUpload: FunctionalComponent<Props> = ({
             const itemRef = db
               .collection(`shoppinglists/${list.id}/items`)
               .doc(item.id);
+
+            // console.log("Adding:", filePath);
+
             itemRef
               .update({
                 images: firebase.firestore.FieldValue.arrayUnion(filePath),
               })
               .then(() => {
-                onClose();
+                // console.log("CALLING onClose:", filePath);
+
+                onClose({ file, filePath });
               })
               .catch((error) => {
                 // XXX Deal with this better.
@@ -133,18 +139,17 @@ export const FileUpload: FunctionalComponent<Props> = ({
                 if (fileInputRef.current) {
                   fileInputRef.current.value = "";
                 }
+                onClose({ file, filePath });
               })
               .catch((error) => {
                 console.error("Error trying to save picture", error);
                 throw error;
               });
-
-            // onClose()
           }
         }
       );
     }
-  }, [prefix, file, list.id, item, storage, db]);
+  }, [prefix, file, list.id, item ? item.id : null, storage, db]);
 
   return (
     <div class={`${style.file_upload}`}>
