@@ -14,7 +14,8 @@ export function DisplayImage({
   maxWidth,
   maxHeight,
   openImageModal,
-  className="img-thumbnail"
+  className="img-thumbnail",
+  thumbnailWidth = null
 }: {
   filePath: string;
   file: File | undefined;
@@ -22,11 +23,12 @@ export function DisplayImage({
   maxHeight: number;
   openImageModal: (url: string) => void;
   className?: string;
+  thumbnailWidth?: number | null
 }) {
   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
     filePath,
-    maxWidth,
+    thumbnailWidth || maxWidth,
     false
   );
   const [loaded, setLoaded] = useState(

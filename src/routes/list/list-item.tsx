@@ -465,6 +465,12 @@ function DisplayFilesViewMode({
               filePath={filePath}
               file={uploadedFiles.get(filePath)}
               openImageModal={openImageModal}
+              // When looking at thumbnails in "edit mode" the width
+              // of the thumbnails is 80. Re-use that here so if you
+              // do switch from "view mode" to "edit mode", the thumbnails
+              // there will hopefully already been downloaded and
+              // browser-cached.
+              thumbnailWidth={80}
               maxWidth={30}
               maxHeight={30}
             />
@@ -500,6 +506,9 @@ function DisplayFilesEditMode({
               filePath={filePath}
               file={uploadedFiles.get(filePath)}
               openImageModal={openImageModal}
+              // Make sure this matches what we use in "view mode"
+              // where it explicitly sets the `thumbnailWidth` to match
+              // what's being used here:
               maxWidth={80}
               maxHeight={80}
             />

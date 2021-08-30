@@ -112,7 +112,7 @@ export const Pictures: FunctionalComponent<Props> = ({
             id: doc.id,
             filePath: data.filePath,
             created: data.created,
-            words: data.words,
+            // words: data.words,
             text: data.text,
             foodWords: data.foodWords,
           };
