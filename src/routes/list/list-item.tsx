@@ -52,10 +52,13 @@ export const ListItem: FunctionalComponent<Props> = ({
   openImageModal,
   deleteItem,
 }: Props) => {
-  const [text, setText] = useState("");
-  const [description, setDescription] = useState("");
-  const [group, setGroup] = useState("");
-  const [quantity, setQuantity] = useState<string | number>("");
+  const [text, setText] = useState(item.text);
+  const [description, setDescription] = useState(item.description);
+  const [group, setGroup] = useState(item.group.text);
+  const [quantity, setQuantity] = useState<string | number>(
+    item.quantity || ""
+  );
+
   const [editMode, setEditMode] = useState<
     "" | "text" | "description" | "group"
   >("");
@@ -83,13 +86,6 @@ export const ListItem: FunctionalComponent<Props> = ({
       mounted = false;
     };
   }, [recentlyAdded, recentlyModified]);
-
-  useEffect(() => {
-    setText(item.text);
-    setDescription(item.description);
-    setGroup(item.group.text);
-    setQuantity(item.quantity || "");
-  }, [item]);
 
   const textInputRef = useRef<HTMLInputElement>(null);
   const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
@@ -129,9 +125,6 @@ export const ListItem: FunctionalComponent<Props> = ({
   const [uploadedFiles, setUploadedFiles] = useState<Map<string, File>>(
     new Map()
   );
-
-  console.log(uploadedFiles);
-
 
   if (editMode) {
     return (
@@ -183,6 +176,9 @@ export const ListItem: FunctionalComponent<Props> = ({
                   aria-label="Quantity"
                   aria-describedby="id_quantity"
                   value={quantity}
+                  onChange={(event) => {
+                    setQuantity(event.currentTarget.value)
+                  }}
                 />
                 <button
                   class={`btn btn-outline-secondary ${style.quantity_button}`}
