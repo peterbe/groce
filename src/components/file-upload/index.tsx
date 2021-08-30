@@ -30,7 +30,8 @@ interface Props {
   item: Item | null;
   list: List;
   prefix?: string;
-  onClose: ({ file, filePath }: { file: File; filePath: string }) => void;
+  onUploaded: ({ file, filePath }: { file: File; filePath: string }) => void;
+  onSaved?: () => void;
   disabled?: boolean;
 }
 
@@ -40,10 +41,10 @@ export const FileUpload: FunctionalComponent<Props> = ({
   item,
   list,
   prefix = "image-uploads",
-  onClose,
+  onSaved,
+  onUploaded,
   disabled = false,
 }: Props) => {
-
   const [file, setFile] = useState<File | null>(null);
   const [fileValidationError, setFileValidationError] = useState<Error | null>(
     null
@@ -102,22 +103,20 @@ export const FileUpload: FunctionalComponent<Props> = ({
           setUploadError(error);
         },
         () => {
-          // updateItemImage(item, { add: filePath });
+          onUploaded({ file, filePath });
           if (item) {
             const itemRef = db
               .collection(`shoppinglists/${list.id}/items`)
               .doc(item.id);
-
-            // console.log("Adding:", filePath);
 
             itemRef
               .update({
                 images: firebase.firestore.FieldValue.arrayUnion(filePath),
               })
               .then(() => {
-                // console.log("CALLING onClose:", filePath);
-
-                onClose({ file, filePath });
+                if (onSaved) {
+                  onSaved();
+                }
               })
               .catch((error) => {
                 // XXX Deal with this better.
@@ -139,7 +138,9 @@ export const FileUpload: FunctionalComponent<Props> = ({
                 if (fileInputRef.current) {
                   fileInputRef.current.value = "";
                 }
-                onClose({ file, filePath });
+                if (onSaved) {
+                  onSaved();
+                }
               })
               .catch((error) => {
                 console.error("Error trying to save picture", error);

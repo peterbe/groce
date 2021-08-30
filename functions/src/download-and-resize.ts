@@ -19,8 +19,6 @@ codeToErrorMap.set(404, "not found");
 codeToErrorMap.set(403, "forbidden");
 codeToErrorMap.set(401, "unauthenticated");
 
-
-
 export const downloadAndResizeAndStore = functions
   .runWith({ memory: "1GB" })
   .https.onRequest(async (req, res) => {

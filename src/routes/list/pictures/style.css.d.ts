@@ -3,6 +3,7 @@ declare namespace StyleCssNamespace {
   export interface IStyleCss {
     list_pictures: string;
     pictures: string;
+    words: string;
   }
 }
 

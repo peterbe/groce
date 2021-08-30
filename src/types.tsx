@@ -33,9 +33,25 @@ export interface FirestoreListPicture {
   modified: firebase.firestore.Timestamp;
   deleted?: firebase.firestore.Timestamp;
   // texts: ListPictureTexts
+  // text?: string;
+  // words?: string[];
 }
+
 export interface ListPicture extends FirestoreListPicture {
   id: string;
+}
+
+export interface FirestoreListPictureText {
+  filePath: string;
+  created: firebase.firestore.Timestamp;
+  // texts: ListPictureTexts
+  text: string;
+  // words: string[];
+  foodWords: string[];
+}
+
+export interface ListPictureText extends FirestoreListPictureText {
+
 }
 
 export interface ListRecentItems {

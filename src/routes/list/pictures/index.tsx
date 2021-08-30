@@ -6,8 +6,15 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import style from "./style.css";
 import { FileUpload } from "../../../components/file-upload";
-import { List, Item, ListPicture, FirestoreListPicture } from "../../../types";
-import {DisplayImage} from '../../../components/display-image'
+import {
+  List,
+  Item,
+  ListPicture,
+  FirestoreListPicture,
+  ListPictureText,
+  FirestoreListPictureText,
+} from "../../../types";
+import { DisplayImage } from "../../../components/display-image";
 
 dayjs.extend(relativeTime);
 
@@ -35,6 +42,12 @@ export const Pictures: FunctionalComponent<Props> = ({
     null
   );
 
+  const [listPictureTexts, setListPictureTexts] = useState<
+    Map<string, ListPictureText>
+  >(new Map());
+  const [listPictureTextsError, setListPictureTextsError] =
+    useState<Error | null>(null);
+
   useEffect(() => {
     if (listPictures) {
       document.title = `Pictures (${listPictures.length}) - ${list.name}`;
@@ -43,6 +56,7 @@ export const Pictures: FunctionalComponent<Props> = ({
     }
   }, [list, listPictures]);
 
+  // Set up watcher on /pictures collection
   useEffect(() => {
     const ref = db.collection(`shoppinglists/${list.id}/pictures`).onSnapshot(
       (snapshot) => {
@@ -80,6 +94,35 @@ export const Pictures: FunctionalComponent<Props> = ({
       (error) => {
         console.error("Snapshot error:", error);
         setListPicturesError(error);
+      }
+    );
+    return () => {
+      ref();
+    };
+  }, [db, list]);
+
+  // Set up watcher on /texts collection
+  useEffect(() => {
+    const ref = db.collection(`shoppinglists/${list.id}/texts`).onSnapshot(
+      (snapshot) => {
+        const newListPictureTexts: Map<string, ListPictureText> = new Map();
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreListPictureText;
+          const item = {
+            id: doc.id,
+            filePath: data.filePath,
+            created: data.created,
+            words: data.words,
+            text: data.text,
+            foodWords: data.foodWords,
+          };
+          newListPictureTexts.set(item.filePath, item);
+        });
+        setListPictureTexts(newListPictureTexts);
+      },
+      (error) => {
+        console.error("Snapshot error:", error);
+        setListPictureTextsError(error);
       }
     );
     return () => {
@@ -166,12 +209,70 @@ export const Pictures: FunctionalComponent<Props> = ({
         disabled={!ready}
         item={null}
         prefix="list-pictures"
-        onClose={({ file, filePath }: { file: File; filePath: string }) => {
-          const newMap: Map<string, File> = new Map(uploadedFiles)
+        onUploaded={({ file, filePath }: { file: File; filePath: string }) => {
+          const newMap: Map<string, File> = new Map(uploadedFiles);
           newMap.set(filePath, file);
           setUploadedFiles(newMap);
         }}
       />
+
+      {listPicturesError && (
+        <div
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          Sorry. An error occurred trying to fetch your pictures.
+          <br />
+          <a
+            href={`/shopping/${list.id}/pictures`}
+            class="btn btn-warning"
+            onClick={(event) => {
+              event.preventDefault();
+              window.location.reload();
+            }}
+          ></a>
+          <br />
+          <code>{listPicturesError.toString()}</code>
+          <button
+            type="button"
+            class="btn-close btn-small"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+            onClick={() => {
+              setListPicturesError(null);
+            }}
+          />
+        </div>
+      )}
+
+      {listPictureTextsError && !listPicturesError && (
+        <div
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          Sorry. An error occurred trying to fetch your picture texts.
+          <br />
+          <a
+            href={`/shopping/${list.id}/pictures`}
+            class="btn btn-warning"
+            onClick={(event) => {
+              event.preventDefault();
+              window.location.reload();
+            }}
+          ></a>
+          <br />
+          <code>{listPictureTextsError.toString()}</code>
+          <button
+            type="button"
+            class="btn-close btn-small"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+            onClick={() => {
+              setListPictureTextsError(null);
+            }}
+          />
+        </div>
+      )}
 
       {saveListPictureError && (
         <div
@@ -204,6 +305,7 @@ export const Pictures: FunctionalComponent<Props> = ({
       {listPictures && (
         <ShowListPictures
           listPictures={listPictures}
+          listPictureTexts={listPictureTexts}
           saveListPictureNotes={saveListPictureNotes}
           deleteListPicture={deleteListPicture}
           openImageModal={openImageModal}
@@ -261,12 +363,14 @@ function UndoListPictureDelete({
 
 function ShowListPictures({
   listPictures,
+  listPictureTexts,
   saveListPictureNotes,
   deleteListPicture,
   openImageModal,
   uploadedFiles,
 }: {
   listPictures: ListPicture[];
+  listPictureTexts: Map<string, ListPictureText>;
   saveListPictureNotes: (id: string, notes: string) => Promise<void>;
   deleteListPicture: (id: string) => void;
   openImageModal: (url: string) => void;
@@ -298,13 +402,14 @@ function ShowListPictures({
 
       <ul class="list-group list-group-flush">
         {listPictures.map((listPicture) => {
+          const listPictureText = listPictureTexts.get(listPicture.filePath);
           return (
             <li class="list-group-item" key={listPicture.id}>
               <DisplayImage
                 filePath={listPicture.filePath}
                 file={uploadedFiles.get(listPicture.filePath)}
-                maxWidth={200}
-                maxHeight={200}
+                maxWidth={300}
+                maxHeight={300}
                 openImageModal={openImageModal}
                 className="rounded float-start"
               />
@@ -314,6 +419,18 @@ function ShowListPictures({
                     listPicture={listPicture}
                     saveListPictureNotes={saveListPictureNotes}
                   />
+
+                  {listPictureText ? (
+                    <div>
+                      <ListWords listPictureText={listPictureText} />
+                    </div>
+                  ) : (
+                    <div class="spinner-border" role="status">
+                      <span class="visually-hidden">
+                        Loading text from picture...
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div class="col">
                   <button
@@ -342,6 +459,56 @@ function ShowListPictures({
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
+  const { text, foodWords } = listPictureText;
+  if (!text) {
+    return null;
+  }
+
+  return (
+    <div class={style.words}>
+      {foodWords && foodWords.length > 0 ? (
+        <div>
+          <b>Food words found:</b>
+          <div class="d-grid gap-2 d-md-block">
+            {foodWords.map((word, i) => {
+              return (
+                <button
+                  key={`${word}${i}`}
+                  class="btn btn-sm btn-outline-secondary"
+                  type="button"
+                >
+                  {word}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <p>
+          <i>No food words found 🤨</i>
+        </p>
+      )}
+      {text !== null && <pre style={{ fontSize: "70%" }}>{text}</pre>}
+      {/* {words && (
+        <div class="d-grid gap-2 d-md-block">
+          {words.map((word, i) => {
+            return (
+              <button
+                key={`${word}${i}`}
+                class="btn btn-sm btn-outline-secondary"
+                type="button"
+              >
+                {word}
+              </button>
+            );
+          })}
+        </div>
+      )} */}
     </div>
   );
 }
@@ -393,95 +560,3 @@ function NotesForm({
     </form>
   );
 }
-
-// const preloadedImageURLsCache = new Set();
-
-// const PLACEHOLDER_IMAGE =
-//   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABGElEQVRoge2ZywrDIBBFb5YhbSHd9f9/tJsOSDDqvLQDcyBLnXuSkKgD+PC5ucKQAqtJAUsOAG8AG2OMVmD71XwwxlQ5iuIcCY0AhacxYokyPFdCKnANL5aohedISATuwoskWhONSHAFeuGp5jAbgFMhwRHQ1nKRGBVwCz+jgHv4slDv/dwF8+6dOU3CE6279VLM+7yZ0zQ8UZPQhCeuEi7hiVLCIjxBEq7hiQ2yd77Hjgnhk6RC61vMXZAtyZMCKZACwQWSZDKhF3Ohl9OhNzSht5ShN/WjJ2Z/eayiCT/613Q9ldPcec5v30Ui/OHuquP11pMw6RHMaHDUJEy6NDNbTKWESZ9sRZPvhEF4KVqB5aTAalJglC/2HDhQqwo8YAAAAABJRU5ErkJggg==";
-
-// function DisplayImage({
-//   filePath,
-//   file,
-//   maxWidth,
-//   maxHeight,
-//   openImageModal,
-// }: {
-//   filePath: string;
-//   file: File | undefined;
-//   maxWidth: number;
-//   maxHeight: number;
-//   openImageModal: (url: string) => void;
-// }) {
-//   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
-//   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
-//     filePath,
-//     200,
-//     false
-//   );
-//   const [loaded, setLoaded] = useState(
-//     preloadedImageURLsCache.has(thumbnailURL)
-//   );
-
-//   useEffect(() => {
-//     let mounted = true;
-
-//     if (preloadedImageURLsCache.has(thumbnailURL)) {
-//       return;
-//     }
-
-//     if (thumbnailURL && !thumbnailError) {
-//       const preloadImg = new Image();
-//       preloadImg.src = thumbnailURL;
-
-//       const callback = () => {
-//         if (mounted) {
-//           setLoaded(true);
-//           preloadedImageURLsCache.add(thumbnailURL);
-//         }
-//       };
-//       if (preloadImg.decode) {
-//         preloadImg.decode().then(callback, callback);
-//       } else {
-//         preloadImg.onload = callback;
-//       }
-//     }
-//     return () => {
-//       mounted = false;
-//     };
-//   }, [thumbnailURL, thumbnailError]);
-
-//   useEffect(() => {
-//     if (downloadURL && !preloadedImageURLsCache.has(downloadURL)) {
-//       preloadedImageURLsCache.add(downloadURL);
-//       new Image().src = downloadURL;
-//     }
-//   }, [downloadURL]);
-
-//   return (
-//     <a
-//       href={downloadURL}
-//       onClick={(event) => {
-//         event.preventDefault();
-//         openImageModal(downloadURL || thumbnailURL);
-//       }}
-//     >
-//       <img
-//         class="rounded float-start"
-//         style={{
-//           width: maxWidth,
-//           height: maxHeight,
-//           "object-fit": "cover",
-//           marginRight: 20,
-//         }}
-//         // src={loaded ? thumbnailURL : PLACEHOLDER_IMAGE}
-//         src={
-//           loaded
-//             ? thumbnailURL
-//             : file
-//             ? URL.createObjectURL(file)
-//             : PLACEHOLDER_IMAGE
-//         }
-//       />
-//     </a>
-//   );
-// }

@@ -23,12 +23,10 @@ export function DisplayImage({
   openImageModal: (url: string) => void;
   className?: string;
 }) {
-  console.log("RENDER DisplayImage", file);
-
   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
     filePath,
-    200,
+    maxWidth,
     false
   );
   const [loaded, setLoaded] = useState(

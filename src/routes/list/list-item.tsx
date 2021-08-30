@@ -269,7 +269,7 @@ export const ListItem: FunctionalComponent<Props> = ({
                 storage={storage}
                 list={list}
                 item={item}
-                onClose={({
+                onUploaded={({
                   file,
                   filePath,
                 }: {
@@ -279,6 +279,8 @@ export const ListItem: FunctionalComponent<Props> = ({
                   const newMap: Map<string, File> = new Map(uploadedFiles);
                   newMap.set(filePath, file);
                   setUploadedFiles(newMap);
+                }}
+                onSaved={() => {
                   setEnableFileUpload(false);
                 }}
               />

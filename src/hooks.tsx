@@ -14,6 +14,8 @@ const FUNCTION_BASE_URL = USE_EMULATOR
   ? "http://localhost:5001/thatsgroce/us-central1"
   : "https://us-central1-thatsgroce.cloudfunctions.net";
 const THUMBNAL_CLOUD_FUNCTION_BASE_URL = `${FUNCTION_BASE_URL}/downloadAndResizeAndStore/`;
+// const IMAGE_TO_TEXT_CLOUD_FUNCTION_BASE_URL = `${FUNCTION_BASE_URL}/imageToText/`
+
 
 function getThumbnailURL(image: string, width: number): string {
   const sp = new URLSearchParams();
@@ -21,6 +23,12 @@ function getThumbnailURL(image: string, width: number): string {
   sp.set("width", `${width}`);
   return `${THUMBNAL_CLOUD_FUNCTION_BASE_URL}?${sp.toString()}`;
 }
+
+// export function getImageToTextURL(image: string) {
+//   const sp = new URLSearchParams();
+//   sp.set("image", image);
+//   return `${IMAGE_TO_TEXT_CLOUD_FUNCTION_BASE_URL}?${sp.toString()}`;
+// }
 
 export function useDownloadImageURL(
   path: string,

@@ -31,6 +31,10 @@ service cloud.firestore {
         allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
       }
 
+      match /texts/{pictureID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
+      }
+
       match /invitations/{invitationID} {
 	    	allow create: if request.auth != null;
 	      allow read: if request.auth != null;

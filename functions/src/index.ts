@@ -5,7 +5,8 @@ export * from "./counters";
 export * from "./invites";
 export * from "./shoppinglists";
 export * from "./download-and-resize";
-// export * from "./image-to-text";
+export * from "./image-to-text";
+// export * from "./image-to-text-http";
 
 admin.initializeApp();
 
