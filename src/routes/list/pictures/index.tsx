@@ -469,6 +469,7 @@ function ShowListPictures({
 
 function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
   const { text, foodWords } = listPictureText;
+  const [showText, setShowText] = useState(false);
   if (!text) {
     return null;
   }
@@ -478,7 +479,28 @@ function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
       {foodWords && foodWords.length > 0 ? (
         <div>
           <b>Food words found:</b>
-          <div class="d-grid gap-2 d-md-block">
+          <ul class="list-group">
+            {foodWords.map((word, i) => {
+              return (
+                <li
+                  key={word}
+                  class="list-group-item"
+                >
+                  <input
+                    key={word}
+                    class="form-check-input me-1"
+                    id={`id_foundword${i}`}
+                    type="checkbox"
+                    value={word}
+                    aria-label={word}
+                  />{" "}
+                  <label htmlFor={`id_foundword${i}`}>{word}</label>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* <div class="d-grid gap-2 d-md-block">
             {foodWords.map((word, i) => {
               return (
                 <button
@@ -490,29 +512,28 @@ function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
                 </button>
               );
             })}
-          </div>
+          </div> */}
         </div>
       ) : (
         <p>
           <i>No food words found 🤨</i>
         </p>
       )}
-      {text !== null && <pre style={{ fontSize: "70%" }}>{text}</pre>}
-      {/* {words && (
-        <div class="d-grid gap-2 d-md-block">
-          {words.map((word, i) => {
-            return (
-              <button
-                key={`${word}${i}`}
-                class="btn btn-sm btn-outline-secondary"
-                type="button"
-              >
-                {word}
-              </button>
-            );
-          })}
-        </div>
-      )} */}
+      {text !== null && (
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary"
+          onClick={() => {
+            setShowText(!showText);
+          }}
+        >
+          {showText ? "Close" : "Show found text"}
+        </button>
+      )}
+
+      {text !== null && showText && (
+        <pre style={{ fontSize: "70%" }}>{text}</pre>
+      )}
     </div>
   );
 }

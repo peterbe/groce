@@ -16,6 +16,23 @@ interface Props {
   user: firebase.User | false | null;
 }
 
+function sortFoodWords(
+  foodWords: FoodWord[],
+  sortBy: string,
+  sortReverse: boolean
+) {
+  return foodWords.sort((a, b) => {
+    const reverse = sortReverse ? -1 : 1;
+    if (sortBy === "useCount") {
+      return reverse * (a.useCount - b.useCount);
+    }
+    if (sortBy === "hitCount") {
+      return reverse * (a.hitCount - b.hitCount);
+    }
+    return reverse * a.word.localeCompare(b.word);
+  });
+}
+
 const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
   useEffect(() => {
     document.title = "Food Words";
@@ -33,40 +50,31 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
 
   useEffect(() => {
     if (db && locale) {
-      db.collection(`foodwords`)
-        .where("locale", "==", locale)
-        .onSnapshot(
-          (snapshot) => {
-            const newFoodWords: FoodWord[] = [];
-            snapshot.forEach((doc) => {
-              const data = doc.data() as FirestoreFoodWord;
-              newFoodWords.push({
-                id: doc.id,
-                locale: data.locale,
-                word: data.word,
-                approved: data.approved,
-                notes: data.notes,
-                useCount: data.useCount,
-                hitCount: data.hitCount,
-              });
+      const label = "Get ALL foodwords";
+      console.time(label);
+      db.collection(`foodwords`).onSnapshot(
+        (snapshot) => {
+          const newFoodWords: FoodWord[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreFoodWord;
+            newFoodWords.push({
+              id: doc.id,
+              locale: data.locale,
+              word: data.word,
+              approved: data.approved,
+              notes: data.notes,
+              useCount: data.useCount,
+              hitCount: data.hitCount,
             });
-            // newFoodWords.sort((a, b) => {
-            //   const reverse = sortReverse ? -1 : 1;
-            //   if (sortBy === "useCount") {
-            //     return reverse * (a.useCount - b.useCount);
-            //   }
-            //   if (sortBy === "hitCount") {
-            //     return reverse * (a.hitCount - b.hitCount);
-            //   }
-            //   return reverse * a.word.localeCompare(b.word);
-            // });
-            setFoodWords(newFoodWords);
-          },
-          (error) => {
-            console.error("Error getting snapshot", error);
-            setFoodWordsError(error);
-          }
-        );
+          });
+          console.timeEnd(label);
+          setFoodWords(sortFoodWords(newFoodWords, 'word', false));
+        },
+        (error) => {
+          console.error("Error getting snapshot", error);
+          setFoodWordsError(error);
+        }
+      );
     }
   }, [db, locale]);
 
@@ -88,18 +96,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
   }, [filterWord, foodWords]);
 
   useEffect(() => {
-    setFilteredFoodWords(
-      filteredFoodWords.sort((a, b) => {
-        const reverse = sortReverse ? -1 : 1;
-        if (sortBy === "useCount") {
-          return reverse * (a.useCount - b.useCount);
-        }
-        if (sortBy === "hitCount") {
-          return reverse * (a.hitCount - b.hitCount);
-        }
-        return reverse * a.word.localeCompare(b.word);
-      })
-    );
+    setFilteredFoodWords(sortFoodWords(filteredFoodWords, sortBy, sortReverse));
   }, [filteredFoodWords, sortBy, sortReverse]);
 
   // useEffect(() => {
