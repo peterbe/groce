@@ -5,9 +5,12 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
-import { FOOD_WORDS } from "./food-words";
-
 const client = new vision.ImageAnnotatorClient();
+
+type FoodWord = {
+  id: string;
+  word: string;
+};
 
 export const onFileUploadToText = functions.storage.object().onFinalize(
   async (object): Promise<void> => {
@@ -57,6 +60,7 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
       return;
     }
 
+    console.time("Extract all user's food words");
     const itemsSnapshot = await admin
       .firestore()
       .collection(`shoppinglists/${listID}/items`)
@@ -65,14 +69,31 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
     itemsSnapshot.forEach(snapshot => {
       return snapshot.data().text;
     });
+    console.timeEnd("Extract all user's food words");
+    logger.info(
+      `Using ${listItemTexts.length} existing grocery words from list owner.`
+    );
 
-    console.log({ itemsSnapshot });
+    console.time("Extract all possible food words");
+    const foodWordsSnapshot = await admin
+      .firestore()
+      .collection("foodwords")
+      .where("locale", "==", "en-US")
+      .get();
+    const allFoodWords: Map<string, string> = new Map();
+    const allFoodWordsLC: Map<string, string> = new Map();
+    foodWordsSnapshot.forEach(snapshot => {
+      const data = snapshot.data() as FoodWord;
+      allFoodWords.set(data.word, snapshot.id);
+      allFoodWordsLC.set(data.word.toLowerCase(), snapshot.id);
+    });
+    console.timeEnd("Extract all possible food words");
+    console.log(`Using ${allFoodWords.size} known sample food words`);
 
-    // const bucketName = admin.storage().bucket().name;
     const bucketName = object.bucket;
-    // logger.info(`Uploaded into: ${bucketName}`);
     const gcsName = `gs://${bucketName}/${name}`;
 
+    console.time("Run documentTextDetection");
     const [result] = await client.documentTextDetection(gcsName);
     const fullTextAnnotation = result.fullTextAnnotation;
     if (!fullTextAnnotation) {
@@ -96,19 +117,44 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
         });
       });
     });
-    // const words = cleanWords(allWords);
-    const foodWords = getFoodWords(text, listItemTexts);
-    logger.info(`Food words: ${foodWords.join(", ")}`);
+    console.timeEnd("Run documentTextDetection");
+
+    const foodWords = getFoodWords(text, [
+      ...allFoodWords.keys(),
+      ...listItemTexts
+    ]);
+    logger.info(`Food words found: ${foodWords.join(", ")}`);
+    console.time("Store found words");
     await admin
       .firestore()
       .collection(`shoppinglists/${listID}/texts`)
       .add({
         filePath: name,
         text,
-        // words,
         foodWords,
         created: admin.firestore.Timestamp.fromDate(new Date())
       });
+    console.timeEnd("Store found words");
+
+    console.time("Increment hitCounts");
+    const batch = admin.firestore().batch();
+    let countUpdates = 0;
+    foodWords.forEach(word => {
+      const id = allFoodWordsLC.get(word.toLowerCase());
+      if (id) {
+        const ref = admin
+          .firestore()
+          .collection("foodwords")
+          .doc(id);
+        batch.update(ref, {
+          hitCount: admin.firestore.FieldValue.increment(1)
+        });
+        countUpdates++;
+      }
+    });
+    logger.info(`Updating hitCount on ${countUpdates} food words`);
+    await batch.commit();
+    console.timeEnd("Increment hitCounts");
   }
 );
 
@@ -116,32 +162,23 @@ const escapeNeedle = (needle: string) =>
   needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 // Exported for the benefit of manual testing with test-get-food-words.ts
-export function getFoodWords(
-  text: string,
-  listItems: string[],
-  language = "en"
-) {
-  const possibleFoodWords = [...listItems.map(t => t.toLowerCase())];
-  if (language === "en") {
-    possibleFoodWords.push(...FOOD_WORDS);
-  } else {
-    console.warn(`No known food word database for '${language}'`);
-  }
+export function getFoodWords(text: string, listItems: string[]) {
+  const possibleFoodWords = listItems.map(t => t.toLowerCase());
 
   possibleFoodWords.sort((a, b) => b.length - a.length);
 
   type Find = { word: string; index: number };
   const finds: Find[] = [];
-  const textOneLine = text.replace(/\n/g, " ").replace(/\s\s+/, " ");
+  text = text.replace(/\n/g, " ").replace(/\s\s+/, " ");
 
   for (const word of possibleFoodWords) {
-    const match = textOneLine.match(
-      new RegExp(`\\b${escapeNeedle(word)}\\b`, "i")
-    );
+    const rex = new RegExp(`\\b${escapeNeedle(word)}\\b`, "i");
+    const match = text.match(rex);
     if (!match) {
       continue;
     }
     finds.push({ word: match[0], index: match.index || 0 });
+    text = text.replace(rex, " ");
   }
   // Sort by the location they were found in the text.
   finds.sort((a, b) => a.index - b.index);

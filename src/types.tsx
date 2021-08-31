@@ -51,7 +51,7 @@ export interface FirestoreListPictureText {
 }
 
 export interface ListPictureText extends FirestoreListPictureText {
-
+  id: string;
 }
 
 export interface ListRecentItems {
@@ -132,4 +132,16 @@ export interface StorageSpec {
   size?: number;
   type?: string;
   error?: string;
+}
+
+export interface FirestoreFoodWord {
+  locale: string;
+  word: string;
+  approved: Date | null;
+  useCount: number;
+  hitCount: number;
+  notes: string;
+}
+export interface FoodWord extends FirestoreFoodWord {
+  id: string;
 }

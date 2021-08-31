@@ -230,7 +230,9 @@ export const Pictures: FunctionalComponent<Props> = ({
               event.preventDefault();
               window.location.reload();
             }}
-          ></a>
+          >
+            Reload
+          </a>
           <br />
           <code>{listPicturesError.toString()}</code>
           <button
@@ -259,7 +261,9 @@ export const Pictures: FunctionalComponent<Props> = ({
               event.preventDefault();
               window.location.reload();
             }}
-          ></a>
+          >
+            Reload
+          </a>
           <br />
           <code>{listPictureTextsError.toString()}</code>
           <button

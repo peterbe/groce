@@ -17,6 +17,7 @@ import Feedback from "../routes/feedback";
 import About from "../routes/about";
 import Version from "../routes/version";
 import Counters from "../routes/counters";
+import FoodWords from "../routes/foodwords";
 import Share from "../routes/share";
 import { OfflineWarning } from "./offline-warning";
 
@@ -307,6 +308,7 @@ const App: FunctionalComponent = () => {
           <Route path="/about" component={About} />
           <Route path="/version" component={Version} />
           <Route path="/counters" component={Counters} db={db} />
+          <Route path="/foodwords" component={FoodWords} user={user} db={db} />
           <Route path="/share" component={Share} />
           <NotFoundPage default />
         </Router>
