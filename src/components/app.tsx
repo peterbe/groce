@@ -78,15 +78,15 @@ const App: FunctionalComponent = () => {
           setPersistenceError(error);
         });
 
-        setDB(db);
-
-        // Clear any offline data.
+        // // Clear any offline data.
         // firebase
         //   .firestore()
         //   .clearPersistence()
         //   .catch((error) => {
-        //     console.error("Could not enable persistence:", error.code);
+        //     console.error("Could not clear persistence:", error.code);
         //   });
+
+        setDB(db);
       })
       .catch((error) => {
         console.error("Unable to lazy-load firebase/firestore:", error);

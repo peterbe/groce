@@ -22,6 +22,16 @@ export const onFoodWordUpdateMaps = functions.firestore
         ? newValue.locale
         : "en-US";
 
+    if (previousValue && newValue) {
+      logger.info(`Changed value: ${newValue.word} (${newValue.locale})`);
+    } else if (previousValue) {
+      logger.info(
+        `Previous value: ${previousValue.word} (${previousValue.locale})`
+      );
+    } else if (newValue) {
+      logger.info(`New value: ${newValue.word} (${newValue.locale})`);
+    }
+
     const allFoodWordsMap = await getAllFoodWords();
     logger.info(`There are ${allFoodWordsMap.size} locales`);
     for (const [locale, map] of allFoodWordsMap) {
