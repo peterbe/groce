@@ -408,57 +408,54 @@ function ShowListPictures({
         {listPictures.map((listPicture) => {
           const listPictureText = listPictureTexts.get(listPicture.filePath);
           return (
-            <li class="list-group-item" key={listPicture.id}>
+            <li class={`list-group-item  ${style.picture_group}`} key={listPicture.id}>
+              <NotesForm
+                listPicture={listPicture}
+                saveListPictureNotes={saveListPictureNotes}
+              />
+
               <DisplayImage
                 filePath={listPicture.filePath}
                 file={uploadedFiles.get(listPicture.filePath)}
-                maxWidth={300}
-                maxHeight={300}
+                maxWidth={450}
+                maxHeight={450}
                 openImageModal={openImageModal}
-                className="rounded float-start"
+                className="img-fluid rounded"
               />
-              <div class="row">
-                <div class="col">
-                  <NotesForm
-                    listPicture={listPicture}
-                    saveListPictureNotes={saveListPictureNotes}
-                  />
 
-                  {listPictureText ? (
-                    <div>
-                      <ListWords listPictureText={listPictureText} />
-                    </div>
-                  ) : (
-                    <div class="spinner-border" role="status">
-                      <span class="visually-hidden">
-                        Loading text from picture...
-                      </span>
-                    </div>
-                  )}
+              {listPictureText ? (
+                <div>
+                  <ListWords listPictureText={listPictureText} />
                 </div>
-                <div class="col">
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    onClick={() => {
-                      deleteListPicture(listPicture.id);
-                    }}
-                  >
-                    Delete
-                  </button>
+              ) : (
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">
+                    Loading text from picture...
+                  </span>
                 </div>
-                <p>
-                  <small class="fw-light">
-                    Added: {dayjs(listPicture.created.toDate()).fromNow()}
-                  </small>{" "}
-                  {listPicture.created.seconds !==
-                    listPicture.modified.seconds && (
-                    <small class="fw-light" style={{ marginLeft: 20 }}>
-                      Modified: {dayjs(listPicture.modified.toDate()).fromNow()}
-                    </small>
-                  )}
-                </p>
-              </div>
+              )}
+
+              <p>
+                <small class="fw-light">
+                  Added: {dayjs(listPicture.created.toDate()).fromNow()}
+                </small>{" "}
+                {listPicture.created.seconds !==
+                  listPicture.modified.seconds && (
+                  <small class="fw-light" style={{ marginLeft: 20 }}>
+                    Modified: {dayjs(listPicture.modified.toDate()).fromNow()}
+                  </small>
+                )}
+              </p>
+
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                onClick={() => {
+                  deleteListPicture(listPicture.id);
+                }}
+              >
+                Delete
+              </button>
             </li>
           );
         })}
@@ -482,10 +479,7 @@ function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
           <ul class="list-group">
             {foodWords.map((word, i) => {
               return (
-                <li
-                  key={word}
-                  class="list-group-item"
-                >
+                <li key={word} class="list-group-item">
                   <input
                     key={word}
                     class="form-check-input me-1"
@@ -500,39 +494,27 @@ function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
             })}
           </ul>
 
-          {/* <div class="d-grid gap-2 d-md-block">
-            {foodWords.map((word, i) => {
-              return (
+          {text !== null && (
+            <div>
+              <p>
                 <button
-                  key={`${word}${i}`}
-                  class="btn btn-sm btn-outline-secondary"
                   type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  onClick={() => {
+                    setShowText(!showText);
+                  }}
                 >
-                  {word}
+                  {showText ? "Close" : "Show found text"}
                 </button>
-              );
-            })}
-          </div> */}
+              </p>
+              {showText && <pre style={{ fontSize: "70%" }}>{text}</pre>}
+            </div>
+          )}
         </div>
       ) : (
         <p>
           <i>No food words found 🤨</i>
         </p>
-      )}
-      {text !== null && (
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-secondary"
-          onClick={() => {
-            setShowText(!showText);
-          }}
-        >
-          {showText ? "Close" : "Show found text"}
-        </button>
-      )}
-
-      {text !== null && showText && (
-        <pre style={{ fontSize: "70%" }}>{text}</pre>
       )}
     </div>
   );

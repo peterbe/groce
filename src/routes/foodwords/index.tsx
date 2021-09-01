@@ -50,9 +50,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
 
   useEffect(() => {
     if (db && locale) {
-      const label = "Get ALL foodwords";
-      console.time(label);
-      db.collection(`foodwords`).onSnapshot(
+      db.collection("foodwords").onSnapshot(
         (snapshot) => {
           const newFoodWords: FoodWord[] = [];
           snapshot.forEach((doc) => {
@@ -67,8 +65,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
               hitCount: data.hitCount,
             });
           });
-          console.timeEnd(label);
-          setFoodWords(sortFoodWords(newFoodWords, 'word', false));
+          setFoodWords(sortFoodWords(newFoodWords, "word", false));
         },
         (error) => {
           console.error("Error getting snapshot", error);
@@ -166,7 +163,8 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
   return (
     <div>
       <h3>
-        Locale: <b>{locale}</b>
+        Locale: <b>{locale}</b> (
+        <small>{foodWords.length.toLocaleString()} words in total</small>)
       </h3>
 
       {foodWordsError && (
@@ -337,10 +335,11 @@ function MassAdd({
               });
             })
           );
-          setNewText("");
+
           setSavedNewWords(newWords.length);
           setSaving(null);
         }
+        setNewText("");
       }}
     >
       <div class="mb-3" style={{ marginTop: 50 }}>

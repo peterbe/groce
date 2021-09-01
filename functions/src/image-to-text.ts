@@ -5,6 +5,8 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
+import { getFoodWords } from "./extract-food-words";
+
 const client = new vision.ImageAnnotatorClient();
 
 type FoodWord = {
@@ -12,6 +14,8 @@ type FoodWord = {
   word: string;
   locale: string;
 };
+
+type FoodWordMap = Map<string, string>;
 
 export const onFileUploadToText = functions.storage.object().onFinalize(
   async (object): Promise<void> => {
@@ -88,7 +92,7 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
 
 async function incrementFoodWordHitCounts(
   foodWords: string[],
-  allFoodWords: Map<string, string>
+  allFoodWords: FoodWordMap
 ): Promise<void> {
   const batch = admin.firestore().batch();
   let countUpdates = 0;
@@ -165,13 +169,30 @@ async function extractText(bucketName: string, name: string): Promise<string> {
   return text;
 }
 
-async function getAllFoodWords(locale = "en-US"): Promise<Map<string, string>> {
-  console.time("Extract all possible food words");
+const globalCacheAllFoodWords: Map<string, FoodWordMap> = new Map();
+const globalCacheAllFoodWordsDates: Map<string, Date> = new Map();
+
+async function getAllFoodWords(locale = "en-US"): Promise<FoodWordMap> {
+  // Relying on a global cache in Cloud Functions isn't great, but if it
+  // works just a little sometimes, it can be a little help.
+  const fromCache = globalCacheAllFoodWords.get(locale);
+  const cacheDate = globalCacheAllFoodWordsDates.get(locale);
+  if (fromCache) {
+    logger.info(`Cache hit on getAllFoodWords(${locale})!`);
+    if (cacheDate) {
+      logger.info(
+        `Cache for getAllFoodWords(${locale}) is from ${cacheDate.toISOString()} `
+      );
+    }
+    return fromCache;
+  }
+  const label = "Time to download ALL food words";
+  console.time(label);
   const foodWordsSnapshot = await admin
     .firestore()
     .collection("foodwords")
     .get();
-  const allFoodWords: Map<string, string> = new Map();
+  const allFoodWords: FoodWordMap = new Map();
   const localeLC = locale.toLowerCase();
   foodWordsSnapshot.forEach(snapshot => {
     const data = snapshot.data() as FoodWord;
@@ -185,34 +206,9 @@ async function getAllFoodWords(locale = "en-US"): Promise<Map<string, string>> {
       allFoodWords.set(data.word.toLowerCase(), snapshot.id);
     }
   });
-  console.timeEnd("Extract all possible food words");
+  console.timeEnd(label);
   console.log(`Using ${allFoodWords.size} known sample food words`);
+  globalCacheAllFoodWords.set(locale, allFoodWords);
+  globalCacheAllFoodWordsDates.set(locale, new Date());
   return allFoodWords;
-}
-
-const escapeNeedle = (needle: string) =>
-  needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-// Exported for the benefit of manual testing with test-get-food-words.ts
-export function getFoodWords(text: string, listItems: string[]) {
-  const possibleFoodWords = listItems.map(t => t.toLowerCase());
-
-  possibleFoodWords.sort((a, b) => b.length - a.length);
-
-  type Find = { word: string; index: number };
-  const finds: Find[] = [];
-  text = text.replace(/\n/g, " ").replace(/\s\s+/, " ");
-
-  for (const word of possibleFoodWords) {
-    const rex = new RegExp(`\\b${escapeNeedle(word)}\\b`, "i");
-    const match = text.match(rex);
-    if (!match) {
-      continue;
-    }
-    finds.push({ word: match[0], index: match.index || 0 });
-    text = text.replace(rex, " ");
-  }
-  // Sort by the location they were found in the text.
-  finds.sort((a, b) => a.index - b.index);
-  return finds.map(find => find.word);
 }
