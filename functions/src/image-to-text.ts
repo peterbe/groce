@@ -14,7 +14,6 @@ type FoodWord = {
   word: string;
   locale: string;
 };
-
 type FoodWordMap = Map<string, string>;
 
 export const onFileUploadToText = functions.storage.object().onFinalize(
@@ -26,7 +25,7 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
       return;
     }
     if (!name.startsWith("list-pictures")) {
-      logger.info(
+      logger.debug(
         `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`
       );
       return;
@@ -62,10 +61,14 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
       return;
     }
 
+    const list = doc.data();
+    const DEFAULT_LOCALE = "en-US";
+    const locale = (list && list.locale) || DEFAULT_LOCALE;
+
     const label = "Total time for allFoodWords, text, listItemTexts";
     console.time(label);
     const [allFoodWords, text, listItemTexts] = await Promise.all([
-      getAllFoodWords("en-US"),
+      getAllFoodWords(locale),
       extractText(object.bucket, name),
       getAllListItemTexts(listID)
     ]);
@@ -87,6 +90,9 @@ export const onFileUploadToText = functions.storage.object().onFinalize(
       });
 
     await incrementFoodWordHitCounts(foodWords, allFoodWords);
+
+    // This forces the the global cache to always be up-to-date.
+    await getAllFoodWords(locale, true);
   }
 );
 
@@ -110,7 +116,7 @@ async function incrementFoodWordHitCounts(
     }
   });
   await batch.commit();
-  logger.info(`Updating hitCount on ${countUpdates} food words`);
+  logger.debug(`Updating hitCount on ${countUpdates} food words`);
 }
 
 async function extractFoodWords(
@@ -170,23 +176,26 @@ async function extractText(bucketName: string, name: string): Promise<string> {
 }
 
 const globalCacheAllFoodWords: Map<string, FoodWordMap> = new Map();
-const globalCacheAllFoodWordsDates: Map<string, Date> = new Map();
 
-async function getAllFoodWords(locale = "en-US"): Promise<FoodWordMap> {
+async function getAllFoodWords(
+  locale = "en-US",
+  refreshCache = false
+): Promise<FoodWordMap> {
   // Relying on a global cache in Cloud Functions isn't great, but if it
   // works just a little sometimes, it can be a little help.
-  const fromCache = globalCacheAllFoodWords.get(locale);
-  const cacheDate = globalCacheAllFoodWordsDates.get(locale);
-  if (fromCache) {
-    logger.info(`Cache hit on getAllFoodWords(${locale})!`);
-    if (cacheDate) {
-      logger.info(
-        `Cache for getAllFoodWords(${locale}) is from ${cacheDate.toISOString()} `
-      );
+
+  if (!refreshCache) {
+    const fromCache = globalCacheAllFoodWords.get(locale);
+    if (fromCache) {
+      logger.info(`Cache HIT on getAllFoodWords(${locale})!`);
+      return fromCache;
     }
-    return fromCache;
+    logger.info(`Cache MISS on getAllFoodWords(${locale})!`);
   }
-  const label = "Time to download ALL food words";
+
+  const label = `Time to download ALL food words (refreshCache=${JSON.stringify(
+    refreshCache
+  )})`;
   console.time(label);
   const foodWordsSnapshot = await admin
     .firestore()
@@ -209,6 +218,5 @@ async function getAllFoodWords(locale = "en-US"): Promise<FoodWordMap> {
   console.timeEnd(label);
   console.log(`Using ${allFoodWords.size} known sample food words`);
   globalCacheAllFoodWords.set(locale, allFoodWords);
-  globalCacheAllFoodWordsDates.set(locale, new Date());
   return allFoodWords;
 }

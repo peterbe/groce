@@ -6,6 +6,6 @@ export * from "./invites";
 export * from "./shoppinglists";
 export * from "./download-and-resize";
 export * from "./image-to-text";
-export * from "./food-words";
+// export * from "./food-words";
 
 admin.initializeApp();

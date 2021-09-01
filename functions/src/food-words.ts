@@ -11,6 +11,7 @@ type FoodWord = {
 type FoodWordMap = Map<string, string>;
 type LocaleFoodWordMap = Map<string, FoodWordMap>;
 
+// CURRENTLY COMMENTED OUT!
 export const onFoodWordUpdateMaps = functions.firestore
   .document("foodwords/{foodWordID}")
   .onWrite(async change => {
@@ -61,25 +62,6 @@ export const onFoodWordUpdateMaps = functions.firestore
         .set({
           words: wordsObj
         });
-      // const docRef = admin
-      //   .firestore()
-      //   .collection("normalizedfoodwords")
-      //   .doc(locale);
-
-      // const docSnapshot = await docRef.get();
-      // if (!docSnapshot.exists) {
-      //   // Very first time!
-      //   // docRef.set({
-      //   //   words: wordsObj
-      //   // });
-      //   console.log(`Doc ${locale} does NOT exist`);
-      // } else {
-      //   console.log(`Doc ${locale} does exist`);
-
-      //   // docRef.update({
-      //   //   words: wordsObj
-      //   // });
-      // }
     }
   });
 
@@ -100,6 +82,5 @@ async function getAllFoodWords(): Promise<LocaleFoodWordMap> {
       map.set(word, id);
     }
   });
-
   return allFoodWords;
 }

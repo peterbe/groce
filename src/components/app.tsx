@@ -68,6 +68,12 @@ const App: FunctionalComponent = () => {
     import("firebase/firestore")
       .then(() => {
         const db = firebase.firestore();
+
+        // Clear any offline data.
+        // firebase.firestore().clearPersistence().catch(error => {
+        //   console.error('Could not enable persistence:', error.code);
+        // })
+
         if (USE_EMULATOR) {
           db.useEmulator("localhost", 9999);
         }
@@ -77,14 +83,6 @@ const App: FunctionalComponent = () => {
         db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
           setPersistenceError(error);
         });
-
-        // // Clear any offline data.
-        // firebase
-        //   .firestore()
-        //   .clearPersistence()
-        //   .catch((error) => {
-        //     console.error("Could not clear persistence:", error.code);
-        //   });
 
         setDB(db);
       })

@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as functions from "firebase-functions";
@@ -152,6 +153,10 @@ export const downloadAndResizeAndStore = functions
       res.setHeader("content-type", contentType);
       res.setHeader("cache-control", CACHE_CONTROL);
       res.send(modifiedImageBuffer);
+
+      // Because they say it's important to clean up after yourself
+      // https://firebase.google.com/docs/functions/tips#always_delete_temporary_files
+      fs.unlinkSync(tempFile);
     } catch (error) {
       console.warn(
         `Error when trying to upload ${modifiedFile} to ${destinationPath}`
