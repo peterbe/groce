@@ -2,7 +2,7 @@ const escapeNeedle = (needle: string) =>
   needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export function getFoodWords(text: string, listItems: string[]) {
-  const possibleFoodWords = listItems.map(t => t.toLowerCase());
+  const possibleFoodWords = [...new Set(listItems.map(t => t.toLowerCase()))];
 
   possibleFoodWords.sort((a, b) => b.length - a.length);
 

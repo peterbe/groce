@@ -57,7 +57,8 @@ export const downloadAndResizeAndStore = functions
         throw new Error("too big");
       }
     } catch (error) {
-      res.status(400).send(`width invalid (${error.message}`);
+      const errorMessage = errorToString(error, "Failed to check widthString");
+      res.status(400).send(`width invalid (${errorMessage})`);
       return;
     }
 
@@ -97,7 +98,7 @@ export const downloadAndResizeAndStore = functions
       // console.error(error);
       console.warn(`Error downloading ${destinationPath}`);
       res.setHeader("content-type", "text/plain");
-      res.status(500).send(error.toString());
+      res.status(500).send(errorToString(error));
       return;
     } finally {
       console.timeEnd(label);
@@ -120,7 +121,7 @@ export const downloadAndResizeAndStore = functions
       } catch (error) {
         console.warn(`Error downloading ${imagePath}`);
         res.setHeader("content-type", "text/plain");
-        res.status(404).send(error.toString());
+        res.status(404).send(errorToString(error));
         return;
       } finally {
         console.timeEnd(label);
@@ -162,10 +163,20 @@ export const downloadAndResizeAndStore = functions
         `Error when trying to upload ${modifiedFile} to ${destinationPath}`
       );
       res.setHeader("content-type", "text/plain");
-      res.status(500).send(error.toString());
+      res.status(500).send(errorToString(error));
       return;
     }
   });
+
+function errorToString(error: any, fallback: string = "") {
+  if (error instanceof Error) {
+    return error.toString();
+  }
+  if (fallback) {
+    return fallback;
+  }
+  return String(error);
+}
 
 function resize(file: string, width: number) {
   return sharp(file)

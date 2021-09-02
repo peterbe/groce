@@ -447,11 +447,13 @@ function ShowListPictures({
                   />
                 </div>
               ) : (
-                <div class="spinner-border" role="status">
-                  <span class="visually-hidden">
-                    Loading text from picture...
-                  </span>
-                </div>
+                // <div class="spinner-border" role="status">
+                //   <span class="visually-hidden">
+                //     Loading text from picture...
+                //   </span>
+                // </div>
+                // Based on a very rough estimate how long it usually takes
+                <DisplayFakeProgressbar time={5 * 1000} />
               )}
 
               <p>
@@ -484,6 +486,40 @@ function ShowListPictures({
   );
 }
 
+function DisplayFakeProgressbar({ time }: { time: number }) {
+  const [startDate] = useState(new Date());
+  const [percent, setPercent] = useState(0);
+  useEffect(() => {
+    let mounted = true;
+    let interval = setInterval(() => {
+      const elapsed = new Date().getTime() - startDate.getTime();
+      const ratio = (100 * elapsed) / time;
+      if (mounted) {
+        setPercent(Math.ceil(Math.min(99, ratio)));
+      }
+      if (ratio >= 100) {
+        clearInterval(interval);
+      }
+    }, 200);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [time, startDate]);
+  return (
+    <div class="progress">
+      <div
+        class="progress-bar progress-bar-striped progress-bar-animated"
+        role="progressbar"
+        aria-valuenow={`${percent}`}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        style={{ width: `${percent}%` }}
+      ></div>
+    </div>
+  );
+}
+
 function ListWords({
   listPictureText,
   items,
@@ -505,10 +541,10 @@ function ListWords({
   }
 
   const alreadyOnListLC = items
-    ? items.map((item) => item.text.toLowerCase())
+    ? items.filter(item => !item.removed).map((item) => item.text.toLowerCase())
     : [];
   const alreadyOnDoneListLC = items
-    ? items.filter((item) => item.done).map((item) => item.text.toLowerCase())
+    ? items.filter((item) => !item.removed && item.done).map((item) => item.text.toLowerCase())
     : [];
 
   return (
@@ -551,7 +587,10 @@ function ListWords({
                   {word}{" "}
                   {isDisabled && (
                     <small>
-                      ({isDone ? "already checked off list" : "already on your list"}
+                      (
+                      {isDone
+                        ? "already checked off list"
+                        : "already on your list"}
                       )
                     </small>
                   )}

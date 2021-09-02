@@ -156,6 +156,23 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
     );
   }
 
+  function downloadToFile(fileName = "sample-food-words.ts") {
+    const words = foodWords?.map((foodWord) => foodWord.word);
+    let text = `// Generated ${new Date().toISOString()}\n`
+    text += `export const FOOD_WORDS = ${JSON.stringify(words, null, 2)};\n`;
+
+    var a = document.createElement("a");
+    a.style.cssText = "display: none";
+    document.body.appendChild(a);
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.parentElement?.removeChild(a);
+  }
+
   if (!foodWords) {
     return <Loading text="Loading..." />;
   }
@@ -202,6 +219,20 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
           Deleted <b>{deletedWord.word}</b>
         </p>
       )}
+      {db && foodWords && isAdmin && (
+        <p>
+          <a
+            href="download"
+            download="test-sample-food-words.ts"
+            onClick={(event) => {
+              event.preventDefault();
+              downloadToFile();
+            }}
+          >
+            Download as TypeScript file
+          </a>
+        </p>
+      )}
       <table class="table table-sm align-middle table-borderless">
         <thead>
           <tr>
@@ -220,6 +251,11 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
                 type="search"
                 class="form-control"
                 value={filterWord}
+                onInput={(event) => {
+                  if (event.currentTarget.value === "") {
+                    setFilterWord("");
+                  }
+                }}
                 onChange={(event) => {
                   setFilterWord(event.currentTarget.value);
                 }}

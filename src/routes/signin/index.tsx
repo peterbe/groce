@@ -53,16 +53,16 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
                     await user.linkWithPopup(provider);
                     route("/", true);
                   } catch (error) {
-                    setSignInError(error);
-                    console.log("ERROR:", error);
+                    setSignInError(
+                      error instanceof Error ? error : new Error(error)
+                    );
                   }
                 } else {
                   try {
                     await auth.signInWithPopup(provider);
                     route("/", true);
-                  } catch (error) {
+                  } catch (error: any) {
                     setSignInError(error);
-                    console.log("ERROR:", error);
                   }
                 }
               }}

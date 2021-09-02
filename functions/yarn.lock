@@ -486,10 +486,10 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
-"@types/sharp@0.28.5":
-  version "0.28.5"
-  resolved "https://registry.yarnpkg.com/@types/sharp/-/sharp-0.28.5.tgz#2095c304e24c310945d6ece7a9fd44b34272c93f"
-  integrity sha512-+RYU1NdKeDtTMau6HBbcVUCWjMiDydW4nRIGnOviwRxZxjJy0LqRdx0+YdxBKHcSlUWIYhD1XtiGQsUtInsjBQ==
+"@types/sharp@0.28.6":
+  version "0.28.6"
+  resolved "https://registry.yarnpkg.com/@types/sharp/-/sharp-0.28.6.tgz#41e4f904b39e5269328080e0bd1d008ae5bc8b21"
+  integrity sha512-AjKjo5vk5mkcTrWL0U1zFUdCp/uqLebvbe7ezAJx0tgp6ST9JmfsYK1q1lpjfPM5S1YQ1wr5uboPSu2S8UO9yw==
   dependencies:
     "@types/node" "*"
 
@@ -2001,10 +2001,10 @@ firebase-functions-test@^0.3.2:
     "@types/lodash" "^4.14.104"
     lodash "^4.17.5"
 
-firebase-functions@^3.15.4:
-  version "3.15.4"
-  resolved "https://registry.yarnpkg.com/firebase-functions/-/firebase-functions-3.15.4.tgz#c9309a565abb1f57a1e50d41b3e54bcee6a3ee51"
-  integrity sha512-6Zq+QIqdslZLsSwWg25Hv39cgFBZr0oUAbCjfe/MXqSHMy8ZK/1Vdy/WKx5IRC6hE7+JrmfVylIyEonTyNcheA==
+firebase-functions@^3.15.5:
+  version "3.15.5"
+  resolved "https://registry.yarnpkg.com/firebase-functions/-/firebase-functions-3.15.5.tgz#d0b9d719c88332048f59ee3ecda5755cb0dabda2"
+  integrity sha512-w5Twk7txwfPFasx+i25f0U4fLiSa06XvwOIoEwazGYLPOLe18b2jCDQ9X8aeJm8S7FZE40ODWGVTLtF6dX6xHg==
   dependencies:
     "@types/cors" "^2.8.5"
     "@types/express" "4.17.3"
@@ -2012,10 +2012,10 @@ firebase-functions@^3.15.4:
     express "^4.17.1"
     lodash "^4.17.14"
 
-firebase-tools@9.16.6:
-  version "9.16.6"
-  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-9.16.6.tgz#9b46c62cba7499fd17d4f44003f9bb05529b1dad"
-  integrity sha512-bW4rT+pTE6n8892rXd5ier9H1snXUZIXrL3WKzuVWXSUqDjUbx6SIgXhjp1++GIdkiMGnfDY5EJR4nV/YrTO5A==
+firebase-tools@9.17.0:
+  version "9.17.0"
+  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-9.17.0.tgz#34d924a81aecc7c59eb4193a774d8408f571d02a"
+  integrity sha512-+srVeGz6w3ouR567ELHe33Nm0nwhhVvu5IHuQOaH0qQvDzX8LgBGqCpatqgYToUmPgDMGG34f1d+aa8vQ0pEBw==
   dependencies:
     "@google-cloud/pubsub" "^2.7.0"
     "@types/archiver" "^5.1.0"
@@ -4947,10 +4947,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.3.5:
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
-  integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==
+typescript@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.4.2.tgz#6d618640d430e3569a1dfb44f7d7e600ced3ee86"
+  integrity sha512-gzP+t5W4hdy4c+68bfcv0t400HVJMMd2+H9B7gae1nQlBzCqvrXX+6GL/b3GAgyTH966pzrZ70/fRjwAtZksSQ==
 
 unique-string@^2.0.0:
   version "2.0.0"

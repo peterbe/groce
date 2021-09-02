@@ -7,6 +7,7 @@ export * from "./shoppinglists";
 export * from "./download-and-resize";
 export * from "./image-to-text";
 export * from "./cleanup-picture-uploads";
+export * from "./cleanup-thumbnails";
 // export * from "./food-words";
 
 admin.initializeApp();
