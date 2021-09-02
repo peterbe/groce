@@ -223,7 +223,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
   }
 
-  function addNewText(text: string) {
+  async function addNewText(text: string) {
     if (!text.trim()) {
       throw new Error("new text empty");
     }
@@ -244,7 +244,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
     if (previousItem) {
       // Update it as not removed and not done
-      db.collection(`shoppinglists/${id}/items`)
+      return db
+        .collection(`shoppinglists/${id}/items`)
         .doc(previousItem.id)
         .set({
           text: previousItem.text,
@@ -280,7 +281,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
       }
 
       // A fresh add
-      db.collection(`shoppinglists/${id}/items`)
+      return db
+        .collection(`shoppinglists/${id}/items`)
         .add({
           text: text.trim(),
           description: "",
@@ -565,7 +567,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
           {editAction ? "Close" : "List options"}
         </button>
       </p>
-      {list && <h2>{list.name} </h2>}
+      {list && (
+        <h2>
+          <Link class={style.list_header_link} href={`/shopping/${list.id}`}>
+            {list.name}
+          </Link>
+        </h2>
+      )}
 
       {items && !editAction && popularityContest && (
         <PopularityContest

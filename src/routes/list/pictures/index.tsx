@@ -1,5 +1,6 @@
 import { FunctionalComponent, h } from "preact";
 import { useState, useEffect } from "preact/hooks";
+import { route } from "preact-router";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -24,7 +25,7 @@ interface Props {
   ready: boolean;
   list: List;
   items: Item[] | null;
-  saveHandler: (text: string) => void;
+  saveHandler: (text: string) => Promise<void>;
   openImageModal: (url: string) => void;
 }
 
@@ -196,6 +197,11 @@ export const Pictures: FunctionalComponent<Props> = ({
       });
   }
 
+  async function saveNewTexts(words: string[]) {
+    await Promise.all(words.map((word) => saveHandler(word)));
+    route(`/shopping/${list.id}`, true);
+  }
+
   const [uploadedFiles, setUploadedFiles] = useState<Map<string, File>>(
     new Map()
   );
@@ -314,6 +320,8 @@ export const Pictures: FunctionalComponent<Props> = ({
           deleteListPicture={deleteListPicture}
           openImageModal={openImageModal}
           uploadedFiles={uploadedFiles}
+          items={items}
+          saveNewTexts={saveNewTexts}
         />
       )}
     </div>
@@ -372,6 +380,8 @@ function ShowListPictures({
   deleteListPicture,
   openImageModal,
   uploadedFiles,
+  items,
+  saveNewTexts,
 }: {
   listPictures: ListPicture[];
   listPictureTexts: Map<string, ListPictureText>;
@@ -379,6 +389,8 @@ function ShowListPictures({
   deleteListPicture: (id: string) => void;
   openImageModal: (url: string) => void;
   uploadedFiles: Map<string, File>;
+  items: Item[] | null;
+  saveNewTexts: (words: string[]) => void;
 }) {
   return (
     <div class={style.list_pictures}>
@@ -408,7 +420,10 @@ function ShowListPictures({
         {listPictures.map((listPicture) => {
           const listPictureText = listPictureTexts.get(listPicture.filePath);
           return (
-            <li class={`list-group-item  ${style.picture_group}`} key={listPicture.id}>
+            <li
+              class={`list-group-item ${style.picture_group}`}
+              key={listPicture.id}
+            >
               <NotesForm
                 listPicture={listPicture}
                 saveListPictureNotes={saveListPictureNotes}
@@ -425,7 +440,11 @@ function ShowListPictures({
 
               {listPictureText ? (
                 <div>
-                  <ListWords listPictureText={listPictureText} />
+                  <ListWords
+                    listPictureText={listPictureText}
+                    items={items}
+                    saveNewTexts={saveNewTexts}
+                  />
                 </div>
               ) : (
                 <div class="spinner-border" role="status">
@@ -438,10 +457,11 @@ function ShowListPictures({
               <p>
                 <small class="fw-light">
                   Added: {dayjs(listPicture.created.toDate()).fromNow()}
-                </small>{" "}
+                </small>
+                <br />
                 {listPicture.created.seconds !==
                   listPicture.modified.seconds && (
-                  <small class="fw-light" style={{ marginLeft: 20 }}>
+                  <small class="fw-light">
                     Modified: {dayjs(listPicture.modified.toDate()).fromNow()}
                   </small>
                 )}
@@ -464,57 +484,118 @@ function ShowListPictures({
   );
 }
 
-function ListWords({ listPictureText }: { listPictureText: ListPictureText }) {
+function ListWords({
+  listPictureText,
+  items,
+  saveNewTexts,
+}: {
+  listPictureText: ListPictureText;
+  items: Item[] | null;
+  saveNewTexts: (words: string[]) => void;
+}) {
   const { text, foodWords } = listPictureText;
   const [showText, setShowText] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
   if (!text) {
-    return null;
+    return (
+      <p>
+        <i>No text found in image 🧐</i>
+      </p>
+    );
   }
+
+  const alreadyOnListLC = items
+    ? items.map((item) => item.text.toLowerCase())
+    : [];
+  const alreadyOnDoneListLC = items
+    ? items.filter((item) => item.done).map((item) => item.text.toLowerCase())
+    : [];
 
   return (
     <div class={style.words}>
       {foodWords && foodWords.length > 0 ? (
         <div>
           <b>Food words found:</b>
-          <ul class="list-group">
+          <div class="list-group">
             {foodWords.map((word, i) => {
-              return (
-                <li key={word} class="list-group-item">
-                  <input
-                    key={word}
-                    class="form-check-input me-1"
-                    id={`id_foundword${i}`}
-                    type="checkbox"
-                    value={word}
-                    aria-label={word}
-                  />{" "}
-                  <label htmlFor={`id_foundword${i}`}>{word}</label>
-                </li>
-              );
-            })}
-          </ul>
+              const isPicked = picked.includes(word);
+              const isDisabled = alreadyOnListLC.includes(word.toLowerCase());
+              const isDone = alreadyOnDoneListLC.includes(word.toLowerCase());
 
-          {text !== null && (
-            <div>
-              <p>
+              return (
                 <button
+                  key={word}
                   type="button"
-                  class="btn btn-sm btn-outline-secondary"
+                  class={`list-group-item list-group-item-action ${
+                    isPicked ? "list-group-item-success" : ""
+                  }`}
+                  aria-current={isPicked || undefined}
+                  disabled={isDisabled}
+                  title={
+                    isDone
+                      ? "Already on list checked off"
+                      : isDisabled
+                      ? "Already on your shopping list"
+                      : undefined
+                  }
                   onClick={() => {
-                    setShowText(!showText);
+                    if (isPicked) {
+                      setPicked((prevState) => {
+                        return prevState.filter((w) => w !== word);
+                      });
+                    } else {
+                      setPicked((prevState) => [...prevState, word]);
+                    }
                   }}
                 >
-                  {showText ? "Close" : "Show found text"}
+                  {word}{" "}
+                  {isDisabled && (
+                    <small>
+                      ({isDone ? "already checked off list" : "already on your list"}
+                      )
+                    </small>
+                  )}
                 </button>
-              </p>
-              {showText && <pre style={{ fontSize: "70%" }}>{text}</pre>}
-            </div>
-          )}
+              );
+            })}
+          </div>
+          <div class={`d-grid gap-2 ${style.add_picked_words_container}`}>
+            <button
+              type="button"
+              class="btn btn-primary"
+              disabled={picked.length === 0}
+              onClick={() => {
+                saveNewTexts(picked);
+              }}
+            >
+              Add{" "}
+              <b>
+                {picked.length} item{picked.length !== 1 ? "s" : ""}
+              </b>{" "}
+              to shopping list
+            </button>
+          </div>
         </div>
       ) : (
         <p>
           <i>No food words found 🤨</i>
         </p>
+      )}
+      {text !== null && (
+        <div class={style.debug_found_foodwords}>
+          <p>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              onClick={() => {
+                setShowText(!showText);
+              }}
+            >
+              {showText ? "Close" : "Show found text"}
+            </button>
+          </p>
+          {showText && <pre style={{ fontSize: "70%" }}>{text}</pre>}
+        </div>
       )}
     </div>
   );
@@ -543,13 +624,13 @@ function NotesForm({
         saveListPictureNotes(listPicture.id, notes.trim());
       }}
     >
-      <div class="input-group input-group-sm mb-3">
+      <div class="input-group mb-3">
         <input
           type="text"
           class="form-control"
           placeholder="Notes"
           aria-label="Notes"
-          aria-describedby="button-addon2"
+          aria-describedby={`button-addon${listPicture.id}`}
           value={notes}
           onInput={(event) => {
             setNotes(event.currentTarget.value);
@@ -559,7 +640,7 @@ function NotesForm({
           class="btn btn-outline-secondary"
           type="submit"
           disabled={!hasChanged}
-          id="button-addon2"
+          id={`button-addon${listPicture.id}`}
         >
           Save
         </button>

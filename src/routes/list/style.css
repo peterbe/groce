@@ -128,3 +128,9 @@
     opacity: 0;
   }
 }
+
+
+.list_header_link {
+  text-decoration: none;
+  color: black;
+}

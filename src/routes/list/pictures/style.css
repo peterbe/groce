@@ -11,6 +11,14 @@
 }
 
 .picture_group {
-  padding-bottom: 20px;
-  margin-bottom: 75px;
+  padding-bottom: 30px !important;
+  margin-bottom: 30px;
+}
+
+.debug_found_foodwords {
+  margin-top: 20px;
+}
+
+.add_picked_words_container {
+  margin-top: 10px;
 }

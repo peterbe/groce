@@ -12,6 +12,7 @@ declare namespace StyleCssNamespace {
     fadeOut: string;
     item_description: string;
     list: string;
+    list_header_link: string;
     list_item_edit_mode: string;
     listoptions: string;
     listoptions_section: string;

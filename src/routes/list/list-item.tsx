@@ -469,6 +469,7 @@ function DisplayFilesViewMode({
               thumbnailWidth={80}
               maxWidth={30}
               maxHeight={30}
+              useObjectFit={true}
             />
           </span>
         );
@@ -507,6 +508,7 @@ function DisplayFilesEditMode({
               // what's being used here:
               maxWidth={80}
               maxHeight={80}
+              useObjectFit={true}
             />
 
             <button

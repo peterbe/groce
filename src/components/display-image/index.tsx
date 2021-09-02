@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { useState, useEffect,  } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 
 import { useDownloadImageURL } from "../../hooks";
 
@@ -14,8 +14,10 @@ export function DisplayImage({
   maxWidth,
   maxHeight,
   openImageModal,
-  className="img-thumbnail",
-  thumbnailWidth = null
+  // className = "img-thumbnail",
+  className = "rounded",
+  thumbnailWidth = null,
+  useObjectFit = false,
 }: {
   filePath: string;
   file: File | undefined;
@@ -23,7 +25,8 @@ export function DisplayImage({
   maxHeight: number;
   openImageModal: (url: string) => void;
   className?: string;
-  thumbnailWidth?: number | null
+  thumbnailWidth?: number | null;
+  useObjectFit?: boolean;
 }) {
   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
@@ -70,6 +73,20 @@ export function DisplayImage({
     }
   }, [downloadURL]);
 
+  const style: {
+    width: number;
+    height?: number;
+    "object-fit"?: string;
+  } = {
+    width: maxWidth,
+    // height: maxHeight,
+    // "object-fit": "cover",
+  };
+  if (useObjectFit) {
+    style.height = maxHeight;
+    style["object-fit"] = "cover";
+  }
+
   return (
     <a
       href={downloadURL}
@@ -80,11 +97,7 @@ export function DisplayImage({
     >
       <img
         class={className}
-        style={{
-          width: maxWidth,
-          height: maxHeight,
-          "object-fit": "cover",
-        }}
+        style={style}
         src={
           loaded
             ? thumbnailURL
