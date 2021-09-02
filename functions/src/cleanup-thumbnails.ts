@@ -2,15 +2,13 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
-// const OLD_DAYS = 30 * 6  // 6 months
-const OLD_DAYS = 245; // TEMP
+const OLD_DAYS = 30 * 6  // 6 months
 // const ADDITIONAL_DAYS_BACK = 5;
 // const ADDITIONAL_DAYS_BACK = 15;
 const PREFIX = "thumbnails";
 
 export const scheduledCleanupThumbnails = functions.pubsub
-  // .schedule("every 24 hours")
-  .schedule("every 5 minutes")
+  .schedule("every 24 hours")
   .onRun(async () => {
     logger.debug("Running scheduledCleanupThumbnails");
 
@@ -63,7 +61,7 @@ async function deleteByPrefix(prefix: string) {
     }
   });
   if (totalSize) {
-    logger.info(`Deleted total of ${totalSize} worth of data`);
+    logger.info(`In ${prefix}: Deleted total of ${totalSize} worth of data`);
   }
-  logger.info(`Deleted ${countDeleted}, Analyzed ${count} files`);
+  logger.info(`In ${prefix}: Deleted ${countDeleted}, Analyzed ${count} files`);
 }
