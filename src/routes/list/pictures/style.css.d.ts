@@ -6,7 +6,10 @@ declare namespace StyleCssNamespace {
     list_pictures: string;
     picture_group: string;
     pictures: string;
+    suggested_foodwords: string;
+    tabs_container: string;
     words: string;
+    your_suggested_words: string;
   }
 }
 

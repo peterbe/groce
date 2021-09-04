@@ -161,7 +161,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
     let text = `// Generated ${new Date().toISOString()}\n`
     text += `export const FOOD_WORDS = ${JSON.stringify(words, null, 2)};\n`;
 
-    var a = document.createElement("a");
+    const a = document.createElement("a");
     a.style.cssText = "display: none";
     document.body.appendChild(a);
     const blob = new Blob([text], { type: "text/plain" });

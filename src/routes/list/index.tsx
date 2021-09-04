@@ -265,42 +265,41 @@ const ShoppingList: FunctionalComponent<Props> = ({
           console.error("Unable to update:", error);
           throw error;
         });
-    } else {
-      if (!list?.config.disableDefaultSuggestions) {
-        // Perhaps what you typed was almost like one of the suggestions.
-        // E.g you typed 'steak' but there's a suggestion, which is spelled
-        // "nicer" and it's 'Steak 🥩'
-        const suggestion = ITEM_SUGGESTIONS.find(
-          (itemText) =>
-            itemText.toLowerCase() === textLC ||
-            stripEmojis(itemText).toLowerCase() === textLC
-        );
-        if (suggestion) {
-          text = suggestion;
-        }
-      }
-
-      // A fresh add
-      return db
-        .collection(`shoppinglists/${id}/items`)
-        .add({
-          text: text.trim(),
-          description: "",
-          group: {
-            order: 0,
-            text: "",
-          },
-          quantity: 0,
-          done: false,
-          removed: false,
-          added: [firebase.firestore.Timestamp.fromDate(new Date())],
-          times_added: 1,
-        })
-        .catch((error) => {
-          console.error("Error trying to add new item:", error);
-          throw error;
-        });
     }
+    if (!list?.config.disableDefaultSuggestions) {
+      // Perhaps what you typed was almost like one of the suggestions.
+      // E.g you typed 'steak' but there's a suggestion, which is spelled
+      // "nicer" and it's 'Steak 🥩'
+      const suggestion = ITEM_SUGGESTIONS.find(
+        (itemText) =>
+          itemText.toLowerCase() === textLC ||
+          stripEmojis(itemText).toLowerCase() === textLC
+      );
+      if (suggestion) {
+        text = suggestion;
+      }
+    }
+
+    // A fresh add
+    return db
+      .collection(`shoppinglists/${id}/items`)
+      .add({
+        text: text.trim(),
+        description: "",
+        group: {
+          order: 0,
+          text: "",
+        },
+        quantity: 0,
+        done: false,
+        removed: false,
+        added: [firebase.firestore.Timestamp.fromDate(new Date())],
+        times_added: 1,
+      })
+      .catch((error) => {
+        console.error("Error trying to add new item:", error);
+        throw error;
+      });
   }
 
   function updateItemDoneToggle(item: Item) {
@@ -648,15 +647,17 @@ const ShoppingList: FunctionalComponent<Props> = ({
         picturesMode &&
         db &&
         storage &&
+        user &&
         list && (
           <Pictures
             db={db}
             storage={storage}
+            user={user}
             list={list}
             ready={!!items}
             items={items}
-            saveHandler={(text: string) => {
-              addNewText(text);
+            saveHandler={async (text: string) => {
+              await addNewText(text);
             }}
             openImageModal={openImageModal}
           />

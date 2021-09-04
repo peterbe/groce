@@ -14,6 +14,8 @@ import {
   FirestoreListPicture,
   ListPictureText,
   FirestoreListPictureText,
+  FirestoreSuggestedFoodword,
+  SuggestedFoodword,
 } from "../../../types";
 import { DisplayImage } from "../../../components/display-image";
 
@@ -22,16 +24,19 @@ dayjs.extend(relativeTime);
 interface Props {
   db: firebase.firestore.Firestore;
   storage: firebase.storage.Storage;
+  user: firebase.User;
   ready: boolean;
   list: List;
   items: Item[] | null;
   saveHandler: (text: string) => Promise<void>;
   openImageModal: (url: string) => void;
 }
+type TabState = "uploads" | "options" | "suggested";
 
 export const Pictures: FunctionalComponent<Props> = ({
   db,
   storage,
+  user,
   ready,
   items,
   list,
@@ -42,6 +47,13 @@ export const Pictures: FunctionalComponent<Props> = ({
   const [listPicturesError, setListPicturesError] = useState<Error | null>(
     null
   );
+  const [tab, setTab] = useState<TabState>("uploads");
+  useEffect(() => {
+    const { hash } = window.location;
+    if (["#uploads", "#options", "#suggested"].includes(hash)) {
+      setTab(hash.slice(1) as TabState);
+    }
+  }, []);
 
   const [listPictureTexts, setListPictureTexts] = useState<
     Map<string, ListPictureText>
@@ -76,21 +88,10 @@ export const Pictures: FunctionalComponent<Props> = ({
           };
           newListPictures.push(item);
         });
-        newListPictures.sort((a, b) => {
-          // Most recently created first
-          return b.created.seconds - a.created.seconds;
-        });
+        // Most recently created first
+        newListPictures.sort((a, b) => b.created.seconds - a.created.seconds);
 
         setListPictures(newListPictures);
-
-        // snapshot.docChanges().forEach((change) => {
-        //   if (change.type === "modified") {
-        //     // const newRecentlyModifiedItems = new Map();
-        //     // newRecentlyModifiedItems.set(change.doc.id, new Date());
-        //     // setRecentlyModifiedItems(newRecentlyModifiedItems);
-        //     console.log("RECENTLY UPDATED", change.doc.data().filePath);
-        //   }
-        // });
       },
       (error) => {
         console.error("Snapshot error:", error);
@@ -113,7 +114,6 @@ export const Pictures: FunctionalComponent<Props> = ({
             id: doc.id,
             filePath: data.filePath,
             created: data.created,
-            // words: data.words,
             text: data.text,
             foodWords: data.foodWords,
           };
@@ -130,6 +130,47 @@ export const Pictures: FunctionalComponent<Props> = ({
       ref();
     };
   }, [db, list]);
+
+  const [suggestedFoodwords, setSuggestedFoodwords] = useState<
+    SuggestedFoodword[] | null
+  >(null);
+
+  useEffect(() => {
+    let ref: () => void;
+    if (user) {
+      ref = db
+        .collection("suggestedfoodwords")
+        .where("creator_uid", "==", user.uid)
+        .onSnapshot(
+          (snapshot) => {
+            const newSuggestedFoodwords: SuggestedFoodword[] = [];
+            snapshot.forEach((doc) => {
+              const data = doc.data() as FirestoreSuggestedFoodword;
+              newSuggestedFoodwords.push({
+                id: doc.id,
+                word: data.word,
+                created: data.created,
+                creator_uid: data.creator_uid,
+              });
+            });
+            newSuggestedFoodwords.sort(
+              (a, b) =>
+                b.created.toDate().getTime() - a.created.toDate().getTime()
+            );
+            setSuggestedFoodwords(newSuggestedFoodwords);
+            // setListPictureTexts(newListPictureTexts);
+          },
+          (error) => {
+            console.error("Snapshot error:", error);
+            // XXX deal better
+            // setListPictureTextsError(error);
+          }
+        );
+    }
+    return () => {
+      if (ref) ref();
+    };
+  }, [db, user]);
 
   const [undoableDelete, setUndoableDelete] = useState<string | null>(null);
   useEffect(() => {
@@ -312,7 +353,16 @@ export const Pictures: FunctionalComponent<Props> = ({
         />
       )}
 
-      {listPictures && (
+      <Tabs
+        onChange={(tab: TabState) => setTab(tab)}
+        tab={tab}
+        countListPictures={listPictures ? listPictures.length : 0}
+        countSuggestedFoodwords={
+          suggestedFoodwords ? suggestedFoodwords.length : 0
+        }
+      />
+
+      {listPictures && tab === "uploads" && (
         <ShowListPictures
           listPictures={listPictures}
           listPictureTexts={listPictureTexts}
@@ -324,9 +374,88 @@ export const Pictures: FunctionalComponent<Props> = ({
           saveNewTexts={saveNewTexts}
         />
       )}
+      {tab === "suggested" && (
+        <ShowSuggestedFoodwords
+          suggestedFoodwords={suggestedFoodwords}
+          addSuggestion={async (word: string) => {
+            await db.collection("suggestedfoodwords").add({
+              word,
+              creator_uid: user.uid,
+              created: firebase.firestore.Timestamp.fromDate(new Date()),
+            });
+          }}
+          removeSuggestions={async (ids: string[]) => {
+            await Promise.all(
+              ids.map((id) => {
+                return db.collection("suggestedfoodwords").doc(id).delete();
+              })
+            );
+          }}
+        />
+      )}
     </div>
   );
 };
+
+function Tabs({
+  tab,
+  onChange,
+  countListPictures,
+  countSuggestedFoodwords,
+}: {
+  tab: TabState;
+  onChange: (tab: TabState) => void;
+  countListPictures: number;
+  countSuggestedFoodwords: number;
+}) {
+  return (
+    <div class={style.tabs_container}>
+      <ul class="nav nav-pills nav-fill">
+        <li class="nav-item">
+          <a
+            class={tab === "uploads" ? "nav-link active" : "nav-link"}
+            aria-current={tab === "uploads" ? "page" : undefined}
+            href="#uploads"
+            onClick={() => {
+              onChange("uploads");
+            }}
+          >
+            Uploads{" "}
+            <small>{countListPictures ? `(${countListPictures})` : ""}</small>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a
+            class={tab === "options" ? "nav-link active" : "nav-link"}
+            aria-current={tab === "options" ? "page" : undefined}
+            href="#options"
+            onClick={() => {
+              onChange("options");
+            }}
+          >
+            Options
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class={tab === "suggested" ? "nav-link active" : "nav-link"}
+            aria-current={tab === "suggested" ? "page" : undefined}
+            href="#suggested"
+            onClick={() => {
+              onChange("suggested");
+            }}
+          >
+            Suggested{" "}
+            <small>
+              {countSuggestedFoodwords ? `(${countSuggestedFoodwords})` : ""}
+            </small>
+          </a>
+        </li>
+      </ul>
+    </div>
+  );
+}
 
 function UndoListPictureDelete({
   undoableDelete,
@@ -369,6 +498,117 @@ function UndoListPictureDelete({
           removeUndoableDelete();
         }}
       />
+    </div>
+  );
+}
+
+function ShowSuggestedFoodwords({
+  suggestedFoodwords,
+  addSuggestion,
+  removeSuggestions,
+}: {
+  suggestedFoodwords: SuggestedFoodword[] | null;
+  addSuggestion: (word: string) => Promise<void>;
+  removeSuggestions: (ids: string[]) => Promise<void>;
+}) {
+  const [newText, setNewText] = useState("");
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+
+  return (
+    <div class={style.suggested_foodwords}>
+      {suggestedFoodwords && suggestedFoodwords.length > 0 ? (
+        <div class={style.your_suggested_words}>
+          <p>Your suggested words:</p>
+          <div class="list-group list-group-flush">
+            {suggestedFoodwords.map((suggestedFoodword) => {
+              return (
+                <label class="list-group-item">
+                  <input
+                    class="form-check-input me-1"
+                    type="checkbox"
+                    value={suggestedFoodword.id}
+                    checked={checkedIds.includes(suggestedFoodword.id)}
+                    onChange={() => {
+                      if (checkedIds.includes(suggestedFoodword.id)) {
+                        setCheckedIds(
+                          checkedIds.filter((id) => id !== suggestedFoodword.id)
+                        );
+                      } else {
+                        setCheckedIds([...checkedIds, suggestedFoodword.id]);
+                      }
+                    }}
+                  />
+                  {"  "}
+                  {suggestedFoodword.word}{" "}
+                  <small class="fw-light">
+                    ({dayjs(suggestedFoodword.created.toDate()).fromNow()})
+                  </small>
+                </label>
+              );
+            })}
+          </div>
+          {checkedIds.length > 0 && (
+            <button
+              type="button"
+              class="btn btn-warning"
+              onClick={async () => {
+                await removeSuggestions(checkedIds);
+                setCheckedIds([]);
+              }}
+            >
+              Remove selected suggestions
+            </button>
+          )}
+        </div>
+      ) : (
+        <p>
+          You can help yourself and everyone else by{" "}
+          <b>suggesting appropriate food words</b> that the picture scanner
+          couldn't find. It's very much appreciated!
+        </p>
+      )}
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (!newText.trim()) {
+            return;
+          }
+          const existing = new Set(
+            suggestedFoodwords?.map((s) => s.word.toLowerCase())
+          );
+          if (existing.has(newText.trim().toLowerCase())) {
+            return;
+          }
+          await addSuggestion(newText.trim());
+          setNewText("");
+        }}
+      >
+        <div class="mb-3">
+          <label htmlFor="id_suggestion" class="form-label">
+            Your new suggestion:
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="id_suggestion"
+            aria-describedby="suggestionHelp"
+            value={newText}
+            onInput={(event) => {
+              setNewText(event.currentTarget.value);
+            }}
+          />
+          <div id="suggestionHelp" class="form-text">
+            For example: <i>Crunchy Stew Sticks</i>
+          </div>
+        </div>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          disabled={!newText.trim()}
+        >
+          Submit suggestion
+        </button>
+      </form>
     </div>
   );
 }
@@ -435,7 +675,7 @@ function ShowListPictures({
                 maxWidth={450}
                 maxHeight={450}
                 openImageModal={openImageModal}
-                className="img-fluid rounded"
+                className="img-fluid rounded img-thumbnail"
               />
 
               {listPictureText ? (
@@ -491,7 +731,7 @@ function DisplayFakeProgressbar({ time }: { time: number }) {
   const [percent, setPercent] = useState(0);
   useEffect(() => {
     let mounted = true;
-    let interval = setInterval(() => {
+    const interval = setInterval(() => {
       const elapsed = new Date().getTime() - startDate.getTime();
       const ratio = (100 * elapsed) / time;
       if (mounted) {
@@ -515,7 +755,7 @@ function DisplayFakeProgressbar({ time }: { time: number }) {
         aria-valuemin="0"
         aria-valuemax="100"
         style={{ width: `${percent}%` }}
-      ></div>
+      />
     </div>
   );
 }
@@ -541,10 +781,14 @@ function ListWords({
   }
 
   const alreadyOnListLC = items
-    ? items.filter(item => !item.removed).map((item) => item.text.toLowerCase())
+    ? items
+        .filter((item) => !item.removed)
+        .map((item) => item.text.toLowerCase())
     : [];
   const alreadyOnDoneListLC = items
-    ? items.filter((item) => !item.removed && item.done).map((item) => item.text.toLowerCase())
+    ? items
+        .filter((item) => !item.removed && item.done)
+        .map((item) => item.text.toLowerCase())
     : [];
 
   return (
@@ -553,7 +797,7 @@ function ListWords({
         <div>
           <b>Food words found:</b>
           <div class="list-group">
-            {foodWords.map((word, i) => {
+            {foodWords.map((word) => {
               const isPicked = picked.includes(word);
               const isDisabled = alreadyOnListLC.includes(word.toLowerCase());
               const isDone = alreadyOnDoneListLC.includes(word.toLowerCase());

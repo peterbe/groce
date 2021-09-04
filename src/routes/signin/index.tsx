@@ -54,15 +54,17 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
                     route("/", true);
                   } catch (error) {
                     setSignInError(
-                      error instanceof Error ? error : new Error(error)
+                      error instanceof Error ? error : new Error(String(error))
                     );
                   }
                 } else {
                   try {
                     await auth.signInWithPopup(provider);
                     route("/", true);
-                  } catch (error: any) {
-                    setSignInError(error);
+                  } catch (error) {
+                    setSignInError(
+                      error instanceof Error ? error : new Error(String(error))
+                    );
                   }
                 }
               }}

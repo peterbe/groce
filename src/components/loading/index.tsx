@@ -109,7 +109,7 @@ export const Loading: FunctionalComponent<Props> = ({
             onClick={(event) => {
               event.preventDefault();
               setReloading(true);
-              window.location.reload(true);
+              window.location.reload();
             }}
           >
             {reloading && (
@@ -128,7 +128,7 @@ export const Loading: FunctionalComponent<Props> = ({
             <a
               href="."
               onClick={() => {
-                window.location.reload(true);
+                window.location.reload();
               }}
             >
               Try reloading the page

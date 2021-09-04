@@ -175,8 +175,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
               setFileValidationError(null);
             } catch (error) {
               console.warn("Problem with file validation", error);
-
-              setFileValidationError(error);
+              setFileValidationError(error instanceof Error ? error : new Error(String(error)));
               return;
             }
             setFile(file);

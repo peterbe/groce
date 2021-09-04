@@ -32,9 +32,6 @@ export interface FirestoreListPicture {
   created: firebase.firestore.Timestamp;
   modified: firebase.firestore.Timestamp;
   deleted?: firebase.firestore.Timestamp;
-  // texts: ListPictureTexts
-  // text?: string;
-  // words?: string[];
 }
 
 export interface ListPicture extends FirestoreListPicture {
@@ -44,13 +41,21 @@ export interface ListPicture extends FirestoreListPicture {
 export interface FirestoreListPictureText {
   filePath: string;
   created: firebase.firestore.Timestamp;
-  // texts: ListPictureTexts
   text: string;
-  // words: string[];
   foodWords: string[];
 }
 
 export interface ListPictureText extends FirestoreListPictureText {
+  id: string;
+}
+
+export interface FirestoreSuggestedFoodword {
+  word: string;
+  created: firebase.firestore.Timestamp;
+  creator_uid: string;
+}
+
+export interface SuggestedFoodword extends FirestoreSuggestedFoodword {
   id: string;
 }
 

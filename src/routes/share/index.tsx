@@ -109,7 +109,7 @@ function WebShare() {
         });
     } catch (error) {
       console.error("Error trying to navigator.share", error);
-      setShareError(error);
+      setShareError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 

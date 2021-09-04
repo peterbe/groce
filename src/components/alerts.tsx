@@ -33,7 +33,7 @@ export const Alert: FunctionalComponent<Props> = ({
             class="btn btn-danger"
             onClick={() => {
               setReloading(true);
-              window.location.reload(true);
+              window.location.reload();
             }}
           >
             {reloading && (
