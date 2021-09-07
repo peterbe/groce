@@ -386,13 +386,13 @@ function DebugOffline({ db }: { db: firebase.firestore.Firestore }) {
         <input
           class="form-check-input"
           type="checkbox"
-          id="flexSwitchCheckDefault"
+          id="switchOffline"
           checked={enableOffline}
           onChange={() => {
             toggleEnableOffline((before) => !before);
           }}
         />
-        <label class="form-check-label" htmlFor="flexSwitchCheckDefault">
+        <label class="form-check-label" htmlFor="switchOffline">
           Go offline <small>(useful for development and testing)</small>
         </label>
       </div>

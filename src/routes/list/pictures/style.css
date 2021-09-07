@@ -3,7 +3,7 @@
 }
 
 .list_pictures {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .words {
@@ -24,7 +24,8 @@
 }
 
 .tabs_container {
-  margin-top: 30px;
+  text-align: center;
+  margin-bottom: 30px
 }
 
 .suggested_foodwords {
@@ -33,4 +34,8 @@
 
 .your_suggested_words {
   margin: 30px 0;
+}
+
+.new_upload {
+  margin-bottom: 20px;
 }

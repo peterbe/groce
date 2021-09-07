@@ -298,19 +298,35 @@ export const Pictures: FunctionalComponent<Props> = ({
 
   return (
     <div class={style.pictures}>
-      <FileUpload
-        db={db}
-        storage={storage}
-        list={list}
-        disabled={!ready}
-        item={null}
-        prefix="list-pictures"
-        onUploaded={({ file, filePath }: { file: File; filePath: string }) => {
-          const newMap: Map<string, File> = new Map(uploadedFiles);
-          newMap.set(filePath, file);
-          setUploadedFiles(newMap);
-        }}
-      />
+      <div class={style.new_upload}>
+        {!uploadedFiles.size && (!listPictures || listPictures.length === 0) && (
+          <div>
+            <p>
+              Click "Choose File" to upload a picture of ingredients you're
+              planning and perhaps you need to buy.
+            </p>
+          </div>
+        )}
+        <FileUpload
+          db={db}
+          storage={storage}
+          list={list}
+          disabled={!ready}
+          item={null}
+          prefix="list-pictures"
+          onUploaded={({
+            file,
+            filePath,
+          }: {
+            file: File;
+            filePath: string;
+          }) => {
+            const newMap: Map<string, File> = new Map(uploadedFiles);
+            newMap.set(filePath, file);
+            setUploadedFiles(newMap);
+          }}
+        />
+      </div>
 
       {listPicturesError && (
         <div
@@ -506,9 +522,9 @@ function FoodwordOptions({
       });
   }
 
-  async function removeWords() {
+  async function removeWords(ids: string[]) {
     await Promise.all(
-      checkedIds.map((id) => {
+      ids.map((id) => {
         return db
           .collection(`shoppinglists/${list.id}/wordoptions`)
           .doc(id)
@@ -705,52 +721,98 @@ function Tabs({
   countSuggestedFoodwords: number;
 }) {
   return (
-    <div class={style.tabs_container}>
-      <ul class="nav nav-pills nav-fill">
-        <li class="nav-item">
-          <a
-            class={tab === "uploads" ? "nav-link active" : "nav-link"}
-            aria-current={tab === "uploads" ? "page" : undefined}
-            href="#uploads"
-            onClick={() => {
-              onChange("uploads");
-            }}
-          >
-            Uploads{" "}
-            <small>{countListPictures ? `(${countListPictures})` : ""}</small>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a
-            class={tab === "options" ? "nav-link active" : "nav-link"}
-            aria-current={tab === "options" ? "page" : undefined}
-            href="#options"
-            onClick={() => {
-              onChange("options");
-            }}
-          >
-            Options
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class={tab === "suggested" ? "nav-link active" : "nav-link"}
-            aria-current={tab === "suggested" ? "page" : undefined}
-            href="#suggested"
-            onClick={() => {
-              onChange("suggested");
-            }}
-          >
-            {countSuggestedFoodwords ? `Suggested` : "Suggest"}{" "}
-            <small>
-              {countSuggestedFoodwords ? `(${countSuggestedFoodwords})` : ""}
-            </small>
-          </a>
-        </li>
-      </ul>
+    <div class={style.tabs_container} role="group" aria-label="Tabs">
+      <a
+        class={`btn btn-sm ${
+          tab === "uploads" ? "btn-outline-primary" : "btn-outline-secondary"
+        }`}
+        aria-current={tab === "uploads" ? "page" : undefined}
+        href="#uploads"
+        onClick={() => {
+          onChange("uploads");
+        }}
+      >
+        Uploads{" "}
+        {countListPictures > 0 && (
+          <small class="fw-light">({countListPictures})</small>
+        )}
+      </a>{" "}
+      <a
+        class={`btn btn-sm ${
+          tab === "options" ? "btn-outline-primary" : "btn-outline-secondary"
+        }`}
+        aria-current={tab === "options" ? "page" : undefined}
+        href="#options"
+        onClick={() => {
+          onChange("options");
+        }}
+      >
+        Options
+      </a>{" "}
+      <a
+        class={`btn btn-sm ${
+          tab === "suggested" ? "btn-outline-primary" : "btn-outline-secondary"
+        }`}
+        aria-current={tab === "suggested" ? "page" : undefined}
+        href="#suggested"
+        onClick={() => {
+          onChange("suggested");
+        }}
+      >
+        {countSuggestedFoodwords ? `Suggested` : "Suggest"}{" "}
+        {countSuggestedFoodwords > 0 && (
+          <small>(${countSuggestedFoodwords})</small>
+        )}
+      </a>
     </div>
   );
+  // return (
+  //   <div class={style.tabs_container}>
+  //     <ul class="nav nav-pills nav-fill">
+  //       <li class="nav-item">
+  //         <a
+  //           class={tab === "uploads" ? "nav-link active" : "nav-link"}
+  //           aria-current={tab === "uploads" ? "page" : undefined}
+  //           href="#uploads"
+  //           onClick={() => {
+  //             onChange("uploads");
+  //           }}
+  //         >
+  //           Uploads{" "}
+  //           <small>{countListPictures ? `(${countListPictures})` : ""}</small>
+  //         </a>
+  //       </li>
+
+  //       <li class="nav-item">
+  //         <a
+  //           class={tab === "options" ? "nav-link active" : "nav-link"}
+  //           aria-current={tab === "options" ? "page" : undefined}
+  //           href="#options"
+  //           onClick={() => {
+  //             onChange("options");
+  //           }}
+  //         >
+  //           Options
+  //         </a>
+  //       </li>
+  //       <li class="nav-item">
+  //         <a
+  //           class={tab === "suggested" ? "nav-link active" : "nav-link"}
+  //           aria-current={tab === "suggested" ? "page" : undefined}
+  //           href="#suggested"
+  //           onClick={() => {
+  //             onChange("suggested");
+  //           }}
+  //         >
+  //           {countSuggestedFoodwords ? `Suggested` : "Suggest"}{" "}
+  //           <small>
+  //             {countSuggestedFoodwords ? `(${countSuggestedFoodwords})` : ""}
+  //           </small>
+  //         </a>
+  //       </li>
+  //     </ul>
+  //   </div>
+  // );
 }
 
 function UndoListPictureDelete({
@@ -819,7 +881,7 @@ function ShowSuggestedFoodwords({
           <div class="list-group list-group-flush">
             {suggestedFoodwords.map((suggestedFoodword) => {
               return (
-                <label class="list-group-item">
+                <label class="list-group-item" key={suggestedFoodword.id}>
                   <input
                     class="form-check-input me-1"
                     type="checkbox"
@@ -942,7 +1004,7 @@ function ShowListPictures({
 
             <div class="container">
               <div class="row">
-                <div class="col">
+                <div class="col-sm">
                   <DisplayImage
                     filePath={listPicture.filePath}
                     file={uploadedFiles.get(listPicture.filePath)}
@@ -952,7 +1014,7 @@ function ShowListPictures({
                     className="img-fluid rounded img-thumbnail"
                   />
                 </div>
-                <div class="col">
+                <div class="col-sm">
                   {listPictureText ? (
                     <div>
                       <ListWords
@@ -968,7 +1030,10 @@ function ShowListPictures({
                     //   </span>
                     // </div>
                     // Based on a very rough estimate how long it usually takes
-                    <DisplayFakeProgressbar time={5 * 1000} />
+                    <div>
+                      <DisplayFakeProgressbar time={5 * 1000} />
+                      <p>Analyzing picture upload to find words in the text.</p>
+                    </div>
                   )}
                 </div>
               </div>

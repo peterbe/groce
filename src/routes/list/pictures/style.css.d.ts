@@ -4,6 +4,7 @@ declare namespace StyleCssNamespace {
     add_picked_words_container: string;
     debug_found_foodwords: string;
     list_pictures: string;
+    new_upload: string;
     picture_group: string;
     pictures: string;
     suggested_foodwords: string;
