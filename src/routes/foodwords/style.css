@@ -16,5 +16,6 @@
 .sortable_on_reverse {
   cursor: pointer;
   font-style: italic;
-  text-transform: lowercase;
+  direction: rtl;
+  unicode-bidi: bidi-override;
 }

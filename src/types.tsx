@@ -51,11 +51,24 @@ export interface ListPictureText extends FirestoreListPictureText {
 
 export interface FirestoreSuggestedFoodword {
   word: string;
+  locale: string;
   created: firebase.firestore.Timestamp;
-  creator_uid: string;
+  creator_uid?: string;
+  creator_email?: string;
 }
 
 export interface SuggestedFoodword extends FirestoreSuggestedFoodword {
+  id: string;
+}
+
+export interface FirestoreListWordOption {
+  word: string;
+  created: firebase.firestore.Timestamp;
+  modified: firebase.firestore.Timestamp;
+  alias?: string;
+  ignore?: boolean;
+}
+export interface ListWordOption extends FirestoreListWordOption {
   id: string;
 }
 
@@ -142,8 +155,6 @@ export interface StorageSpec {
 export interface FirestoreFoodWord {
   locale: string;
   word: string;
-  approved: Date | null;
-  useCount: number;
   hitCount: number;
   notes: string;
 }

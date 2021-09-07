@@ -13,8 +13,8 @@ service cloud.firestore {
     }
 
     match /suggestedfoodwords/{foodwordID=**} {
-    	allow read: if request.auth != null && request.auth.uid == resource.data.creator_uid;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.creator_uid;
+    	allow read: if request.auth != null && (request.auth.uid == resource.data.creator_uid || request.auth.token.email == 'peterbe@gmail.com');
+      allow delete: if request.auth != null && (request.auth.uid == resource.data.creator_uid || request.auth.token.email == 'peterbe@gmail.com');
       allow create: if request.auth != null;
     }
 
@@ -44,6 +44,10 @@ service cloud.firestore {
       }
 
       match /texts/{pictureID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
+      }
+
+      match /wordoptions/{pictureID} {
         allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
       }
 

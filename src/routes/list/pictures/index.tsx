@@ -1,11 +1,12 @@
 import { FunctionalComponent, h } from "preact";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { route } from "preact-router";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import style from "./style.css";
+import { Loading } from "../../../components/loading";
 import { FileUpload } from "../../../components/file-upload";
 import {
   List,
@@ -16,6 +17,8 @@ import {
   FirestoreListPictureText,
   FirestoreSuggestedFoodword,
   SuggestedFoodword,
+  FirestoreListWordOption,
+  ListWordOption,
 } from "../../../types";
 import { DisplayImage } from "../../../components/display-image";
 
@@ -143,14 +146,17 @@ export const Pictures: FunctionalComponent<Props> = ({
         .where("creator_uid", "==", user.uid)
         .onSnapshot(
           (snapshot) => {
-            const newSuggestedFoodwords: SuggestedFoodword[] = [];
+            const newSuggestedFoodwords: Omit<
+              SuggestedFoodword,
+              "creator_email" | "creator_uid"
+            >[] = [];
             snapshot.forEach((doc) => {
               const data = doc.data() as FirestoreSuggestedFoodword;
               newSuggestedFoodwords.push({
                 id: doc.id,
+                locale: data.locale,
                 word: data.word,
                 created: data.created,
-                creator_uid: data.creator_uid,
               });
             });
             newSuggestedFoodwords.sort(
@@ -158,7 +164,6 @@ export const Pictures: FunctionalComponent<Props> = ({
                 b.created.toDate().getTime() - a.created.toDate().getTime()
             );
             setSuggestedFoodwords(newSuggestedFoodwords);
-            // setListPictureTexts(newListPictureTexts);
           },
           (error) => {
             console.error("Snapshot error:", error);
@@ -171,6 +176,50 @@ export const Pictures: FunctionalComponent<Props> = ({
       if (ref) ref();
     };
   }, [db, user]);
+
+  const [listWordOptions, setListWordOptions] = useState<
+    ListWordOption[] | null
+  >(null);
+
+  // Set up watcher on /wordoptions collection
+  useEffect(() => {
+    const ref = db
+      .collection(`shoppinglists/${list.id}/wordoptions`)
+      .onSnapshot(
+        (snapshot) => {
+          const newListWordOptions: ListWordOption[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreListWordOption;
+            const item = {
+              id: doc.id,
+              word: data.word,
+              alias: data.alias,
+              ignore: data.ignore,
+              modified: data.modified,
+              created: data.created,
+            };
+            newListWordOptions.push(item);
+          });
+          newListWordOptions.sort((a, b) => {
+            if (a.alias && !b.alias) {
+              return -1;
+            } else if (b.alias && !a.alias) {
+              return 1;
+            }
+            return a.word.localeCompare(b.word);
+          });
+          setListWordOptions(newListWordOptions);
+        },
+        (error) => {
+          console.error("Snapshot error:", error);
+          // setListPictureTextsError(error);
+          // XXX deal with this better
+        }
+      );
+    return () => {
+      ref();
+    };
+  }, [db, list]);
 
   const [undoableDelete, setUndoableDelete] = useState<string | null>(null);
   useEffect(() => {
@@ -374,13 +423,24 @@ export const Pictures: FunctionalComponent<Props> = ({
           saveNewTexts={saveNewTexts}
         />
       )}
+
+      {tab === "options" && db && (
+        <FoodwordOptions
+          db={db}
+          list={list}
+          listWordOptions={listWordOptions}
+        />
+      )}
+
       {tab === "suggested" && (
         <ShowSuggestedFoodwords
           suggestedFoodwords={suggestedFoodwords}
           addSuggestion={async (word: string) => {
             await db.collection("suggestedfoodwords").add({
               word,
+              locale: "en-US",
               creator_uid: user.uid,
+              creator_email: user.email,
               created: firebase.firestore.Timestamp.fromDate(new Date()),
             });
           }}
@@ -396,6 +456,242 @@ export const Pictures: FunctionalComponent<Props> = ({
     </div>
   );
 };
+
+function FoodwordOptions({
+  list,
+  listWordOptions,
+  db,
+}: {
+  list: List;
+  listWordOptions: ListWordOption[] | null;
+  db: firebase.firestore.Firestore;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [word, setWord] = useState("");
+  const [action, setAction] = useState<"ignore" | "alias">("ignore");
+  const [alias, setAlias] = useState("");
+  const [saveError, setSaveError] = useState<Error | null>(null);
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+
+  async function saveNewWord() {
+    const existing: string[] = [];
+    if (listWordOptions) {
+      existing.push(...listWordOptions.map((o) => o.word.toLowerCase()));
+    }
+
+    if (existing.includes(word.trim().toLowerCase())) {
+      setSaveError(new Error(`'${word}' already added`));
+      return;
+    }
+    if (action === "alias" && !alias.trim()) {
+      setSaveError(new Error("No alias word entered"));
+      return;
+    }
+    const newWordOption: FirestoreListWordOption = {
+      word: word.trim(),
+      modified: firebase.firestore.Timestamp.fromDate(new Date()),
+      created: firebase.firestore.Timestamp.fromDate(new Date()),
+    };
+    if (action === "alias") {
+      newWordOption.alias = alias.trim();
+    } else {
+      newWordOption.ignore = true;
+    }
+
+    await db
+      .collection(`shoppinglists/${list.id}/wordoptions`)
+      .add(newWordOption)
+      .catch((error) => {
+        setSaveError(error instanceof Error ? error : new Error(String(error)));
+      });
+  }
+
+  async function removeWords() {
+    await Promise.all(
+      checkedIds.map((id) => {
+        return db
+          .collection(`shoppinglists/${list.id}/wordoptions`)
+          .doc(id)
+          .delete();
+      })
+    );
+  }
+
+  if (!listWordOptions) {
+    return <Loading text="Loading options…" />;
+  }
+  return (
+    <div>
+      <h4>Your food word options</h4>
+      {listWordOptions.length === 0 ? (
+        <p>
+          <i>None, yet</i>
+        </p>
+      ) : (
+        <div>
+          <ul class="list-group list-group-flush">
+            {listWordOptions.map((listWordOption) => {
+              return (
+                <li key={listWordOption.id} class="list-group-item">
+                  <input
+                    class="form-check-input me-1"
+                    type="checkbox"
+                    value={listWordOption.id}
+                    aria-label={`Word: ${listWordOption.word}`}
+                    onChange={(event) => {
+                      if (event.currentTarget.checked) {
+                        setCheckedIds((prevState) => {
+                          return [listWordOption.id, ...prevState];
+                        });
+                      } else {
+                        setCheckedIds((prevState) => {
+                          return prevState.filter(
+                            (id) => id !== listWordOption.id
+                          );
+                        });
+                      }
+                    }}
+                  />
+                  {listWordOption.word}{" "}
+                  {listWordOption.alias ? (
+                    <span>
+                      <i style={{ color: "#898989" }}>alias to:</i>{" "}
+                      {listWordOption.alias}
+                    </span>
+                  ) : (
+                    <i style={{ color: "#898989" }}>always ignored</i>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {checkedIds.length > 0 && (
+            <button
+              type="button"
+              class="btn btn-warning"
+              onClick={async () => {
+                await removeWords(checkedIds);
+                setCheckedIds([]);
+              }}
+            >
+              Remove selected words
+            </button>
+          )}
+        </div>
+      )}
+
+      <h4 style={{ marginTop: 30 }}>Set up a new food word option</h4>
+
+      {saveError && (
+        <div
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          Error trying to save new food word option:{" "}
+          <code>{saveError.toString()}</code>
+          <button
+            type="button"
+            class="btn-close btn-small"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+            onClick={() => {
+              setSaveError(null);
+            }}
+          />
+        </div>
+      )}
+
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (!word.trim()) {
+            return;
+          }
+          setSaving(true);
+          try {
+            await saveNewWord();
+          } finally {
+            setSaving(false);
+            setWord("");
+            setAlias("");
+          }
+        }}
+      >
+        <div class="mb-3">
+          <label for="id_newword" class="form-label">
+            Word
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="id_newword"
+            placeholder="Salt"
+            value={word}
+            onInput={(event) => {
+              setWord(event.currentTarget.value);
+            }}
+            aria-describedby="newwordHelp"
+          />
+          <div id="newwordHelp" class="form-text">
+            Case is <i>not</i> important
+          </div>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            id="id_ignore"
+            checked={action === "ignore"}
+            onClick={() => {
+              setAction("ignore");
+            }}
+          />
+          <label class="form-check-label" for="id_ignore">
+            Ignore
+          </label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            id="id_alias"
+            checked={action === "alias"}
+            onClick={() => {
+              setAction("alias");
+            }}
+          />
+          <label class="form-check-label" for="id_alias">
+            Alias
+          </label>
+        </div>
+        {action === "alias" && (
+          <div class="mb-3">
+            <label for="id_alias" class="form-label">
+              Alias
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="id_alias"
+              placeholder="Red pepper"
+              value={alias}
+              onInput={(event) => {
+                setAlias(event.currentTarget.value);
+              }}
+            />
+          </div>
+        )}
+        <button
+          type="submit"
+          class="btn btn-primary"
+          disabled={saving || !word.trim()}
+        >
+          Save new food word option
+        </button>
+      </form>
+    </div>
+  );
+}
 
 function Tabs({
   tab,
@@ -446,7 +742,7 @@ function Tabs({
               onChange("suggested");
             }}
           >
-            Suggested{" "}
+            {countSuggestedFoodwords ? `Suggested` : "Suggest"}{" "}
             <small>
               {countSuggestedFoodwords ? `(${countSuggestedFoodwords})` : ""}
             </small>
@@ -513,6 +809,7 @@ function ShowSuggestedFoodwords({
 }) {
   const [newText, setNewText] = useState("");
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const [validationError, setValidationError] = useState<Error | null>(null);
 
   return (
     <div class={style.suggested_foodwords}>
@@ -634,94 +931,73 @@ function ShowListPictures({
 }) {
   return (
     <div class={style.list_pictures}>
-      {/* <div class="toast-container position-absolute p-3 top-0 end-0" style="z-index: 1100">
-        <div
-          id="liveToast"
-          class="toast fade show"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          <div class="toast-header">
-            <strong class="me-auto">Bootstrap</strong>
-            <small>11 mins ago</small>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="toast-body">Hello, world! This is a toast message.</div>
-        </div>
-      </div> */}
+      {listPictures.map((listPicture) => {
+        const listPictureText = listPictureTexts.get(listPicture.filePath);
+        return (
+          <div class={style.picture_group} key={listPicture.id}>
+            <NotesForm
+              listPicture={listPicture}
+              saveListPictureNotes={saveListPictureNotes}
+            />
 
-      <ul class="list-group list-group-flush">
-        {listPictures.map((listPicture) => {
-          const listPictureText = listPictureTexts.get(listPicture.filePath);
-          return (
-            <li
-              class={`list-group-item ${style.picture_group}`}
-              key={listPicture.id}
-            >
-              <NotesForm
-                listPicture={listPicture}
-                saveListPictureNotes={saveListPictureNotes}
-              />
-
-              <DisplayImage
-                filePath={listPicture.filePath}
-                file={uploadedFiles.get(listPicture.filePath)}
-                maxWidth={450}
-                maxHeight={450}
-                openImageModal={openImageModal}
-                className="img-fluid rounded img-thumbnail"
-              />
-
-              {listPictureText ? (
-                <div>
-                  <ListWords
-                    listPictureText={listPictureText}
-                    items={items}
-                    saveNewTexts={saveNewTexts}
+            <div class="container">
+              <div class="row">
+                <div class="col">
+                  <DisplayImage
+                    filePath={listPicture.filePath}
+                    file={uploadedFiles.get(listPicture.filePath)}
+                    maxWidth={450}
+                    maxHeight={450}
+                    openImageModal={openImageModal}
+                    className="img-fluid rounded img-thumbnail"
                   />
                 </div>
-              ) : (
-                // <div class="spinner-border" role="status">
-                //   <span class="visually-hidden">
-                //     Loading text from picture...
-                //   </span>
-                // </div>
-                // Based on a very rough estimate how long it usually takes
-                <DisplayFakeProgressbar time={5 * 1000} />
-              )}
+                <div class="col">
+                  {listPictureText ? (
+                    <div>
+                      <ListWords
+                        listPictureText={listPictureText}
+                        items={items}
+                        saveNewTexts={saveNewTexts}
+                      />
+                    </div>
+                  ) : (
+                    // <div class="spinner-border" role="status">
+                    //   <span class="visually-hidden">
+                    //     Loading text from picture...
+                    //   </span>
+                    // </div>
+                    // Based on a very rough estimate how long it usually takes
+                    <DisplayFakeProgressbar time={5 * 1000} />
+                  )}
+                </div>
+              </div>
+            </div>
 
-              <p>
+            <p>
+              <small class="fw-light">
+                Added: {dayjs(listPicture.created.toDate()).fromNow()}
+              </small>
+              <br />
+              {listPicture.created.seconds !== listPicture.modified.seconds && (
                 <small class="fw-light">
-                  Added: {dayjs(listPicture.created.toDate()).fromNow()}
+                  Modified: {dayjs(listPicture.modified.toDate()).fromNow()}
                 </small>
-                <br />
-                {listPicture.created.seconds !==
-                  listPicture.modified.seconds && (
-                  <small class="fw-light">
-                    Modified: {dayjs(listPicture.modified.toDate()).fromNow()}
-                  </small>
-                )}
-              </p>
+              )}
+            </p>
 
-              <button
-                type="button"
-                class="btn btn-danger btn-sm"
-                onClick={() => {
-                  deleteListPicture(listPicture.id);
-                }}
-              >
-                Delete
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+            <button
+              type="button"
+              class="btn btn-danger btn-sm"
+              onClick={() => {
+                deleteListPicture(listPicture.id);
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -772,6 +1048,17 @@ function ListWords({
   const { text, foodWords } = listPictureText;
   const [showText, setShowText] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
+
+  const selfRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const age =
+      (new Date().getTime() - listPictureText.created.toDate().getTime()) /
+      1000;
+    if (age < 1 && selfRef.current) {
+      selfRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [listPictureText]);
+
   if (!text) {
     return (
       <p>
@@ -792,7 +1079,7 @@ function ListWords({
     : [];
 
   return (
-    <div class={style.words}>
+    <div class={style.words} ref={selfRef}>
       {foodWords && foodWords.length > 0 ? (
         <div>
           <b>Food words found:</b>

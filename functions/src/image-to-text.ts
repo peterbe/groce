@@ -5,7 +5,7 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
-import { getFoodWords } from "./extract-food-words";
+import { getFoodWords, Options } from "./extract-food-words";
 
 type FoodWord = {
   id: string;
@@ -13,6 +13,11 @@ type FoodWord = {
   locale: string;
 };
 type FoodWordMap = Map<string, string>;
+type FoodWordOption = {
+  word: string;
+  ignore: boolean;
+  alias: string | null;
+};
 
 export const onFileUploadToText = functions
   .runWith({
@@ -73,17 +78,24 @@ export const onFileUploadToText = functions
 
       const label = "Total time for allFoodWords, text, listItemTexts";
       console.time(label);
-      const [allFoodWords, text, listItemTexts] = await Promise.all([
+      const [
+        allFoodWords,
+        text,
+        listItemTexts,
+        listWordOptions
+      ] = await Promise.all([
         getAllFoodWords(locale),
         extractText(object.bucket, name),
-        getAllListItemTexts(listID)
+        getAllListItemTexts(listID),
+        getListWordOptions(listID)
       ]);
       console.timeEnd(label);
 
-      const foodWords = await extractFoodWords(text, [
-        ...allFoodWords.keys(),
-        ...listItemTexts
-      ]);
+      const foodWords = await extractFoodWords(
+        text,
+        [...allFoodWords.keys(), ...listItemTexts],
+        listWordOptions
+      );
 
       await admin
         .firestore()
@@ -127,11 +139,21 @@ async function incrementFoodWordHitCounts(
 
 async function extractFoodWords(
   text: string,
-  searchWords: string[]
+  searchWords: string[],
+  foodWordOptions: FoodWordOption[]
 ): Promise<string[]> {
+  const options: Options = {
+    ignore: foodWordOptions.filter(o => o.ignore).map(o => o.word),
+    aliases: new Map(
+      foodWordOptions.filter(o => !o.ignore && o.alias).map(o => {
+        return [o.word, o.alias!];
+      })
+    )
+  };
+  logger.debug("Foodword options:", options);
   const label = "Time to extract foodwords from text";
   console.time(label);
-  const foodWords = getFoodWords(text, searchWords);
+  const foodWords = getFoodWords(text, searchWords, options);
   console.timeEnd(label);
   logger.info(`Food words found: ${foodWords.join(", ")}`);
   return foodWords;
@@ -148,6 +170,27 @@ async function getAllListItemTexts(listID: string): Promise<string[]> {
   console.timeEnd(label);
   logger.info(`Found ${texts.length} existing list item texts.`);
   return texts;
+}
+
+async function getListWordOptions(listID: string): Promise<FoodWordOption[]> {
+  const label = "Time to extract all list food word options";
+  console.time(label);
+  const snapshot = await admin
+    .firestore()
+    .collection(`shoppinglists/${listID}/wordoptions`)
+    .get();
+  const foodWordOptions: FoodWordOption[] = [];
+  snapshot.docs.forEach(doc => {
+    const data = doc.data();
+    foodWordOptions.push({
+      word: data.word,
+      ignore: data.ignore || false,
+      alias: data.alias || null
+    });
+  });
+  console.timeEnd(label);
+  logger.info(`Found ${foodWordOptions.length} food word options.`);
+  return foodWordOptions;
 }
 
 async function extractText(bucketName: string, name: string): Promise<string> {

@@ -7,7 +7,12 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import style from "./style.css";
 import { GoBack } from "../../components/go-back";
 import { Loading } from "../../components/loading";
-import { FirestoreFoodWord, FoodWord } from "../../types";
+import {
+  FirestoreFoodWord,
+  FoodWord,
+  FirestoreSuggestedFoodword,
+  SuggestedFoodword,
+} from "../../types";
 
 dayjs.extend(relativeTime);
 
@@ -23,11 +28,11 @@ function sortFoodWords(
 ) {
   return foodWords.sort((a, b) => {
     const reverse = sortReverse ? -1 : 1;
-    if (sortBy === "useCount") {
-      return reverse * (a.useCount - b.useCount);
-    }
     if (sortBy === "hitCount") {
-      return reverse * (a.hitCount - b.hitCount);
+      const cmp = reverse * (a.hitCount - b.hitCount);
+      if (cmp !== 0) {
+        return cmp;
+      }
     }
     return reverse * a.word.localeCompare(b.word);
   });
@@ -41,10 +46,11 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
   const [foodWords, setFoodWords] = useState<FoodWord[] | null>(null);
   const [foodWordsError, setFoodWordsError] = useState<Error | null>(null);
   const [locale] = useState("en-US");
-  const [sortBy, setSortBy] = useState<"word" | "useCount" | "hitCount">(
-    "word"
-  );
+  const [sortBy, setSortBy] = useState<"word" | "hitCount">("word");
   const [sortReverse, setSortReverse] = useState(false);
+  const [suggestedFoodwords, setSuggestedFoodwords] = useState<
+    SuggestedFoodword[] | null
+  >(null);
 
   const isAdmin = user && ["peterbe@gmail.com"].includes(user.email || "");
 
@@ -59,9 +65,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
               id: doc.id,
               locale: data.locale,
               word: data.word,
-              approved: data.approved,
               notes: data.notes,
-              useCount: data.useCount,
               hitCount: data.hitCount,
             });
           });
@@ -70,6 +74,41 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
         (error) => {
           console.error("Error getting snapshot", error);
           setFoodWordsError(error);
+        }
+      );
+    }
+  }, [db, locale]);
+
+  const [showSuggestedFoodwords, setShowSuggestedFoodwords] = useState(false);
+
+  useEffect(() => {
+    if (db && locale) {
+      db.collection("suggestedfoodwords").onSnapshot(
+        (snapshot) => {
+          const newSuggestedFoodwords: SuggestedFoodword[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreSuggestedFoodword;
+            newSuggestedFoodwords.push({
+              id: doc.id,
+              word: data.word,
+              locale: data.locale,
+              created: data.created,
+              creator_uid: data.creator_uid,
+              creator_email: data.creator_email,
+            });
+          });
+          newSuggestedFoodwords.sort(
+            (a, b) => b.created.seconds - a.created.seconds
+          );
+          setSuggestedFoodwords(newSuggestedFoodwords);
+          if (newSuggestedFoodwords.length === 0) {
+            setShowSuggestedFoodwords(false);
+          }
+        },
+        (error) => {
+          console.error("Snapshot error:", error);
+          // XXX deal better
+          // setListPictureTextsError(error);
         }
       );
     }
@@ -132,7 +171,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
     };
   }, [deletedWord]);
 
-  function getSortHeading(key: "word" | "useCount" | "hitCount", text: string) {
+  function getSortHeading(key: "word" | "hitCount", text: string) {
     return (
       <span
         class={
@@ -158,7 +197,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
 
   function downloadToFile(fileName = "sample-food-words.ts") {
     const words = foodWords?.map((foodWord) => foodWord.word);
-    let text = `// Generated ${new Date().toISOString()}\n`
+    let text = `// Generated ${new Date().toISOString()}\n`;
     text += `export const FOOD_WORDS = ${JSON.stringify(words, null, 2)};\n`;
 
     const a = document.createElement("a");
@@ -219,30 +258,92 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
           Deleted <b>{deletedWord.word}</b>
         </p>
       )}
-      {db && foodWords && isAdmin && (
-        <p>
-          <a
-            href="download"
-            download="test-sample-food-words.ts"
-            onClick={(event) => {
-              event.preventDefault();
-              downloadToFile();
-            }}
-          >
-            Download as TypeScript file
-          </a>
-        </p>
+
+      {isAdmin && suggestedFoodwords && suggestedFoodwords.length > 0 && (
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          onClick={() => {
+            setShowSuggestedFoodwords(!showSuggestedFoodwords);
+          }}
+        >
+          {showSuggestedFoodwords ? "Hide" : "Show"} suggested foodwords (
+          {suggestedFoodwords.length})
+        </button>
       )}
-      <table class="table table-sm align-middle table-borderless">
+      {isAdmin && showSuggestedFoodwords && suggestedFoodwords && (
+        <table
+          class="table table-sm table-hover align-middle table-borderless"
+          style={{ marginBottom: 50 }}
+        >
+          <thead>
+            <tr>
+              <th scope="col">Action</th>
+              <th scope="col">Word</th>
+              <th scope="col">Locale</th>
+              <th scope="col">Suggested by</th>
+              <th scope="col">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {suggestedFoodwords.map((suggestedFoodword) => {
+              return (
+                <tr key={suggestedFoodword.id}>
+                  <td>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      title="Delete"
+                      onClick={async () => {
+                        if (db) {
+                          db.collection("suggestedfoodwords")
+                            .doc(suggestedFoodword.id)
+                            .delete();
+                        }
+                      }}
+                    >
+                      🗑
+                    </span>{" "}
+                    <span
+                      style={{ cursor: "pointer" }}
+                      title="Add! (ship it)"
+                      onClick={async () => {
+                        if (db) {
+                          await db.collection("foodwords").add({
+                            locale: suggestedFoodword.locale,
+                            word: suggestedFoodword.word,
+                            hitCount: 0,
+                            notes: "",
+                          });
+                          await db
+                            .collection("suggestedfoodwords")
+                            .doc(suggestedFoodword.id)
+                            .delete();
+                        }
+                      }}
+                    >
+                      🛳
+                    </span>
+                  </td>
+                  <td>{suggestedFoodword.word}</td>
+                  <td>{suggestedFoodword.locale}</td>
+                  <td>{suggestedFoodword.creator_email}</td>
+                  <td title={suggestedFoodword.created.toDate().toISOString()}>
+                    {dayjs(suggestedFoodword.created.toDate()).fromNow()}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+
+      <table class="table table-sm table-hover align-middle table-borderless">
         <thead>
           <tr>
             {isAdmin && <th scope="col">Delete</th>}
             <th scope="col">{getSortHeading("word", "Word")}</th>
             <th scope="col">Notes</th>
-            <th scope="col">
-              {getSortHeading("hitCount", "Hit")}/
-              {getSortHeading("useCount", "Use")} Count
-            </th>
+            <th scope="col">{getSortHeading("hitCount", "Hit count")}</th>
           </tr>
           <tr>
             {isAdmin && <th scope="col" />}
@@ -293,14 +394,27 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
                 <td>
                   {foodWord.notes ? <small>{foodWord.notes}</small> : null}
                 </td>
-                <td>
-                  {foodWord.hitCount} / {foodWord.useCount}
-                </td>
+                <td>{foodWord.hitCount}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      {db && foodWords && isAdmin && (
+        <p>
+          <a
+            href="download"
+            download="test-sample-food-words.ts"
+            onClick={(event) => {
+              event.preventDefault();
+              downloadToFile();
+            }}
+          >
+            Download as TypeScript file
+          </a>
+        </p>
+      )}
+
       {db && foodWords && isAdmin && (
         <MassAdd db={db} foodWords={foodWords} locale={locale} />
       )}
@@ -364,8 +478,6 @@ function MassAdd({
               return db.collection("foodwords").add({
                 locale,
                 word,
-                approved: firebase.firestore.Timestamp.fromDate(new Date()),
-                useCount: 0,
                 hitCount: 0,
                 notes: "",
               });

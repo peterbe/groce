@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
-const OLD_DAYS = 30 * 6  // 6 months
+const OLD_DAYS = 30 * 6; // 6 months
 // const ADDITIONAL_DAYS_BACK = 5;
 // const ADDITIONAL_DAYS_BACK = 15;
 const PREFIX = "thumbnails";
@@ -21,7 +21,6 @@ export const scheduledCleanupThumbnails = functions.pubsub
       const mm = date.getMonth() + 1;
       const dd = date.getDate();
       const prefix = `${PREFIX}/${yyyy}/${zeroPad(mm)}/${zeroPad(dd)}`;
-      logger.debug(`PREFIX=${prefix}`);
       await deleteByPrefix(prefix);
     });
 
