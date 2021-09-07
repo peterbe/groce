@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import { FunctionalComponent, h, Fragment } from "preact";
 import { Route, Router } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 
@@ -20,6 +20,7 @@ import Counters from "../routes/counters";
 import FoodWords from "../routes/foodwords";
 import Share from "../routes/share";
 import { OfflineWarning } from "./offline-warning";
+import { ToastsProvider, useToasts } from "../toasts-context";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
 if ((module as any).hot) {
@@ -249,71 +250,78 @@ const App: FunctionalComponent = () => {
       <Header auth={auth} user={user} />
 
       <DisplayPersistenceError error={persistenceError} />
+      <ToastsProvider>
+        <div class="main">
+          {/* <Router onChange={handleRoute}> */}
+          <Router>
+            <Route
+              path="/"
+              component={Home}
+              db={db}
+              user={user}
+              auth={auth}
+              lists={lists}
+            />
+            <Route
+              path="/shopping"
+              component={Shopping}
+              user={user}
+              db={db}
+              lists={lists}
+            />
+            <Route
+              path="/shopping/:id/pictures"
+              component={ShoppingList}
+              picturesMode={true}
+              lists={lists}
+              user={user}
+              db={db}
+              storage={storage}
+            />
+            <Route
+              path="/shopping/:id"
+              component={ShoppingList}
+              picturesMode={false}
+              lists={lists}
+              user={user}
+              db={db}
+              storage={storage}
+            />
+            <Route
+              path="/invited/:listID/:invitationID"
+              component={Invited}
+              lists={lists}
+              user={user}
+              db={db}
+            />
+            <Route path="/signin" component={Signin} user={user} auth={auth} />
+            <Route path="/settings" component={Settings} />
+            <Route
+              path="/feedback"
+              component={Feedback}
+              lists={lists}
+              user={user}
+              db={db}
+            />
 
-      <div class="main">
-        {/* <Router onChange={handleRoute}> */}
-        <Router>
-          <Route
-            path="/"
-            component={Home}
-            db={db}
-            user={user}
-            auth={auth}
-            lists={lists}
-          />
-          <Route
-            path="/shopping"
-            component={Shopping}
-            user={user}
-            db={db}
-            lists={lists}
-          />
-          <Route
-            path="/shopping/:id/pictures"
-            component={ShoppingList}
-            picturesMode={true}
-            lists={lists}
-            user={user}
-            db={db}
-            storage={storage}
-          />
-          <Route
-            path="/shopping/:id"
-            component={ShoppingList}
-            picturesMode={false}
-            lists={lists}
-            user={user}
-            db={db}
-            storage={storage}
-          />
-          <Route
-            path="/invited/:listID/:invitationID"
-            component={Invited}
-            lists={lists}
-            user={user}
-            db={db}
-          />
-          <Route path="/signin" component={Signin} user={user} auth={auth} />
-          <Route path="/settings" component={Settings} />
-          <Route
-            path="/feedback"
-            component={Feedback}
-            lists={lists}
-            user={user}
-            db={db}
-          />
-
-          <Route path="/about" component={About} />
-          <Route path="/version" component={Version} />
-          <Route path="/counters" component={Counters} db={db} />
-          <Route path="/foodwords" component={FoodWords} user={user} db={db} />
-          <Route path="/share" component={Share} />
-          <NotFoundPage default />
-        </Router>
-        {/* {process.env.NODE_ENV === "development" && db && (
+            <Route path="/about" component={About} />
+            <Route path="/version" component={Version} />
+            <Route path="/counters" component={Counters} db={db} />
+            <Route
+              path="/foodwords"
+              component={FoodWords}
+              user={user}
+              db={db}
+            />
+            <Route path="/share" component={Share} />
+            <NotFoundPage default />
+          </Router>
+          {/* {process.env.NODE_ENV === "development" && db && (
           <DebugOffline db={db} />
         )} */}
-      </div>
+          <Toasts />
+        </div>
+      </ToastsProvider>
     </div>
   );
 };
@@ -401,6 +409,50 @@ function DebugOffline({ db }: { db: firebase.firestore.Firestore }) {
           {enablingError.toString()}
         </div>
       )}
+    </div>
+  );
+}
+
+function Toasts() {
+  const { toasts, closeToast } = useToasts();
+
+  if (!toasts.length) {
+    return null;
+  }
+  return (
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      class="position-relative"
+      style={{ zIndex: 1234 }}
+    >
+      <div class="toast-container position-absolute p-3 bottom-0 end-0">
+        {toasts.map((t) => {
+          return (
+            <div
+              class="toast fade show"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+            >
+              <div class="toast-header">
+                <strong class="me-auto">{t.header}</strong>
+                {/* <small class="text-muted">{t.date.toISOString()}</small> */}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="toast"
+                  aria-label="Close"
+                  onClick={() => {
+                    closeToast(t.id);
+                  }}
+                ></button>
+              </div>
+              {t.body && <div class="toast-body">{t.body}</div>}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
