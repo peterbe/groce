@@ -251,6 +251,7 @@ const App: FunctionalComponent = () => {
 
       <DisplayPersistenceError error={persistenceError} />
       <ToastsProvider>
+        <Toasts />
         <div class="main">
           {/* <Router onChange={handleRoute}> */}
           <Router>
@@ -319,7 +320,6 @@ const App: FunctionalComponent = () => {
           {/* {process.env.NODE_ENV === "development" && db && (
           <DebugOffline db={db} />
         )} */}
-          <Toasts />
         </div>
       </ToastsProvider>
     </div>
@@ -415,7 +415,6 @@ function DebugOffline({ db }: { db: firebase.firestore.Firestore }) {
 
 function Toasts() {
   const { toasts, closeToast } = useToasts();
-
   if (!toasts.length) {
     return null;
   }
@@ -426,7 +425,7 @@ function Toasts() {
       class="position-relative"
       style={{ zIndex: 1234 }}
     >
-      <div class="toast-container position-absolute p-3 bottom-0 end-0">
+      <div class="toast-container position-absolute p-3 top-0 end-0">
         {toasts.map((t) => {
           return (
             <div

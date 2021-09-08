@@ -21,7 +21,7 @@ import {
   ListWordOption,
 } from "../../../types";
 import { DisplayImage } from "../../../components/display-image";
-import { useToasts } from "../../../toasts-context";
+// import { useToasts } from "../../../toasts-context";
 
 dayjs.extend(relativeTime);
 
@@ -47,19 +47,19 @@ export const Pictures: FunctionalComponent<Props> = ({
   saveHandler,
   openImageModal,
 }: Props) => {
-  const { addToast } = useToasts();
+  // const { addToast } = useToasts();
 
   const [listPictures, setListPictures] = useState<ListPicture[] | null>(null);
-  useEffect(() => {
-    if (listPictures === null) {
-      addToast("It's null!");
-    } else {
-      addToast({
-        header: `${listPictures.length} list pictures`,
-        body: "Body here!",
-      });
-    }
-  }, [listPictures]);
+  // useEffect(() => {
+  //   if (listPictures === null) {
+  //     addToast("It's null!");
+  //   } else {
+  //     addToast({
+  //       header: `${listPictures.length} list pictures`,
+  //       body: "Body here!",
+  //     });
+  //   }
+  // }, [listPictures]);
   const [listPicturesError, setListPicturesError] = useState<Error | null>(
     null
   );
