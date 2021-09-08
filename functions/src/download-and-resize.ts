@@ -23,6 +23,8 @@ codeToErrorMap.set(401, "unauthenticated");
 export const downloadAndResizeAndStore = functions
   .runWith({ memory: "1GB" })
   .https.onRequest(async (req, res) => {
+    console.log("CONFIG:", functions.config());
+
     const imagePath = req.query.image || "";
 
     if (!imagePath) {
@@ -95,7 +97,7 @@ export const downloadAndResizeAndStore = functions
         return;
       }
     } catch (error) {
-      // console.error(error);
+      console.error(error);
       console.warn(`Error downloading ${destinationPath}`);
       res.setHeader("content-type", "text/plain");
       res.status(500).send(errorToString(error));
@@ -154,17 +156,22 @@ export const downloadAndResizeAndStore = functions
       res.setHeader("content-type", contentType);
       res.setHeader("cache-control", CACHE_CONTROL);
       res.send(modifiedImageBuffer);
-
-      // Because they say it's important to clean up after yourself
-      // https://firebase.google.com/docs/functions/tips#always_delete_temporary_files
-      fs.unlinkSync(tempFile);
     } catch (error) {
+      console.error(error);
       console.warn(
         `Error when trying to upload ${modifiedFile} to ${destinationPath}`
       );
       res.setHeader("content-type", "text/plain");
       res.status(500).send(errorToString(error));
       return;
+    }
+    // Because they say it's important to clean up after yourself
+    // https://firebase.google.com/docs/functions/tips#always_delete_temporary_files
+    if (fs.existsSync(tempFile)) {
+      console.log(`Attempting to unlink ${tempFile}`);
+      fs.unlinkSync(tempFile);
+    } else {
+      console.log(`tempFile (${tempFile}) does not exist.`);
     }
   });
 
