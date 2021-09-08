@@ -146,10 +146,9 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
           seen.add(word.word);
         }
       }
-      var batch = db.batch();
+      const batch = db.batch();
       dupes.forEach((id) => {
-        var ref = db.collection("foodwords").doc(id);
-        batch.delete(ref);
+        batch.delete(db.collection("foodwords").doc(id));
       });
       batch.commit();
     }

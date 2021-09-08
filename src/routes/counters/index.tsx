@@ -130,10 +130,13 @@ function TDRow({
 }) {
   const value = map.get(firstKey) || 0;
   return (
-    <td>
-      <span class={style.number}>{value}</span>
+    <td title={value.toLocaleString()}>
+      <span class={style.number}>{value > 1000 ? kilo(value) : value}</span>
     </td>
   );
+}
+function kilo(value: number) {
+  return `${(value / 1000).toFixed(1)}k`
 }
 
 let lastId = 0;
