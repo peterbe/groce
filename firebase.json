@@ -24,7 +24,7 @@
         "destination": "/index.html"
       },
       {
-        "regex": "/(version|settings|feedback|signin|counters)",
+        "regex": "/(version|settings|feedback|signin|counters|foodwords)",
         "destination": "/index.html"
       }
     ],
