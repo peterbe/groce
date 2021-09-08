@@ -429,6 +429,7 @@ function Toasts() {
         {toasts.map((t) => {
           return (
             <div
+              key={t.id}
               class="toast fade show"
               role="alert"
               aria-live="assertive"
@@ -445,7 +446,7 @@ function Toasts() {
                   onClick={() => {
                     closeToast(t.id);
                   }}
-                ></button>
+                />
               </div>
               {t.body && <div class="toast-body">{t.body}</div>}
             </div>

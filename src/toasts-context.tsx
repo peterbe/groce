@@ -58,8 +58,8 @@ export function useToasts() {
   return (
     value || {
       toasts: [],
-      addToast: () => {},
-      closeToast: () => {},
+      addToast: () => ({}),
+      closeToast: () => ({}),
     }
   );
 }
