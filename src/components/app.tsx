@@ -19,6 +19,7 @@ import Version from "../routes/version";
 import Counters from "../routes/counters";
 import FoodWords from "../routes/foodwords";
 import Share from "../routes/share";
+import Advanced from "../routes/advanced";
 import { OfflineWarning } from "./offline-warning";
 import { ToastsProvider, useToasts } from "../toasts-context";
 
@@ -271,9 +272,9 @@ const App: FunctionalComponent = () => {
               lists={lists}
             />
             <Route
-              path="/shopping/:id/pictures"
+              path="/shopping/:id/photos"
               component={ShoppingList}
-              picturesMode={true}
+              photosMode={true}
               lists={lists}
               user={user}
               db={db}
@@ -282,7 +283,7 @@ const App: FunctionalComponent = () => {
             <Route
               path="/shopping/:id"
               component={ShoppingList}
-              picturesMode={false}
+              photosMode={false}
               lists={lists}
               user={user}
               db={db}
@@ -315,6 +316,7 @@ const App: FunctionalComponent = () => {
               db={db}
             />
             <Route path="/share" component={Share} />
+            <Route path="/advanced" component={Advanced} />
             <NotFoundPage default />
           </Router>
           {/* {process.env.NODE_ENV === "development" && db && (

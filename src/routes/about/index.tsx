@@ -37,7 +37,8 @@ const About: FunctionalComponent = () => {
       </p>
 
       <h3 class="display-3">Features</h3>
-      <h4>It&apos;s a to-do list</h4>
+
+      <h4>As simple as a to-do list</h4>
       <p>
         But it&apos;s perfected for home grocery shopping and family life.
         Suggestions are based on what you&apos;ve typed before and it&apos;s
@@ -75,6 +76,30 @@ const About: FunctionalComponent = () => {
           Screenshot listing co-owners.
         </figcaption>
       </figure>
+
+      <h4 id="photo-to-list">
+        Photos of your cookbook ingredients
+      </h4>
+      <p>Not only can it be useful to have a photo gallery of cookbook meals,
+        it can analyze the photo for <i>food words</i> and make suggestions
+        to add items to your shopping list.
+      </p>
+      <figure class="figure">
+        <video
+          autoPlay
+          // loop
+          muted
+          controls={true}
+          style={{ width: "90%" }}
+          class="shadow"
+        >
+          <source src="/lazy-assets/photos-of-ingredients-720.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="figure-caption">
+          Demo of taking a photo of your cookbook ingredients to add to your shopping list.
+        </figcaption>
+      </figure>
+
 
       <h4>
         Everything is <b>real-time</b>

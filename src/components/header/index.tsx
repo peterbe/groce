@@ -91,7 +91,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               </li>
             )}
-            <li class="nav-item">
+            {/* <li class="nav-item">
               <Link
                 class="nav-link"
                 activeClassName={"active"}
@@ -102,7 +102,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
               >
                 Settings
               </Link>
-            </li>
+            </li> */}
             {user && (
               <li class="nav-item">
                 <Link
@@ -141,7 +141,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 Share the ❤️
               </Link>
             </li>
-            <li class="nav-item">
+            {/* <li class="nav-item">
               <Link
                 class="nav-link"
                 activeClassName={"active"}
@@ -151,6 +151,18 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 }}
               >
                 Version
+              </Link>
+            </li> */}
+            <li class="nav-item">
+              <Link
+                class="nav-link"
+                activeClassName={"active"}
+                href="/advanced"
+                onClick={() => {
+                  setShowNavbar(false);
+                }}
+              >
+                Advanced
               </Link>
             </li>
             {showPrintThisPage && (
@@ -223,118 +235,6 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                 )}
               </li>
             )}
-
-            {/* {auth && (!user || user.isAnonymous) && (
-              <li class="nav-item dropdown">
-                <a
-                  class={
-                    showSigninMenu
-                      ? "nav-link dropdown-toggle show"
-                      : "nav-link dropdown-toggle"
-                  }
-                  href="#"
-                  id="navbarDropdownSignin"
-                  role="button"
-                  data-toggle="dropdown"
-                  aria-expanded="false"
-                  onClick={() => {
-                    setShowSigninMenu(!showSigninMenu);
-                  }}
-                >
-                  Sign in
-                </a>
-                <ul
-                  class={
-                    showSigninMenu ? "dropdown-menu show" : "dropdown-menu"
-                  }
-                  aria-labelledby="navbarDropdownSignin"
-                >
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onClick={async () => {
-                        const provider = new firebase.auth.GoogleAuthProvider();
-                        try {
-                          await auth.signInWithRedirect(provider);
-                        } catch (error) {
-                          console.log("ERROR:", error);
-                        }
-                      }}
-                    >
-                      Sign in with Google
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onClick={async () => {
-                        const provider = new firebase.auth.GoogleAuthProvider();
-                        try {
-                          await auth.signInWithPopup(provider);
-                        } catch (error) {
-                          console.log("ERROR:", error);
-                        }
-                      }}
-                    >
-                      Sign in (with popup)
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            )} */}
-
-            {/* {user && !user.isAnonymous && auth && (
-              <li class="nav-item dropdown">
-                <a
-                  class={
-                    showUserMenu
-                      ? "nav-link dropdown-toggle show"
-                      : "nav-link dropdown-toggle"
-                  }
-                  href="#"
-                  id="navbarDropdown"
-                  role="button"
-                  data-toggle="dropdown"
-                  aria-expanded="false"
-                  onClick={() => {
-                    setShowUserMenu(!showUserMenu);
-                  }}
-                >
-                  <img
-                    src={
-                      user.photoURL ? user.photoURL : "/assets/icons/avatar.svg"
-                    }
-                    class="img-thumbnail"
-                    width="30"
-                    alt="Avatar"
-                  />
-                </a>
-                <ul
-                  class={showUserMenu ? "dropdown-menu show" : "dropdown-menu"}
-                  aria-labelledby="navbarDropdown"
-                >
-                  <li class="dropdown-item">
-                    <b>{user.displayName}</b> {user.email && `(${user.email})`}
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="#"
-                      onClick={async () => {
-                        await auth.signOut();
-                      }}
-                    >
-                      Sign out
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            )} */}
           </ul>
         </div>
       </div>

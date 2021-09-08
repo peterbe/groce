@@ -24,7 +24,7 @@ interface Props {
   storage: firebase.storage.Storage | null;
   id: string;
   lists: List[] | null;
-  picturesMode: boolean;
+  photosMode: boolean;
 }
 
 const ShoppingList: FunctionalComponent<Props> = ({
@@ -33,7 +33,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   storage,
   id,
   lists,
-  picturesMode,
+  photosMode,
 }: Props) => {
   const [items, setItems] = useState<Item[] | null>(null);
 
@@ -630,7 +630,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && !editGroups && !popularityContest && !picturesMode && (
+      {!editAction && !editGroups && !popularityContest && !photosMode && (
         <NewItemForm
           ready={!!items}
           items={items}
@@ -644,7 +644,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
         !editGroups &&
         !popularityContest &&
-        picturesMode &&
+        photosMode &&
         db &&
         storage &&
         user &&
@@ -669,7 +669,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
-        !picturesMode &&
+        !photosMode &&
         !todoItems.length &&
         !doneItems.length && (
           <p class={style.empty_list}>List is empty at the moment.</p>
@@ -679,7 +679,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
-        !picturesMode &&
+        !photosMode &&
         !!todoItems.length && (
           <ul class="list-group shadow-sm bg-white rounded">
             {todoItems
@@ -713,7 +713,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
-        !picturesMode &&
+        !photosMode &&
         !!doneItems.length && (
           <div class={style.done_items}>
             <h5>Done and dusted</h5>
@@ -748,7 +748,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
       !editGroups &&
       !popularityContest &&
-      !picturesMode &&
+      !photosMode &&
       !!doneItems.length ? (
         <div class={`${style.clearitems} d-grid gap-2`}>
           <button
@@ -767,7 +767,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
         !editGroups &&
         !popularityContest &&
-        !picturesMode &&
+        !photosMode &&
         !!clearedItems.length && (
           <div class={`${style.clearitems} d-grid gap-2`}>
             <button
@@ -792,7 +792,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         hasOrganizableGroups &&
         !editAction &&
         !popularityContest &&
-        !picturesMode &&
+        !photosMode &&
         !editGroups && (
           <div class={`${style.edit_groups_action} hide-in-print`}>
             <button
@@ -807,13 +807,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
           </div>
         )}
 
-      {!editAction && !editGroups && !popularityContest && !picturesMode && (
+      {!editAction && !editGroups && !popularityContest && !photosMode && (
         <div class={style.camera_mode}>
           <Link
-            href={`/shopping/${id}/pictures`}
+            href={`/shopping/${id}/photos`}
             class="btn btn-outline-secondary"
           >
-            📸 Pictures
+            📸 Photos
           </Link>
         </div>
       )}
@@ -826,7 +826,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      {picturesMode ? (
+      {photosMode ? (
         <GoBack url={`/shopping/${id}`} name="shopping list" />
       ) : (
         <GoBack url="/shopping" name="lists" />

@@ -156,7 +156,7 @@ export interface FirestoreFoodWord {
   locale: string;
   word: string;
   hitCount: number;
-  notes: string;
+  // notes: string;
 }
 export interface FoodWord extends FirestoreFoodWord {
   id: string;

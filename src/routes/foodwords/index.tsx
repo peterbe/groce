@@ -65,7 +65,6 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
               id: doc.id,
               locale: data.locale,
               word: data.word,
-              notes: data.notes,
               hitCount: data.hitCount,
             });
           });
@@ -135,26 +134,26 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
     setFilteredFoodWords(sortFoodWords(filteredFoodWords, sortBy, sortReverse));
   }, [filteredFoodWords, sortBy, sortReverse]);
 
-  // useEffect(() => {
-  //   if (db && foodWords) {
-  //     const dupes: string[] = [];
-  //     const seen = new Set();
+  useEffect(() => {
+    if (db && foodWords && isAdmin) {
+      const dupes: string[] = [];
+      const seen = new Set();
 
-  //     for (const word of foodWords) {
-  //       if (seen.has(word.word)) {
-  //         dupes.push(word.id);
-  //       } else {
-  //         seen.add(word.word);
-  //       }
-  //     }
-  //     var batch = db.batch();
-  //     dupes.forEach((id) => {
-  //       var ref = db.collection("foodwords").doc(id);
-  //       batch.delete(ref);
-  //     });
-  //     batch.commit();
-  //   }
-  // }, [db, foodWords]);
+      for (const word of foodWords) {
+        if (seen.has(word.word)) {
+          dupes.push(word.id);
+        } else {
+          seen.add(word.word);
+        }
+      }
+      var batch = db.batch();
+      dupes.forEach((id) => {
+        var ref = db.collection("foodwords").doc(id);
+        batch.delete(ref);
+      });
+      batch.commit();
+    }
+  }, [db, foodWords, isAdmin]);
 
   const [deletedWord, setDeletedWord] = useState<FoodWord | null>(null);
   useEffect(() => {
@@ -337,20 +336,35 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
         </table>
       )}
 
+      <input
+        type="search"
+        class="form-control"
+        placeholder="Search..."
+        value={filterWord}
+        onInput={(event) => {
+          if (event.currentTarget.value === "") {
+            setFilterWord("");
+          }
+        }}
+        onChange={(event) => {
+          setFilterWord(event.currentTarget.value);
+        }}
+      />
       <table class="table table-sm table-hover align-middle table-borderless">
         <thead>
           <tr>
             {isAdmin && <th scope="col">Delete</th>}
             <th scope="col">{getSortHeading("word", "Word")}</th>
-            <th scope="col">Notes</th>
+            {/* <th scope="col">Notes</th> */}
             <th scope="col">{getSortHeading("hitCount", "Hit count")}</th>
           </tr>
-          <tr>
+          {/* <tr>
             {isAdmin && <th scope="col" />}
             <th scope="col">
               <input
                 type="search"
                 class="form-control"
+                placeholder="Search..."
                 value={filterWord}
                 onInput={(event) => {
                   if (event.currentTarget.value === "") {
@@ -363,8 +377,7 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
               />
             </th>
             <th scope="col" />
-            <th scope="col" />
-          </tr>
+          </tr> */}
         </thead>
         <tbody>
           {filteredFoodWords.map((foodWord) => {
@@ -391,15 +404,20 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
                   </td>
                 )}
                 <td>{foodWord.word}</td>
-                <td>
+                {/* <td>
                   {foodWord.notes ? <small>{foodWord.notes}</small> : null}
-                </td>
+                </td> */}
                 <td>{foodWord.hitCount}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      {filterWord && filteredFoodWords.length === 0 && (
+        <p>
+          <i>Nothing found</i>
+        </p>
+      )}
       {db && foodWords && isAdmin && (
         <p>
           <a

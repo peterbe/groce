@@ -940,15 +940,10 @@ function ShowListPictures({
                       />
                     </div>
                   ) : (
-                    // <div class="spinner-border" role="status">
-                    //   <span class="visually-hidden">
-                    //     Loading text from picture...
-                    //   </span>
-                    // </div>
                     // Based on a very rough estimate how long it usually takes
                     <div>
-                      <DisplayFakeProgressbar time={5 * 1000} />
-                      <p>Analyzing picture upload to find words in the text.</p>
+                      <DisplayFakeProgressbar time={6 * 1000} />
+                      <p>Analyzing photo to find words in the text.</p>
                     </div>
                   )}
                 </div>
