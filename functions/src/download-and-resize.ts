@@ -23,8 +23,6 @@ codeToErrorMap.set(401, "unauthenticated");
 export const downloadAndResizeAndStore = functions
   .runWith({ memory: "1GB" })
   .https.onRequest(async (req, res) => {
-    console.log("CONFIG:", functions.config());
-
     const imagePath = req.query.image || "";
 
     if (!imagePath) {
