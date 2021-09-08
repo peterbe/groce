@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as functions from "firebase-functions";
@@ -18,88 +19,6 @@ const codeToErrorMap: Map<number, string> = new Map();
 codeToErrorMap.set(404, "not found");
 codeToErrorMap.set(403, "forbidden");
 codeToErrorMap.set(401, "unauthenticated");
-
-// export const downloadAndResize = functions
-//   .runWith({ memory: "1GB" })
-//   .https.onRequest(async (req, res) => {
-//     const imagePath = req.query.image || "";
-//     if (!imagePath) {
-//       res.status(400).send("missing 'image'");
-//       return;
-//     }
-//     if (typeof imagePath !== "string") {
-//       res.status(400).send("can only be one 'image'");
-//       return;
-//     }
-//     const widthString = req.query.width || "";
-//     if (!widthString || typeof widthString !== "string") {
-//       res.status(400).send("missing 'width' or not a single string");
-//       return;
-//     }
-//     const extension = imagePath
-//       .toLowerCase()
-//       .split(".")
-//       .slice(-1)[0];
-//     if (!["jpg", "png", "jpeg"].includes(extension)) {
-//       res.status(400).send(`invalid extension (${extension})`);
-//       return;
-//     }
-//     let width = 0;
-//     try {
-//       width = parseInt(widthString);
-//       if (width < 0) {
-//         throw new Error("too small");
-//       }
-//       if (width > 1000) {
-//         throw new Error("too big");
-//       }
-//     } catch (error) {
-//       res.status(400).send(`width invalid (${error.toString()}`);
-//       return;
-//     }
-
-//     admin
-//       .storage()
-//       .bucket()
-//       .file(imagePath)
-//       .download()
-//       .then(downloadData => {
-//         const contents = downloadData[0];
-//         console.log(
-//           `downloadAndResize (${JSON.stringify({
-//             width,
-//             imagePath
-//           })}) downloadData.length=${humanFileSize(contents.length)}\n`
-//         );
-
-//         const contentType = extension === "png" ? "image/png" : "image/jpeg";
-//         sharp(contents)
-//           .rotate() // auto-rotates based on EXIF
-//           .resize(width)
-//           .toBuffer()
-//           .then(buffer => {
-//             res.setHeader("content-type", contentType);
-//             res.setHeader(
-//               "cache-control",
-//               `public,max-age=${60 * 60 * 24 * 7}`
-//             );
-//             res.send(buffer);
-//           })
-//           .catch((error: Error) => {
-//             console.error(`Error reading in with sharp: ${error.toString()}`);
-//             res
-//               .status(500)
-//               .send(`Unable to read in image: ${error.toString()}`);
-//           });
-//       })
-//       .catch((error: StorageErrorType) => {
-//         if (error.code && codeToErrorMap.has(error.code)) {
-//           res.status(error.code).send(codeToErrorMap.get(error.code));
-//         } else {
-//           res.status(500).send(error.message);
-//         }
-//       });
-//   });
 
 export const downloadAndResizeAndStore = functions
   .runWith({ memory: "1GB" })
@@ -138,7 +57,8 @@ export const downloadAndResizeAndStore = functions
         throw new Error("too big");
       }
     } catch (error) {
-      res.status(400).send(`width invalid (${error.message}`);
+      const errorMessage = errorToString(error, "Failed to check widthString");
+      res.status(400).send(`width invalid (${errorMessage})`);
       return;
     }
 
@@ -178,7 +98,7 @@ export const downloadAndResizeAndStore = functions
       // console.error(error);
       console.warn(`Error downloading ${destinationPath}`);
       res.setHeader("content-type", "text/plain");
-      res.status(500).send(error.toString());
+      res.status(500).send(errorToString(error));
       return;
     } finally {
       console.timeEnd(label);
@@ -201,7 +121,7 @@ export const downloadAndResizeAndStore = functions
       } catch (error) {
         console.warn(`Error downloading ${imagePath}`);
         res.setHeader("content-type", "text/plain");
-        res.status(404).send(error.toString());
+        res.status(404).send(errorToString(error));
         return;
       } finally {
         console.timeEnd(label);
@@ -234,15 +154,29 @@ export const downloadAndResizeAndStore = functions
       res.setHeader("content-type", contentType);
       res.setHeader("cache-control", CACHE_CONTROL);
       res.send(modifiedImageBuffer);
+
+      // Because they say it's important to clean up after yourself
+      // https://firebase.google.com/docs/functions/tips#always_delete_temporary_files
+      fs.unlinkSync(tempFile);
     } catch (error) {
       console.warn(
         `Error when trying to upload ${modifiedFile} to ${destinationPath}`
       );
       res.setHeader("content-type", "text/plain");
-      res.status(500).send(error.toString());
+      res.status(500).send(errorToString(error));
       return;
     }
   });
+
+function errorToString(error: any, fallback: string = "") {
+  if (error instanceof Error) {
+    return error.toString();
+  }
+  if (fallback) {
+    return fallback;
+  }
+  return String(error);
+}
 
 function resize(file: string, width: number) {
   return sharp(file)

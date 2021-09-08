@@ -8,7 +8,8 @@ import party from "party-js";
 import { FileUpload } from "../../components/file-upload";
 import style from "./style.css";
 import { Item, List, StorageSpec } from "../../types";
-import { useDownloadImageURL } from "./hooks";
+// import { useDownloadImageURL } from "../../hooks";
+import { DisplayImage } from "../../components/display-image";
 
 dayjs.extend(relativeTime);
 
@@ -51,10 +52,13 @@ export const ListItem: FunctionalComponent<Props> = ({
   openImageModal,
   deleteItem,
 }: Props) => {
-  const [text, setText] = useState("");
-  const [description, setDescription] = useState("");
-  const [group, setGroup] = useState("");
-  const [quantity, setQuantity] = useState<string | number>("");
+  const [text, setText] = useState(item.text);
+  const [description, setDescription] = useState(item.description);
+  const [group, setGroup] = useState(item.group.text);
+  const [quantity, setQuantity] = useState<string | number>(
+    item.quantity || ""
+  );
+
   const [editMode, setEditMode] = useState<
     "" | "text" | "description" | "group"
   >("");
@@ -82,13 +86,6 @@ export const ListItem: FunctionalComponent<Props> = ({
       mounted = false;
     };
   }, [recentlyAdded, recentlyModified]);
-
-  useEffect(() => {
-    setText(item.text);
-    setDescription(item.description);
-    setGroup(item.group.text);
-    setQuantity(item.quantity || "");
-  }, [item]);
 
   const textInputRef = useRef<HTMLInputElement>(null);
   const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
@@ -124,6 +121,10 @@ export const ListItem: FunctionalComponent<Props> = ({
   }
 
   const [checked, setChecked] = useState(false);
+
+  const [uploadedFiles, setUploadedFiles] = useState<Map<string, File>>(
+    new Map()
+  );
 
   if (editMode) {
     return (
@@ -175,6 +176,9 @@ export const ListItem: FunctionalComponent<Props> = ({
                   aria-label="Quantity"
                   aria-describedby="id_quantity"
                   value={quantity}
+                  onChange={(event) => {
+                    setQuantity(event.currentTarget.value)
+                  }}
                 />
                 <button
                   class={`btn btn-outline-secondary ${style.quantity_button}`}
@@ -249,6 +253,7 @@ export const ListItem: FunctionalComponent<Props> = ({
                 images={item.images}
                 updateItemImage={updateItemImage}
                 openImageModal={openImageModal}
+                uploadedFiles={uploadedFiles}
               />
             </div>
           )}
@@ -260,7 +265,18 @@ export const ListItem: FunctionalComponent<Props> = ({
                 storage={storage}
                 list={list}
                 item={item}
-                onClose={() => {
+                onUploaded={({
+                  file,
+                  filePath,
+                }: {
+                  file: File;
+                  filePath: string;
+                }) => {
+                  const newMap: Map<string, File> = new Map(uploadedFiles);
+                  newMap.set(filePath, file);
+                  setUploadedFiles(newMap);
+                }}
+                onSaved={() => {
                   setEnableFileUpload(false);
                 }}
               />
@@ -394,6 +410,7 @@ export const ListItem: FunctionalComponent<Props> = ({
               <DisplayFilesViewMode
                 images={item.images}
                 openImageModal={openImageModal}
+                uploadedFiles={uploadedFiles}
               />
             </span>
           )}
@@ -429,20 +446,30 @@ export const ListItem: FunctionalComponent<Props> = ({
 function DisplayFilesViewMode({
   images,
   openImageModal,
+  uploadedFiles,
 }: {
   images: string[];
   openImageModal: (url: string) => void;
+  uploadedFiles: Map<string, File>;
 }) {
   return (
     <span>
-      {images.map((path) => {
+      {images.map((filePath) => {
         return (
-          <span key={path} style={{ paddingRight: 5 }}>
-            <Image
-              path={path}
+          <span key={filePath} style={{ paddingRight: 5 }}>
+            <DisplayImage
+              filePath={filePath}
+              file={uploadedFiles.get(filePath)}
               openImageModal={openImageModal}
+              // When looking at thumbnails in "edit mode" the width
+              // of the thumbnails is 80. Re-use that here so if you
+              // do switch from "view mode" to "edit mode", the thumbnails
+              // there will hopefully already been downloaded and
+              // browser-cached.
+              thumbnailWidth={80}
               maxWidth={30}
               maxHeight={30}
+              useObjectFit={true}
             />
           </span>
         );
@@ -456,32 +483,39 @@ function DisplayFilesEditMode({
   item,
   updateItemImage,
   openImageModal,
+  uploadedFiles,
 }: {
   images: string[];
   item: Item;
   updateItemImage: (item: Item, spec: StorageSpec) => void;
   openImageModal: (url: string) => void;
+  uploadedFiles: Map<string, File>;
 }) {
   return (
     <ul class="list-group list-group-flush">
-      {images.map((path) => {
+      {images.map((filePath) => {
         return (
           <li
-            key={path}
+            key={filePath}
             class="list-group-item d-flex justify-content-between align-items-center"
           >
-            <Image
-              path={path}
+            <DisplayImage
+              filePath={filePath}
+              file={uploadedFiles.get(filePath)}
               openImageModal={openImageModal}
+              // Make sure this matches what we use in "view mode"
+              // where it explicitly sets the `thumbnailWidth` to match
+              // what's being used here:
               maxWidth={80}
               maxHeight={80}
+              useObjectFit={true}
             />
 
             <button
               type="button"
               class="btn btn-warning btn-sm"
               onClick={() => {
-                updateItemImage(item, { remove: path });
+                updateItemImage(item, { remove: filePath });
               }}
             >
               Delete
@@ -493,64 +527,67 @@ function DisplayFilesEditMode({
   );
 }
 
-function Image({
-  path,
-  openImageModal,
-  maxWidth,
-  maxHeight,
-}: {
-  path: string;
-  openImageModal: (url: string) => void;
-  maxWidth: number;
-  maxHeight: number;
-}) {
-  const { url: downloadURL } = useDownloadImageURL(path, 1000, false);
-  const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
-    path,
-    100,
-    false
-  );
+// function Image({
+//   path,
+//   file,
+//   openImageModal,
+//   maxWidth,
+//   maxHeight,
+// }: {
+//   path: string;
+//   file: File | null;
+//   openImageModal: (url: string) => void;
+//   maxWidth: number;
+//   maxHeight: number;
+// }) {
+//   const { url: downloadURL } = useDownloadImageURL(path, 1000, false);
+//   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
+//     path,
+//     100,
+//     false
+//   );
 
-  if (thumbnailError) {
-    <img alt={thumbnailError.toString()} style={{ maxWidth, maxHeight }} />;
-  }
+//   if (thumbnailError) {
+//     // XXX this isn't working!
+//     <img alt={thumbnailError.toString()} style={{ maxWidth, maxHeight }} />;
+//   }
 
-  const preloaded = new Map<string, boolean>();
+//   const preloaded = new Map<string, boolean>();
 
-  return (
-    <a
-      href={downloadURL || thumbnailURL}
-      onClick={(event) => {
-        event.preventDefault();
-        openImageModal(downloadURL || thumbnailURL);
-      }}
-      onMouseOver={() => {
-        if (!preloaded.has(downloadURL)) {
-          preloaded.set(downloadURL, false);
-          const preloadImg = new window.Image();
-          preloadImg.src = downloadURL;
-          if (preloadImg.decode) {
-            preloadImg
-              .decode()
-              .then(() => {
-                preloaded.set(downloadURL, true);
-              })
-              .catch(() => {
-                preloaded.set(downloadURL, false);
-              });
-          } else {
-            preloadImg.onload = () => {
-              preloaded.set(downloadURL, true);
-            };
-          }
-        }
-      }}
-    >
-      <img
-        class="img-thumbnail"
-        style={{ width: maxWidth, height: maxHeight, "object-fit": "cover" }}
-        src={thumbnailURL}
-      />
-    </a>
-  );
-}
+//   return (
+//     <a
+//       href={downloadURL || thumbnailURL}
+//       onClick={(event) => {
+//         event.preventDefault();
+//         openImageModal(downloadURL || thumbnailURL);
+//       }}
+//       onMouseOver={() => {
+//         if (!preloaded.has(downloadURL)) {
+//           preloaded.set(downloadURL, false);
+//           const preloadImg = new window.Image();
+//           preloadImg.src = downloadURL;
+//           if (preloadImg.decode) {
+//             preloadImg
+//               .decode()
+//               .then(() => {
+//                 preloaded.set(downloadURL, true);
+//               })
+//               .catch(() => {
+//                 preloaded.set(downloadURL, false);
+//               });
+//           } else {
+//             preloadImg.onload = () => {
+//               preloaded.set(downloadURL, true);
+//             };
+//           }
+//         }
+//       }}
+//     >
+//       <img
+//         class="img-thumbnail"
+//         style={{ width: maxWidth, height: maxHeight, "object-fit": "cover" }}
+//         src={thumbnailURL}
+//       />
+//     </a>
+//   );
+// }

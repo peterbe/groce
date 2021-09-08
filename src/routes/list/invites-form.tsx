@@ -231,7 +231,7 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
                               "Error trying to navigator.share",
                               error
                             );
-                            setShareError(error);
+                            setShareError(error instanceof Error ? error : new Error(String(error)));
                           }
                         }}
                       >

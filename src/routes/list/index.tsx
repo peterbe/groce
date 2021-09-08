@@ -12,6 +12,7 @@ import { ListOptions } from "./list-options";
 import { OrganizeGroups } from "./organize-groups";
 import { ListItem } from "./list-item";
 import { NewItemForm } from "./new-item-form";
+import { Pictures } from "./pictures";
 import { PopularityContest } from "./popularity-contest";
 import { GROUP_SUGGESTIONS, ITEM_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List, StorageSpec } from "../../types";
@@ -23,6 +24,7 @@ interface Props {
   storage: firebase.storage.Storage | null;
   id: string;
   lists: List[] | null;
+  picturesMode: boolean;
 }
 
 const ShoppingList: FunctionalComponent<Props> = ({
@@ -31,6 +33,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
   storage,
   id,
   lists,
+  picturesMode,
 }: Props) => {
   const [items, setItems] = useState<Item[] | null>(null);
 
@@ -220,7 +223,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
   }
 
-  function addNewText(text: string) {
+  async function addNewText(text: string) {
     if (!text.trim()) {
       throw new Error("new text empty");
     }
@@ -241,7 +244,8 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
     if (previousItem) {
       // Update it as not removed and not done
-      db.collection(`shoppinglists/${id}/items`)
+      return db
+        .collection(`shoppinglists/${id}/items`)
         .doc(previousItem.id)
         .set({
           text: previousItem.text,
@@ -261,41 +265,41 @@ const ShoppingList: FunctionalComponent<Props> = ({
           console.error("Unable to update:", error);
           throw error;
         });
-    } else {
-      if (!list?.config.disableDefaultSuggestions) {
-        // Perhaps what you typed was almost like one of the suggestions.
-        // E.g you typed 'steak' but there's a suggestion, which is spelled
-        // "nicer" and it's 'Steak 🥩'
-        const suggestion = ITEM_SUGGESTIONS.find(
-          (itemText) =>
-            itemText.toLowerCase() === textLC ||
-            stripEmojis(itemText).toLowerCase() === textLC
-        );
-        if (suggestion) {
-          text = suggestion;
-        }
-      }
-
-      // A fresh add
-      db.collection(`shoppinglists/${id}/items`)
-        .add({
-          text: text.trim(),
-          description: "",
-          group: {
-            order: 0,
-            text: "",
-          },
-          quantity: 0,
-          done: false,
-          removed: false,
-          added: [firebase.firestore.Timestamp.fromDate(new Date())],
-          times_added: 1,
-        })
-        .catch((error) => {
-          console.error("Error trying to add new item:", error);
-          throw error;
-        });
     }
+    if (!list?.config.disableDefaultSuggestions) {
+      // Perhaps what you typed was almost like one of the suggestions.
+      // E.g you typed 'steak' but there's a suggestion, which is spelled
+      // "nicer" and it's 'Steak 🥩'
+      const suggestion = ITEM_SUGGESTIONS.find(
+        (itemText) =>
+          itemText.toLowerCase() === textLC ||
+          stripEmojis(itemText).toLowerCase() === textLC
+      );
+      if (suggestion) {
+        text = suggestion;
+      }
+    }
+
+    // A fresh add
+    return db
+      .collection(`shoppinglists/${id}/items`)
+      .add({
+        text: text.trim(),
+        description: "",
+        group: {
+          order: 0,
+          text: "",
+        },
+        quantity: 0,
+        done: false,
+        removed: false,
+        added: [firebase.firestore.Timestamp.fromDate(new Date())],
+        times_added: 1,
+      })
+      .catch((error) => {
+        console.error("Error trying to add new item:", error);
+        throw error;
+      });
   }
 
   function updateItemDoneToggle(item: Item) {
@@ -323,7 +327,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
     const collectionRef = db.collection(`shoppinglists/${id}/items`);
     const itemRef = collectionRef.doc(item.id);
-    itemRef.delete()
+    itemRef.delete();
   }
 
   function updateItem(
@@ -562,7 +566,13 @@ const ShoppingList: FunctionalComponent<Props> = ({
           {editAction ? "Close" : "List options"}
         </button>
       </p>
-      {list && <h2>{list.name} </h2>}
+      {list && (
+        <h2>
+          <Link class={style.list_header_link} href={`/shopping/${list.id}`}>
+            {list.name}
+          </Link>
+        </h2>
+      )}
 
       {items && !editAction && popularityContest && (
         <PopularityContest
@@ -620,7 +630,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!editAction && !editGroups && !popularityContest && (
+      {!editAction && !editGroups && !popularityContest && !picturesMode && (
         <NewItemForm
           ready={!!items}
           items={items}
@@ -631,12 +641,35 @@ const ShoppingList: FunctionalComponent<Props> = ({
         />
       )}
 
-      {!items && <Loading text="Loading shopping list..." />}
+      {!editAction &&
+        !editGroups &&
+        !popularityContest &&
+        picturesMode &&
+        db &&
+        storage &&
+        user &&
+        list && (
+          <Pictures
+            db={db}
+            storage={storage}
+            user={user}
+            list={list}
+            ready={!!items}
+            items={items}
+            saveHandler={async (text: string) => {
+              await addNewText(text);
+            }}
+            openImageModal={openImageModal}
+          />
+        )}
+
+      {!items && <Loading text="Loading shopping list..." minHeight={200} />}
 
       {items &&
         !editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !todoItems.length &&
         !doneItems.length && (
           <p class={style.empty_list}>List is empty at the moment.</p>
@@ -646,6 +679,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !!todoItems.length && (
           <ul class="list-group shadow-sm bg-white rounded">
             {todoItems
@@ -679,6 +713,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         !editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !!doneItems.length && (
           <div class={style.done_items}>
             <h5>Done and dusted</h5>
@@ -713,6 +748,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
       !editGroups &&
       !popularityContest &&
+      !picturesMode &&
       !!doneItems.length ? (
         <div class={`${style.clearitems} d-grid gap-2`}>
           <button
@@ -731,6 +767,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       {!editAction &&
         !editGroups &&
         !popularityContest &&
+        !picturesMode &&
         !!clearedItems.length && (
           <div class={`${style.clearitems} d-grid gap-2`}>
             <button
@@ -755,6 +792,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
         hasOrganizableGroups &&
         !editAction &&
         !popularityContest &&
+        !picturesMode &&
         !editGroups && (
           <div class={`${style.edit_groups_action} hide-in-print`}>
             <button
@@ -769,6 +807,17 @@ const ShoppingList: FunctionalComponent<Props> = ({
           </div>
         )}
 
+      {!editAction && !editGroups && !popularityContest && !picturesMode && (
+        <div class={style.camera_mode}>
+          <Link
+            href={`/shopping/${id}/pictures`}
+            class="btn btn-outline-secondary"
+          >
+            📸 Pictures
+          </Link>
+        </div>
+      )}
+
       {db && user && user.isAnonymous && (
         <div class={`${style.sign_in_reminder} text-right`}>
           <Link href="/signin" class="btn btn-sm btn-outline-primary">
@@ -777,7 +826,11 @@ const ShoppingList: FunctionalComponent<Props> = ({
         </div>
       )}
 
-      <GoBack url="/shopping" name="lists" />
+      {picturesMode ? (
+        <GoBack url={`/shopping/${id}`} name="shopping list" />
+      ) : (
+        <GoBack url="/shopping" name="lists" />
+      )}
 
       <ImageModal url={modalImageURL} close={closeImageModal} />
     </div>

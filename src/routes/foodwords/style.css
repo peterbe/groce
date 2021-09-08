@@ -1,0 +1,21 @@
+.food_words {
+  padding-top: 50px;
+}
+
+.food_words td {
+  padding: 0;
+}
+
+.sortable {
+  cursor: pointer;
+}
+.sortable_on {
+  cursor: pointer;
+  font-style: italic;
+}
+.sortable_on_reverse {
+  cursor: pointer;
+  font-style: italic;
+  direction: rtl;
+  unicode-bidi: bidi-override;
+}

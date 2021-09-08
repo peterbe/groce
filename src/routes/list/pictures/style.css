@@ -1,0 +1,41 @@
+.pictures {
+  margin-bottom: 50px;
+}
+
+.list_pictures {
+  margin-top: 0;
+}
+
+.words {
+  margin: 5px;
+}
+
+.picture_group {
+  padding-bottom: 30px !important;
+  margin-bottom: 30px;
+}
+
+.debug_found_foodwords {
+  margin-top: 20px;
+}
+
+.add_picked_words_container {
+  margin-top: 10px;
+}
+
+.tabs_container {
+  text-align: center;
+  margin-bottom: 30px
+}
+
+.suggested_foodwords {
+  margin: 20px 0;
+}
+
+.your_suggested_words {
+  margin: 30px 0;
+}
+
+.new_upload {
+  margin-bottom: 20px;
+}

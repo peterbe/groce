@@ -6,10 +6,6 @@ const USE_EMULATOR = process.env.PREACT_APP_USE_EMULATOR
   ? Boolean(JSON.parse(process.env.PREACT_APP_USE_EMULATOR))
   : false;
 
-// const THUMBNAL_CLOUD_FUNCTION_BASE_URL =
-//   "https://us-central1-thatsgroce.cloudfunctions.net/downloadAndResize/";
-// const THUMBNAL_CLOUD_FUNCTION_BASE_URL =
-//   "https://us-central1-thatsgroce.cloudfunctions.net/downloadAndResizeAndStore/";
 const FUNCTION_BASE_URL = USE_EMULATOR
   ? "http://localhost:5001/thatsgroce/us-central1"
   : "https://us-central1-thatsgroce.cloudfunctions.net";

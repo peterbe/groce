@@ -26,6 +26,52 @@ export interface Item extends FirestoreItem {
   id: string;
 }
 
+export interface FirestoreListPicture {
+  filePath: string;
+  notes: string;
+  created: firebase.firestore.Timestamp;
+  modified: firebase.firestore.Timestamp;
+  deleted?: firebase.firestore.Timestamp;
+}
+
+export interface ListPicture extends FirestoreListPicture {
+  id: string;
+}
+
+export interface FirestoreListPictureText {
+  filePath: string;
+  created: firebase.firestore.Timestamp;
+  text: string;
+  foodWords: string[];
+}
+
+export interface ListPictureText extends FirestoreListPictureText {
+  id: string;
+}
+
+export interface FirestoreSuggestedFoodword {
+  word: string;
+  locale: string;
+  created: firebase.firestore.Timestamp;
+  creator_uid?: string;
+  creator_email?: string;
+}
+
+export interface SuggestedFoodword extends FirestoreSuggestedFoodword {
+  id: string;
+}
+
+export interface FirestoreListWordOption {
+  word: string;
+  created: firebase.firestore.Timestamp;
+  modified: firebase.firestore.Timestamp;
+  alias?: string;
+  ignore?: boolean;
+}
+export interface ListWordOption extends FirestoreListWordOption {
+  id: string;
+}
+
 export interface ListRecentItems {
   text: string;
   description: string;
@@ -104,4 +150,14 @@ export interface StorageSpec {
   size?: number;
   type?: string;
   error?: string;
+}
+
+export interface FirestoreFoodWord {
+  locale: string;
+  word: string;
+  hitCount: number;
+  notes: string;
+}
+export interface FoodWord extends FirestoreFoodWord {
+  id: string;
 }

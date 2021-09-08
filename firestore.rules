@@ -7,6 +7,18 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /foodwords/{foodwordID=**} {
+    	allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == 'peterbe@gmail.com';
+    }
+
+    match /suggestedfoodwords/{foodwordID=**} {
+    	allow read: if request.auth != null && (request.auth.uid == resource.data.creator_uid || request.auth.token.email == 'peterbe@gmail.com');
+      allow delete: if request.auth != null && (request.auth.uid == resource.data.creator_uid || request.auth.token.email == 'peterbe@gmail.com');
+      allow create: if request.auth != null;
+    }
+
+
 		match /feedback/{feedbackID} {
     	allow create: if request.auth != null;
       allow read: if request.auth != null && request.auth.uid == resource.data.creator_uid;
@@ -25,6 +37,38 @@ service cloud.firestore {
 
       match /items/{itemID} {
         allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
+      }
+
+      match /pictures/{pictureID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
+      }
+
+      match /texts/{pictureID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
+      }
+
+      match /wordoptions/{pictureID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(listID)).data.owners;
+      }
+
+      match /invitations/{invitationID} {
+	    	allow create: if request.auth != null;
+	      allow read: if request.auth != null;
+        allow delete: if request.auth != null && (
+          request.auth.uid == resource.data.inviter_uid ||
+          request.auth.token.email == resource.data.email
+        );
+        allow update: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == resource.data.inviter_uid;
+      }
+
+    }
+    match /menus/{menuID} {
+    	allow create: if request.auth != null;
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.owners;
+
+      match /meals/{mealID} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/menus/$(menuID)).data.owners;
       }
 
       match /invitations/{invitationID} {
@@ -46,7 +90,6 @@ service cloud.firestore {
 //         request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(request.)).data.owners;
 //     	allow write: if request.auth != null &&
 //         request.auth.uid in get(/databases/$(database)/documents/shoppinglists/$(request.resource.data.shoppinglist)).data.owners;
-
 //     }
   }
 }

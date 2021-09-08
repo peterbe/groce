@@ -6,3 +6,5 @@ node_modules
 size-plugin.json
 .builds
 functions/firebase-debug.log
+functions/firestore-debug.log
+functions/ui-debug.log

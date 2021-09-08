@@ -7,6 +7,7 @@ interface Props {
   message: string | JSX.Element | Error;
   type?: "danger" | "warning" | "info" | "secondary" | "success";
   offerReload?: boolean;
+  linkToHomepage?: boolean;
 }
 
 export const Alert: FunctionalComponent<Props> = ({
@@ -14,6 +15,7 @@ export const Alert: FunctionalComponent<Props> = ({
   message,
   type,
   offerReload,
+  linkToHomepage = true,
 }: Props) => {
   const [reloading, setReloading] = useState(false);
   return (
@@ -21,11 +23,13 @@ export const Alert: FunctionalComponent<Props> = ({
       <h4 class="alert-heading">{heading}</h4>
       {message instanceof Error ? message.toString() : message}
       <hr />
-      <p>
-        <Link href="/" class="btn btn-outline-primary">
-          Go back to <b>home page</b>
-        </Link>
-      </p>
+      {linkToHomepage && (
+        <p>
+          <Link href="/" class="btn btn-outline-primary">
+            Go back to <b>home page</b>
+          </Link>
+        </p>
+      )}
       {offerReload && (
         <p>
           <button
@@ -33,7 +37,7 @@ export const Alert: FunctionalComponent<Props> = ({
             class="btn btn-danger"
             onClick={() => {
               setReloading(true);
-              window.location.reload(true);
+              window.location.reload();
             }}
           >
             {reloading && (

@@ -1,29 +1,30 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import Sortable from "sortablejs";
 import firebase from "firebase/app";
 
+import { Alert } from "../../components/alerts";
 import { List, Item } from "../../types";
 import style from "./style.css";
-
-interface Props {
-  db: firebase.firestore.Firestore;
-  list: List;
-  items: Item[];
-  close: () => void;
-}
 
 interface Group {
   text: string;
   order: number;
 }
 
-export const OrganizeGroups: FunctionalComponent<Props> = ({
+export function OrganizeGroups({
   db,
   list,
   items,
   close,
-}: Props) => {
+}: {
+  db: firebase.firestore.Firestore;
+  list: List;
+  items: Item[];
+  close: () => void;
+}) {
+  const [saveError, setSaveError] = useState<Error | null>(null);
+
   function changeGroupText(
     group: Group,
     newText: string,
@@ -52,6 +53,9 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
         })
         .catch((error) => {
           console.error("Error doing batch edit", error);
+          setSaveError(
+            error instanceof Error ? error : new Error(String(error))
+          );
         });
     }
   }
@@ -88,6 +92,9 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
         })
         .catch((error) => {
           console.error("Error doing batch edit", error);
+          setSaveError(
+            error instanceof Error ? error : new Error(String(error))
+          );
         });
     }
   }
@@ -145,7 +152,15 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
       >
         &larr; back to shopping list
       </button>
-      <p>Drag to change order. Click to edit.</p>
+      {saveError && (
+        <Alert
+          heading="Error saving"
+          message={saveError}
+          type="danger"
+          offerReload={true}
+        />
+      )}
+      <p>Click and hold ⇅ change order. Click to edit.</p>
       {groups.length ? (
         <ul class="list-group" id="sortable">
           {groups.map((group) => {
@@ -170,7 +185,7 @@ export const OrganizeGroups: FunctionalComponent<Props> = ({
       )}
     </div>
   );
-};
+}
 
 function ListItem({
   group,

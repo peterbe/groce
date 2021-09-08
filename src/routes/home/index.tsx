@@ -215,7 +215,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                     await auth.signInWithRedirect(provider);
                   } catch (error) {
                     console.error("Error signing in with redirect", error);
-                    setSigninError(error);
+                    setSigninError(error instanceof Error ? error : new Error(String(error)));
                   }
                 }}
               >
@@ -232,7 +232,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                     await auth.signInAnonymously();
                   } catch (error) {
                     console.error("Error signing in anonymously", error);
-                    setSigninError(error);
+                    setSigninError(error instanceof Error ? error : new Error(String(error)));
                   }
                 }}
               >
