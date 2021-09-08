@@ -8,6 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import style from "./style.css";
 import { Loading } from "../../../components/loading";
 import { FileUpload } from "../../../components/file-upload";
+import { Alert } from "../../../components/alerts";
 import {
   List,
   Item,
@@ -150,6 +151,8 @@ export const Pictures: FunctionalComponent<Props> = ({
   const [suggestedFoodwords, setSuggestedFoodwords] = useState<
     SuggestedFoodword[] | null
   >(null);
+  const [suggestedFoodwordsError, setSuggestedFoodwordsError] =
+    useState<Error | null>(null);
 
   useEffect(() => {
     let ref: () => void;
@@ -180,8 +183,9 @@ export const Pictures: FunctionalComponent<Props> = ({
           },
           (error) => {
             console.error("Snapshot error:", error);
-            // XXX deal better
-            // setListPictureTextsError(error);
+            setSuggestedFoodwordsError(
+              error instanceof Error ? error : new Error(String(error))
+            );
           }
         );
     }
@@ -342,83 +346,29 @@ export const Pictures: FunctionalComponent<Props> = ({
       </div>
 
       {listPicturesError && (
-        <div
-          class="alert alert-danger alert-dismissible fade show"
-          role="alert"
-        >
-          Sorry. An error occurred trying to fetch your pictures.
-          <br />
-          <a
-            href={`/shopping/${list.id}/pictures`}
-            class="btn btn-warning"
-            onClick={(event) => {
-              event.preventDefault();
-              window.location.reload();
-            }}
-          >
-            Reload
-          </a>
-          <br />
-          <code>{listPicturesError.toString()}</code>
-          <button
-            type="button"
-            class="btn-close btn-small"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            onClick={() => {
-              setListPicturesError(null);
-            }}
-          />
-        </div>
+        <Alert
+          heading="An error occurred trying to fetch your pictures."
+          message={listPicturesError}
+          type="danger"
+          offerReload={true}
+        />
       )}
 
       {listPictureTextsError && !listPicturesError && (
-        <div
-          class="alert alert-danger alert-dismissible fade show"
-          role="alert"
-        >
-          Sorry. An error occurred trying to fetch your picture texts.
-          <br />
-          <a
-            href={`/shopping/${list.id}/pictures`}
-            class="btn btn-warning"
-            onClick={(event) => {
-              event.preventDefault();
-              window.location.reload();
-            }}
-          >
-            Reload
-          </a>
-          <br />
-          <code>{listPictureTextsError.toString()}</code>
-          <button
-            type="button"
-            class="btn-close btn-small"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            onClick={() => {
-              setListPictureTextsError(null);
-            }}
-          />
-        </div>
+        <Alert
+          heading="An error occurred trying to fetch your picture texts."
+          message={listPictureTextsError}
+          offerReload={true}
+          type="danger"
+        />
       )}
 
       {saveListPictureError && (
-        <div
-          class="alert alert-danger alert-dismissible fade show"
-          role="alert"
-        >
-          An error occurred trying to save.
-          <button
-            type="button"
-            class="btn-close btn-small"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            onClick={() => {
-              setSaveListPictureError(null);
-            }}
-          />
-        </div>
+        <Alert
+          heading="An error occurred trying to save."
+          message={saveListPictureError}
+          type="danger"
+        />
       )}
 
       {undoableDelete && (
@@ -463,6 +413,7 @@ export const Pictures: FunctionalComponent<Props> = ({
 
       {tab === "suggested" && (
         <ShowSuggestedFoodwords
+          suggestedFoodwordsError={suggestedFoodwordsError}
           suggestedFoodwords={suggestedFoodwords}
           addSuggestion={async (word: string) => {
             await db.collection("suggestedfoodwords").add({
@@ -558,7 +509,7 @@ function FoodwordOptions({
         </p>
       ) : (
         <div>
-          <ul class="list-group list-group-flush">
+          <ul class="list-group shadow-sm bg-white rounded">
             {listWordOptions.map((listWordOption) => {
               return (
                 <li key={listWordOption.id} class="list-group-item">
@@ -612,22 +563,11 @@ function FoodwordOptions({
       <h4 style={{ marginTop: 30 }}>Set up a new food word option</h4>
 
       {saveError && (
-        <div
-          class="alert alert-danger alert-dismissible fade show"
-          role="alert"
-        >
-          Error trying to save new food word option:{" "}
-          <code>{saveError.toString()}</code>
-          <button
-            type="button"
-            class="btn-close btn-small"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-            onClick={() => {
-              setSaveError(null);
-            }}
-          />
-        </div>
+        <Alert
+          heading="Error trying to save new food word option"
+          message={saveError}
+          type="danger"
+        />
       )}
 
       <form
@@ -774,58 +714,11 @@ function Tabs({
       >
         {countSuggestedFoodwords ? `Suggested` : "Suggest"}{" "}
         {countSuggestedFoodwords > 0 && (
-          <small>(${countSuggestedFoodwords})</small>
+          <small>({countSuggestedFoodwords})</small>
         )}
       </a>
     </div>
   );
-  // return (
-  //   <div class={style.tabs_container}>
-  //     <ul class="nav nav-pills nav-fill">
-  //       <li class="nav-item">
-  //         <a
-  //           class={tab === "uploads" ? "nav-link active" : "nav-link"}
-  //           aria-current={tab === "uploads" ? "page" : undefined}
-  //           href="#uploads"
-  //           onClick={() => {
-  //             onChange("uploads");
-  //           }}
-  //         >
-  //           Uploads{" "}
-  //           <small>{countListPictures ? `(${countListPictures})` : ""}</small>
-  //         </a>
-  //       </li>
-
-  //       <li class="nav-item">
-  //         <a
-  //           class={tab === "options" ? "nav-link active" : "nav-link"}
-  //           aria-current={tab === "options" ? "page" : undefined}
-  //           href="#options"
-  //           onClick={() => {
-  //             onChange("options");
-  //           }}
-  //         >
-  //           Options
-  //         </a>
-  //       </li>
-  //       <li class="nav-item">
-  //         <a
-  //           class={tab === "suggested" ? "nav-link active" : "nav-link"}
-  //           aria-current={tab === "suggested" ? "page" : undefined}
-  //           href="#suggested"
-  //           onClick={() => {
-  //             onChange("suggested");
-  //           }}
-  //         >
-  //           {countSuggestedFoodwords ? `Suggested` : "Suggest"}{" "}
-  //           <small>
-  //             {countSuggestedFoodwords ? `(${countSuggestedFoodwords})` : ""}
-  //           </small>
-  //         </a>
-  //       </li>
-  //     </ul>
-  //   </div>
-  // );
 }
 
 function UndoListPictureDelete({
@@ -877,17 +770,27 @@ function ShowSuggestedFoodwords({
   suggestedFoodwords,
   addSuggestion,
   removeSuggestions,
+  suggestedFoodwordsError,
 }: {
   suggestedFoodwords: SuggestedFoodword[] | null;
   addSuggestion: (word: string) => Promise<void>;
   removeSuggestions: (ids: string[]) => Promise<void>;
+  suggestedFoodwordsError: Error | null;
 }) {
   const [newText, setNewText] = useState("");
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
-  const [validationError, setValidationError] = useState<Error | null>(null);
 
   return (
     <div class={style.suggested_foodwords}>
+      {suggestedFoodwordsError && (
+        <Alert
+          heading="Error loading your food words"
+          message={suggestedFoodwordsError}
+          type="danger"
+          linkToHomepage={false}
+          offerReload={true}
+        />
+      )}
       {suggestedFoodwords && suggestedFoodwords.length > 0 ? (
         <div class={style.your_suggested_words}>
           <p>Your suggested words:</p>

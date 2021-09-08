@@ -24,7 +24,7 @@
     "build/*"
   ],
   "dependencies": {
-    "@types/sortablejs": "1.10.6",
+    "@types/sortablejs": "1.10.7",
     "bootstrap": "5.1.0",
     "copy-to-clipboard": "3.3.1",
     "dayjs": "1.10.6",
@@ -39,7 +39,7 @@
     "rough-viz": "1.0.6",
     "sass": "1.39.0",
     "sass-loader": "10.1.1",
-    "sortablejs": "1.13.0"
+    "sortablejs": "1.14.0"
   },
   "devDependencies": {
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
