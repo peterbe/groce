@@ -7,6 +7,8 @@ import { logger } from "firebase-functions";
 
 import { wrappedLogError } from "./rollbar-logger";
 import { getFoodWords, Options } from "./extract-food-words";
+import { MOCK_TEXTS } from "./mock-texts";
+import { FOOD_WORDS } from "./sample-food-words";
 
 type FoodWord = {
   id: string;
@@ -31,6 +33,12 @@ export const onFileUploadToText = functions
   .onFinalize(
     wrappedLogError(
       async (object): Promise<void> => {
+        console.log(
+          `process.env.FUNCTIONS_EMULATOR=${JSON.stringify(
+            process.env.FUNCTIONS_EMULATOR
+          )}`
+        );
+
         const { contentType, name } = object;
 
         if (!name) {
@@ -109,7 +117,9 @@ export const onFileUploadToText = functions
             created: admin.firestore.Timestamp.fromDate(new Date())
           });
 
-        await incrementFoodWordHitCounts(foodWords, allFoodWords);
+        if (!process.env.FUNCTIONS_EMULATOR) {
+          await incrementFoodWordHitCounts(foodWords, allFoodWords);
+        }
 
         // This forces the the global cache to always be up-to-date.
         await getAllFoodWords(locale, true);
@@ -197,8 +207,11 @@ async function getListWordOptions(listID: string): Promise<FoodWordOption[]> {
 }
 
 async function extractText(bucketName: string, name: string): Promise<string> {
-  const gcsName = `gs://${bucketName}/${name}`;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    return mockExtractText();
+  }
 
+  const gcsName = `gs://${bucketName}/${name}`;
   const client = new vision.ImageAnnotatorClient();
 
   console.time("Run documentTextDetection");
@@ -228,6 +241,13 @@ async function extractText(bucketName: string, name: string): Promise<string> {
   return text;
 }
 
+function mockExtractText(): Promise<string> {
+  return new Promise(resolve => {
+    const prefix = `MOCK TEXT! ${new Date()}\n`;
+    resolve(prefix + MOCK_TEXTS[Math.floor(Math.random() * MOCK_TEXTS.length)]);
+  });
+}
+
 const globalCacheAllFoodWords: Map<string, FoodWordMap> = new Map();
 
 async function getAllFoodWords(
@@ -244,6 +264,10 @@ async function getAllFoodWords(
       return fromCache;
     }
     logger.info(`Cache MISS on getAllFoodWords(${locale})!`);
+  }
+
+  if (process.env.FUNCTIONS_EMULATOR) {
+    return mockAllFoodwords();
   }
 
   const label = `Time to download ALL food words (refreshCache=${JSON.stringify(
@@ -272,4 +296,14 @@ async function getAllFoodWords(
   console.log(`Using ${allFoodWords.size} known sample food words`);
   globalCacheAllFoodWords.set(locale, allFoodWords);
   return allFoodWords;
+}
+
+function mockAllFoodwords(): Promise<FoodWordMap> {
+  return new Promise(resolve => {
+    const allFoodWords: FoodWordMap = new Map();
+    FOOD_WORDS.forEach((word, i) => {
+      allFoodWords.set(word.toLowerCase(), `fakeFoodWord-${i + 1}`);
+    });
+    resolve(allFoodWords);
+  });
 }
