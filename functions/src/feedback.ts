@@ -38,16 +38,3 @@ Sent: ${new Date().toLocaleString()}`
       console.log("sendEmail response:", response);
     })
   );
-
-// export const onFeedbackSubmitted = functions.firestore
-//   .document("feedback/{feedbackID}")
-//   .onCreate((snapshot, context) => {
-//     const data = snapshot.data();
-//     console.log(
-//       `Feedback created: feedbackID=${
-//         context.params.feedbackID
-//       } data=${JSON.stringify(data)}`
-//     );
-
-//     return Promise.resolve("Nothing updated.");
-//   });
