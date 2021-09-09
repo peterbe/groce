@@ -910,7 +910,7 @@ function ShowListPictures({
   openImageModal: (url: string) => void;
   uploadedFiles: Map<string, File>;
   items: Item[] | null;
-  saveNewTexts: (words: string[]) => void;
+  saveNewTexts: (words: string[]) => Promise<void>;
 }) {
   return (
     <div class={style.list_pictures}>
@@ -1024,11 +1024,12 @@ function ListWords({
 }: {
   listPictureText: ListPictureText;
   items: Item[] | null;
-  saveNewTexts: (words: string[]) => void;
+  saveNewTexts: (words: string[]) => Promise<void>;
 }) {
   const { text, foodWords } = listPictureText;
   const [showText, setShowText] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
+  const [adding, setAdding] = useState(false);
 
   const selfRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -1096,6 +1097,7 @@ function ListWords({
                     }
                   }}
                 >
+                  {(isDone || isDisabled) && <span role="icon">✔️ </span>}
                   {word}{" "}
                   {isDisabled && (
                     <small>
@@ -1115,10 +1117,19 @@ function ListWords({
               type="button"
               class="btn btn-primary"
               disabled={picked.length === 0}
-              onClick={() => {
-                saveNewTexts(picked);
+              onClick={async () => {
+                setAdding(true);
+                await saveNewTexts(picked);
+                setAdding(false);
               }}
             >
+              {adding && (
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+              )}{" "}
               Add{" "}
               <b>
                 {picked.length} item{picked.length !== 1 ? "s" : ""}
