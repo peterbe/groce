@@ -910,7 +910,7 @@ function ShowListPictures({
   openImageModal: (url: string) => void;
   uploadedFiles: Map<string, File>;
   items: Item[] | null;
-  saveNewTexts: (words: string[]) => void;
+  saveNewTexts: (words: string[]) => Promise<void>;
 }) {
   return (
     <div class={style.list_pictures}>
