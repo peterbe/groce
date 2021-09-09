@@ -1128,7 +1128,7 @@ function ListWords({
                   class="spinner-border spinner-border-sm"
                   role="status"
                   aria-hidden="true"
-                ></span>
+                />
               )}{" "}
               Add{" "}
               <b>
