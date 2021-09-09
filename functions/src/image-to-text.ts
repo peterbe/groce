@@ -33,12 +33,6 @@ export const onFileUploadToText = functions
   .onFinalize(
     wrappedLogError(
       async (object): Promise<void> => {
-        console.log(
-          `process.env.FUNCTIONS_EMULATOR=${JSON.stringify(
-            process.env.FUNCTIONS_EMULATOR
-          )}`
-        );
-
         const { contentType, name } = object;
 
         if (!name) {
