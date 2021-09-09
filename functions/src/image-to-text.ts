@@ -5,6 +5,7 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
+import { wrappedLogError } from "./rollbar-logger";
 import { getFoodWords, Options } from "./extract-food-words";
 
 type FoodWord = {
@@ -28,90 +29,92 @@ export const onFileUploadToText = functions
   })
   .storage.object()
   .onFinalize(
-    async (object): Promise<void> => {
-      const { contentType, name } = object;
+    wrappedLogError(
+      async (object): Promise<void> => {
+        const { contentType, name } = object;
 
-      if (!name) {
-        logger.warn(`object without a name ${object}`);
-        return;
-      }
-      if (!name.startsWith("list-pictures")) {
-        logger.debug(
-          `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`
-        );
-        return;
-      }
-      // console.log(`KEYS: ${JSON.stringify([...Object.keys(object)])}`);
-      const fileName = path.basename(name);
-      const listID = fileName.split("-")[0];
-      if (!listID) {
-        logger.warn(
-          `First part of the name (${name}) doesn't appear to be a list ID`
-        );
-        return;
-      }
+        if (!name) {
+          logger.warn(`object without a name ${object}`);
+          return;
+        }
+        if (!name.startsWith("list-pictures")) {
+          logger.debug(
+            `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`
+          );
+          return;
+        }
+        // console.log(`KEYS: ${JSON.stringify([...Object.keys(object)])}`);
+        const fileName = path.basename(name);
+        const listID = fileName.split("-")[0];
+        if (!listID) {
+          logger.warn(
+            `First part of the name (${name}) doesn't appear to be a list ID`
+          );
+          return;
+        }
 
-      if (!["image/jpeg", "image/png"].includes(contentType || "")) {
-        // Technically many more formats are supported but we can't make
-        // thumbnails out of them. Perhaps that's a mistake.
-        // https://cloud.google.com/vision/docs/supported-files#file_formats
-        logger.warn(
-          `${contentType} content type is not supported for image-to-text`
-        );
-        return;
-      }
+        if (!["image/jpeg", "image/png"].includes(contentType || "")) {
+          // Technically many more formats are supported but we can't make
+          // thumbnails out of them. Perhaps that's a mistake.
+          // https://cloud.google.com/vision/docs/supported-files#file_formats
+          logger.warn(
+            `${contentType} content type is not supported for image-to-text`
+          );
+          return;
+        }
 
-      const doc = await admin
-        .firestore()
-        .collection("shoppinglists")
-        .doc(listID)
-        .get();
+        const doc = await admin
+          .firestore()
+          .collection("shoppinglists")
+          .doc(listID)
+          .get();
 
-      if (!doc.exists) {
-        logger.error(`Shopping list (${listID}) does not exist`);
-        return;
-      }
+        if (!doc.exists) {
+          logger.error(`Shopping list (${listID}) does not exist`);
+          return;
+        }
 
-      const list = doc.data();
-      const DEFAULT_LOCALE = "en-US";
-      const locale = (list && list.locale) || DEFAULT_LOCALE;
+        const list = doc.data();
+        const DEFAULT_LOCALE = "en-US";
+        const locale = (list && list.locale) || DEFAULT_LOCALE;
 
-      const label = "Total time for allFoodWords, text, listItemTexts";
-      console.time(label);
-      const [
-        allFoodWords,
-        text,
-        listItemTexts,
-        listWordOptions
-      ] = await Promise.all([
-        getAllFoodWords(locale),
-        extractText(object.bucket, name),
-        getAllListItemTexts(listID),
-        getListWordOptions(listID)
-      ]);
-      console.timeEnd(label);
-
-      const foodWords = await extractFoodWords(
-        text,
-        [...allFoodWords.keys(), ...listItemTexts],
-        listWordOptions
-      );
-
-      await admin
-        .firestore()
-        .collection(`shoppinglists/${listID}/texts`)
-        .add({
-          filePath: name,
+        const label = "Total time for allFoodWords, text, listItemTexts";
+        console.time(label);
+        const [
+          allFoodWords,
           text,
-          foodWords,
-          created: admin.firestore.Timestamp.fromDate(new Date())
-        });
+          listItemTexts,
+          listWordOptions
+        ] = await Promise.all([
+          getAllFoodWords(locale),
+          extractText(object.bucket, name),
+          getAllListItemTexts(listID),
+          getListWordOptions(listID)
+        ]);
+        console.timeEnd(label);
 
-      await incrementFoodWordHitCounts(foodWords, allFoodWords);
+        const foodWords = await extractFoodWords(
+          text,
+          [...allFoodWords.keys(), ...listItemTexts],
+          listWordOptions
+        );
 
-      // This forces the the global cache to always be up-to-date.
-      await getAllFoodWords(locale, true);
-    }
+        await admin
+          .firestore()
+          .collection(`shoppinglists/${listID}/texts`)
+          .add({
+            filePath: name,
+            text,
+            foodWords,
+            created: admin.firestore.Timestamp.fromDate(new Date())
+          });
+
+        await incrementFoodWordHitCounts(foodWords, allFoodWords);
+
+        // This forces the the global cache to always be up-to-date.
+        await getAllFoodWords(locale, true);
+      }
+    )
   );
 
 async function incrementFoodWordHitCounts(

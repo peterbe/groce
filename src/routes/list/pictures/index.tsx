@@ -4,6 +4,7 @@ import { route } from "preact-router";
 import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import smoothscroll from "smoothscroll-polyfill";
 
 import style from "./style.css";
 import { Loading } from "../../../components/loading";
@@ -25,6 +26,10 @@ import { DisplayImage } from "../../../components/display-image";
 // import { useToasts } from "../../../toasts-context";
 
 dayjs.extend(relativeTime);
+
+if (typeof window !== "undefined") {
+  smoothscroll.polyfill();
+}
 
 interface Props {
   db: firebase.firestore.Firestore;

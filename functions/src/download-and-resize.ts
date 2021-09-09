@@ -5,6 +5,8 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import * as sharp from "sharp";
 
+import { logError } from "./rollbar-logger";
+
 // Because they do it
 // https://github.com/firebase/extensions/blob/86b62e3fd9a0c2e54fbc053390e644048a39a5eb/storage-resize-images/functions/src/index.ts#L34
 sharp.cache(false);
@@ -99,6 +101,7 @@ export const downloadAndResizeAndStore = functions
       console.warn(`Error downloading ${destinationPath}`);
       res.setHeader("content-type", "text/plain");
       res.status(500).send(errorToString(error));
+      logError(error, req);
       return;
     } finally {
       console.timeEnd(label);
@@ -116,7 +119,9 @@ export const downloadAndResizeAndStore = functions
       label = `Download?${destinationPath}`;
       console.time(label);
       try {
-        await bucket.file(imagePath).download({ destination: tempFile });
+        await bucket
+          .file(imagePath as string)
+          .download({ destination: tempFile });
         console.log(`Downloaded ${imagePath} to ${tempFile}`);
       } catch (error) {
         console.warn(`Error downloading ${imagePath}`);
@@ -161,6 +166,7 @@ export const downloadAndResizeAndStore = functions
       );
       res.setHeader("content-type", "text/plain");
       res.status(500).send(errorToString(error));
+      logError(error, req);
       return;
     }
     // Because they say it's important to clean up after yourself
