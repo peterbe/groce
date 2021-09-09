@@ -2,6 +2,8 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
+import { wrappedLogError } from "./rollbar-logger";
+
 const OLD_DAYS = 30 * 6; // 6 months
 // const ADDITIONAL_DAYS_BACK = 5;
 // const ADDITIONAL_DAYS_BACK = 15;
@@ -9,23 +11,25 @@ const PREFIX = "thumbnails";
 
 export const scheduledCleanupThumbnails = functions.pubsub
   .schedule("every 24 hours")
-  .onRun(async () => {
-    logger.debug("Running scheduledCleanupThumbnails");
+  .onRun(
+    wrappedLogError(async () => {
+      logger.debug("Running scheduledCleanupThumbnails");
 
-    const now = new Date().getTime();
-    const range = [...Array(10).keys()];
-    range.forEach(async i => {
-      const ms = (OLD_DAYS - i) * 24 * 60 * 60 * 1000;
-      const date = new Date(now - ms);
-      const yyyy = date.getFullYear();
-      const mm = date.getMonth() + 1;
-      const dd = date.getDate();
-      const prefix = `${PREFIX}/${yyyy}/${zeroPad(mm)}/${zeroPad(dd)}`;
-      await deleteByPrefix(prefix);
-    });
+      const now = new Date().getTime();
+      const range = [...Array(5).keys()];
+      range.forEach(async i => {
+        const ms = (OLD_DAYS - i) * 24 * 60 * 60 * 1000;
+        const date = new Date(now - ms);
+        const yyyy = date.getFullYear();
+        const mm = date.getMonth() + 1;
+        const dd = date.getDate();
+        const prefix = `${PREFIX}/${yyyy}/${zeroPad(mm)}/${zeroPad(dd)}`;
+        await deleteByPrefix(prefix);
+      });
 
-    return null;
-  });
+      return null;
+    })
+  );
 
 function zeroPad(num: number, places = 2): string {
   return `${num}`.padStart(places, "0");
