@@ -31,7 +31,7 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
       <div class="container-md">
         <Link class="navbar-brand" href="/">
           <img
-            src={"/assets/icons/favicon-32x32.png"}
+            src={"/assets/icons/android-chrome-192x192.png"}
             width="30"
             height="30"
             class="d-inline-block align-top"
