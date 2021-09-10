@@ -599,7 +599,7 @@ function FoodwordOptions({
             type="text"
             class="form-control"
             id="id_newword"
-            placeholder="Salt"
+            placeholder="For example, Salt"
             value={word}
             onInput={(event) => {
               setWord(event.currentTarget.value);
