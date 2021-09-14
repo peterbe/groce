@@ -1,22 +1,31 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import copy from "copy-to-clipboard";
-import firebase from "firebase/app";
+import { User } from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  onSnapshot,
+  collection,
+  addDoc,
+  query,
+  Timestamp,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
 import { FirestoreInvitation, Invitation, List } from "../../types";
 
-interface Props {
-  list: List;
-  db: firebase.firestore.Firestore;
-  user: firebase.User;
-}
-
-export const InvitationsForm: FunctionalComponent<Props> = ({
+export function InvitationsForm({
   list,
   db,
   user,
-}: Props) => {
+}: {
+  list: List;
+  db: Firestore;
+  user: User;
+}): h.JSX.Element {
   const [invitations, setInvitations] = useState<Invitation[] | null>(null);
 
   const showShare = !!navigator.share;
@@ -53,101 +62,101 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
   }, [shared]);
 
   useEffect(() => {
-    const ref = db
-      .collection(`shoppinglists/${list.id}/invitations`)
-      .onSnapshot(
-        (snapshot) => {
-          const newInvitations: Invitation[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data() as FirestoreInvitation;
-            newInvitations.push({
-              id: doc.id,
-              email: data.email,
-              added: data.added,
-              expires: data.expires,
-              inviter_uid: data.inviter_uid,
-              about: {
-                inviter: data.about.inviter,
-                id: data.about.id,
-                name: data.about.name,
-                notes: data.about.notes,
-                inviter_name: data.about.inviter_name,
-              },
-              accepted: data.accepted,
-            });
+    const collectionRef = collection(
+      db,
+      `shoppinglists/${list.id}/invitations`
+    );
+    const unsubscribe = onSnapshot(
+      query(collectionRef),
+      (snapshot) => {
+        const newInvitations: Invitation[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreInvitation;
+          newInvitations.push({
+            id: doc.id,
+            email: data.email,
+            added: data.added,
+            expires: data.expires,
+            inviter_uid: data.inviter_uid,
+            about: {
+              inviter: data.about.inviter,
+              id: data.about.id,
+              name: data.about.name,
+              notes: data.about.notes,
+              inviter_name: data.about.inviter_name,
+            },
+            accepted: data.accepted,
           });
-          setInvitations(newInvitations);
-        },
-        (error) => {
-          console.log("Error getting invitations list", error);
-        }
-      );
+        });
+        setInvitations(newInvitations);
+      },
+      (error) => {
+        console.log("Error getting invitations list", error);
+      }
+    );
 
     return () => {
-      if (ref) {
-        ref();
-      }
+      unsubscribe();
     };
   }, [db, list]);
 
   const [deleteError, setDeleteError] = useState<Error | null>(null);
 
-  function deleteInvite(invitationID: string) {
-    db.collection(`shoppinglists/${list.id}/invitations`)
-      .doc(invitationID)
-      .delete()
-      .then(() => {
-        console.log("Invited deleted");
-      })
-      .catch((error) => {
-        console.error("Unable to delete invite", error);
-        setDeleteError(error);
-      });
+  async function deleteInvite(invitationID: string) {
+    try {
+      await deleteDoc(
+        doc(db, `shoppinglists/${list.id}/invitations`, invitationID)
+      );
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  function generateInviteLink() {
+  async function generateInviteLink() {
     const now = new Date();
     const future = new Date();
     future.setDate(now.getDate() + 30);
-    db.collection(`shoppinglists/${list.id}/invitations`)
-      .add({
-        inviter_uid: user.uid,
-        added: firebase.firestore.Timestamp.fromDate(now),
-        expires: firebase.firestore.Timestamp.fromDate(future),
-        about: {
-          id: list.id,
-          name: list.name,
-          notes: list.notes,
-          inviter: user.uid,
-          inviter_name: user.displayName,
-        },
-        accepted: [],
-        accepted_names: [],
-      })
-      .then(() => {
-        console.log("Invitation created");
-      })
-      .catch((error) => {
-        console.error("Error adding invitation", error);
-      });
+    const collectionRef = collection(
+      db,
+      `shoppinglists/${list.id}/invitations`
+    );
+    await addDoc(collectionRef, {
+      inviter_uid: user.uid,
+      added: Timestamp.fromDate(now),
+      expires: Timestamp.fromDate(future),
+      about: {
+        id: list.id,
+        name: list.name,
+        notes: list.notes,
+        inviter: user.uid,
+        inviter_name: user.displayName,
+      },
+      accepted: [],
+      accepted_names: [],
+    });
+    // .then(() => {
+    //   console.log("Invitation created");
+    // })
+    // .catch((error) => {
+    //   console.error("Error adding invitation", error);
+    // });
   }
 
-  function setInvitationEmail(invitation: Invitation, email: string) {
+  async function setInvitationEmail(invitation: Invitation, email: string) {
     email = email.trim();
-
-    const doc = db
-      .collection(`shoppinglists/${list.id}/invitations`)
-      .doc(invitation.id);
-    doc
-      .update({
+    await updateDoc(
+      doc(db, `shoppinglists/${list.id}/invitations`, invitation.id),
+      {
         email: email.toLowerCase(),
-      })
-      .then(() => {
-        console.log(`Email '${email}' set on invitation`);
-      })
-      .catch((error) => {
-        console.error("Error trying to set invitation email", error);
-      });
+      }
+    );
+
+    // .then(() => {
+    //   console.log(`Email '${email}' set on invitation`);
+    // })
+    // .catch((error) => {
+    //   console.error("Error trying to set invitation email", error);
+    // });
   }
 
   if (deleteError) {
@@ -231,7 +240,11 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
                               "Error trying to navigator.share",
                               error
                             );
-                            setShareError(error instanceof Error ? error : new Error(String(error)));
+                            setShareError(
+                              error instanceof Error
+                                ? error
+                                : new Error(String(error))
+                            );
                           }
                         }}
                       >
@@ -249,14 +262,14 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
                       {copied ? "Copied to clipboard" : "Copy link"}
                     </button>{" "}
                     <DeleteInviteOption
-                      confirmed={() => {
-                        deleteInvite(invitation.id);
+                      confirmed={async () => {
+                        await deleteInvite(invitation.id);
                       }}
                     />
                     <SetInvitationEmail
                       invitation={invitation}
-                      update={(email: string) => {
-                        setInvitationEmail(invitation, email);
+                      update={async (email: string) => {
+                        await setInvitationEmail(invitation, email);
                       }}
                     />
                   </div>
@@ -277,7 +290,7 @@ export const InvitationsForm: FunctionalComponent<Props> = ({
       </div>
     </form>
   );
-};
+}
 
 function DeleteInviteOption({ confirmed }: { confirmed: () => void }) {
   const [certain, toggleCertain] = useState(false);

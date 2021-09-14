@@ -1,11 +1,11 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import style from "./style.css";
 import { useEffect, useState } from "preact/hooks";
 import copy from "copy-to-clipboard";
 
 import { GoBack } from "../../components/go-back";
 
-const ShareOuter: FunctionalComponent = () => {
+export default function ShareOuter(): h.JSX.Element {
   return (
     <div class={style.share}>
       <h2>Share the ❤️</h2>
@@ -14,11 +14,9 @@ const ShareOuter: FunctionalComponent = () => {
       <GoBack />
     </div>
   );
-};
+}
 
-export default ShareOuter;
-
-const Share: FunctionalComponent = () => {
+function Share() {
   const [absURL, setAbsURL] = useState("https://thatsgroce.web.app");
   const [copied, setCopied] = useState(false);
 
@@ -67,7 +65,7 @@ const Share: FunctionalComponent = () => {
       </div>
     </div>
   );
-};
+}
 
 function WebShare() {
   const [shared, setShared] = useState(false);

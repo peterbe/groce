@@ -1,24 +1,20 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import style from "./style.css";
 import { useEffect, useRef, useState } from "preact/hooks";
-import firebase from "firebase/app";
 import rv from "rough-viz/dist/roughviz.min";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+
+import { doc, Firestore, onSnapshot } from "firebase/firestore";
 
 import { GoBack } from "../../components/go-back";
 import { Loading } from "../../components/loading";
 
 dayjs.extend(relativeTime);
 
-interface Props {
-  db: firebase.firestore.Firestore | null;
-}
-
 type Counter = { [id: string]: number };
 
-const Counters: FunctionalComponent<Props> = (props: Props) => {
-  const { db } = props;
+function Counters({ db }: { db: Firestore }) {
   useEffect(() => {
     document.title = "Counters";
   }, []);
@@ -34,40 +30,43 @@ const Counters: FunctionalComponent<Props> = (props: Props) => {
   const thisDay = `${year}-${month}-${day}`;
 
   useEffect(() => {
-    if (db) {
-      db.collection("counters")
-        .doc("itemsDone")
-        .onSnapshot(
-          (snapshot) => {
-            const data = snapshot.data() as Counter;
-            const newItemsDone = new Map<string, number>();
-            Object.entries(data).forEach(([key, value]) => {
-              newItemsDone.set(key, value);
-            });
+    const unsubscribeDone = onSnapshot(
+      doc(db, "counters", "itemsDone"),
+      (snapshot) => {
+        const data = snapshot.data() as Counter;
+        const newItemsDone = new Map<string, number>();
+        Object.entries(data).forEach(([key, value]) => {
+          newItemsDone.set(key, value);
+        });
 
-            setItemsDone(newItemsDone);
-          },
-          (error) => {
-            console.error("Error getting itemsDone snapshot", error);
-          }
+        setItemsDone(newItemsDone);
+      },
+      (error) => {
+        // XXX deal with this better
+        console.error("Error getting itemsDone snapshot", error);
+      }
+    );
+    const unsubscribeCreated = onSnapshot(
+      doc(db, "counters", "listsCreated"),
+      (snapshot) => {
+        const data = snapshot.data() as Counter;
+        const newListsCreated = new Map<string, number>();
+        Object.entries(data).forEach(([key, value]) =>
+          newListsCreated.set(key, value)
         );
-      db.collection("counters")
-        .doc("listsCreated")
-        .onSnapshot(
-          (snapshot) => {
-            const data = snapshot.data() as Counter;
-            const newListsCreated = new Map<string, number>();
-            Object.entries(data).forEach(([key, value]) =>
-              newListsCreated.set(key, value)
-            );
 
-            setListsCreated(newListsCreated);
-          },
-          (error) => {
-            console.error("Error getting itemsDone snapshot", error);
-          }
-        );
-    }
+        setListsCreated(newListsCreated);
+      },
+      (error) => {
+        console.error("Error getting itemsDone snapshot", error);
+      }
+    );
+
+    return () => {
+      unsubscribeDone();
+
+      unsubscribeCreated();
+    };
   }, [db]);
 
   if (!itemsDone.size || !listsCreated.size) {
@@ -119,7 +118,7 @@ const Counters: FunctionalComponent<Props> = (props: Props) => {
       <DayByDayNumberTable map={itemsDone} title="Items done" />
     </div>
   );
-};
+}
 
 function TDRow({
   map,
@@ -136,7 +135,7 @@ function TDRow({
   );
 }
 function kilo(value: number) {
-  return `${(value / 1000).toFixed(1)}k`
+  return `${(value / 1000).toFixed(1)}k`;
 }
 
 let lastId = 0;
@@ -212,7 +211,11 @@ function DayByDayNumberTable({
   return <div id={id} ref={ref} />;
 }
 
-const CountersOuter: FunctionalComponent<Props> = (props: Props) => {
+export default function CountersOuter({
+  db,
+}: {
+  db: Firestore | null;
+}): h.JSX.Element {
   return (
     <div class={style.counters}>
       <h1>Counters</h1>
@@ -220,11 +223,9 @@ const CountersOuter: FunctionalComponent<Props> = (props: Props) => {
         Number of things across the whole app. For the numerically nerdily
         inclined.
       </p>
-      <Counters {...props} />
+      {db ? <Counters db={db} /> : <Loading text="Loading application..." />}
 
       <GoBack />
     </div>
   );
-};
-
-export default CountersOuter;
+}

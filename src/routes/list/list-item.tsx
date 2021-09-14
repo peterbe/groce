@@ -1,9 +1,11 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
-import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import party from "party-js";
+
+import { Firestore } from "firebase/firestore";
+import { FirebaseStorage } from "firebase/storage";
 
 import { FileUpload } from "../../components/file-upload";
 import style from "./style.css";
@@ -13,11 +15,26 @@ import { DisplayImage } from "../../components/display-image";
 
 dayjs.extend(relativeTime);
 
-interface Props {
+export function ListItem({
+  item,
+  list,
+  db,
+  storage,
+  groupOptions,
+  toggleDone,
+  updateItem,
+  updateItemImage,
+  modified,
+  disableGroups,
+  disableQuantity,
+  disableFireworks,
+  openImageModal,
+  deleteItem,
+}: {
   item: Item;
   list: List;
-  storage: firebase.storage.Storage | null;
-  db: firebase.firestore.Firestore | null;
+  storage: FirebaseStorage | null;
+  db: Firestore | null;
   groupOptions: string[];
   toggleDone: (item: Item) => void;
   updateItem: (
@@ -34,24 +51,7 @@ interface Props {
   disableFireworks: boolean;
   openImageModal: (url: string) => void;
   deleteItem: (item: Item) => void;
-}
-
-export const ListItem: FunctionalComponent<Props> = ({
-  item,
-  list,
-  db,
-  storage,
-  groupOptions,
-  toggleDone,
-  updateItem,
-  updateItemImage,
-  modified,
-  disableGroups,
-  disableQuantity,
-  disableFireworks,
-  openImageModal,
-  deleteItem,
-}: Props) => {
+}): h.JSX.Element {
   const [text, setText] = useState(item.text);
   const [description, setDescription] = useState(item.description);
   const [group, setGroup] = useState(item.group.text);
@@ -177,7 +177,7 @@ export const ListItem: FunctionalComponent<Props> = ({
                   aria-describedby="id_quantity"
                   value={quantity}
                   onChange={(event) => {
-                    setQuantity(event.currentTarget.value)
+                    setQuantity(event.currentTarget.value);
                   }}
                 />
                 <button
@@ -441,7 +441,7 @@ export const ListItem: FunctionalComponent<Props> = ({
       )}
     </li>
   );
-};
+}
 
 function DisplayFilesViewMode({
   images,
@@ -526,68 +526,3 @@ function DisplayFilesEditMode({
     </ul>
   );
 }
-
-// function Image({
-//   path,
-//   file,
-//   openImageModal,
-//   maxWidth,
-//   maxHeight,
-// }: {
-//   path: string;
-//   file: File | null;
-//   openImageModal: (url: string) => void;
-//   maxWidth: number;
-//   maxHeight: number;
-// }) {
-//   const { url: downloadURL } = useDownloadImageURL(path, 1000, false);
-//   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
-//     path,
-//     100,
-//     false
-//   );
-
-//   if (thumbnailError) {
-//     // XXX this isn't working!
-//     <img alt={thumbnailError.toString()} style={{ maxWidth, maxHeight }} />;
-//   }
-
-//   const preloaded = new Map<string, boolean>();
-
-//   return (
-//     <a
-//       href={downloadURL || thumbnailURL}
-//       onClick={(event) => {
-//         event.preventDefault();
-//         openImageModal(downloadURL || thumbnailURL);
-//       }}
-//       onMouseOver={() => {
-//         if (!preloaded.has(downloadURL)) {
-//           preloaded.set(downloadURL, false);
-//           const preloadImg = new window.Image();
-//           preloadImg.src = downloadURL;
-//           if (preloadImg.decode) {
-//             preloadImg
-//               .decode()
-//               .then(() => {
-//                 preloaded.set(downloadURL, true);
-//               })
-//               .catch(() => {
-//                 preloaded.set(downloadURL, false);
-//               });
-//           } else {
-//             preloadImg.onload = () => {
-//               preloaded.set(downloadURL, true);
-//             };
-//           }
-//         }
-//       }}
-//     >
-//       <img
-//         class="img-thumbnail"
-//         style={{ width: maxWidth, height: maxHeight, "object-fit": "cover" }}
-//         src={thumbnailURL}
-//       />
-//     </a>
-//   );
-// }

@@ -1,16 +1,20 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import { Link, route } from "preact-router";
-import firebase from "firebase/app";
+import {
+  Auth,
+  User,
+  GoogleAuthProvider,
+  signInWithRedirect,
+} from "firebase/auth";
 
-interface Props {
-  user: firebase.User | false | null;
-  auth: firebase.auth.Auth | null;
-}
-
-const Header: FunctionalComponent<Props> = (props: Props) => {
-  const { user, auth } = props;
-
+export default function Header({
+  user,
+  auth,
+}: {
+  user: User | false | null;
+  auth: Auth | null;
+}): h.JSX.Element {
   // const [showUserMenu, setShowUserMenu] = useState(false);
   // const [showSigninMenu, setShowSigninMenu] = useState(false);
   const [showNavbar, setShowNavbar] = useState(false);
@@ -221,9 +225,9 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
                     class="nav-link"
                     onClick={async (event) => {
                       event.preventDefault();
-                      const provider = new firebase.auth.GoogleAuthProvider();
+                      const provider = new GoogleAuthProvider();
                       try {
-                        await auth.signInWithRedirect(provider);
+                        await signInWithRedirect(auth, provider);
                       } catch (error) {
                         console.log("ERROR:", error);
                         route("/signin", true);
@@ -240,6 +244,4 @@ const Header: FunctionalComponent<Props> = (props: Props) => {
       </div>
     </nav>
   );
-};
-
-export default Header;
+}

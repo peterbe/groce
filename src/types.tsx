@@ -1,4 +1,4 @@
-import firebase from "firebase/app";
+import { Timestamp } from "firebase/firestore";
 
 // I don't know if this is right! But it works. Now I can use `error.code`
 export interface StorageErrorType extends Error {
@@ -15,9 +15,9 @@ export interface FirestoreItem {
   description: string;
   group: ItemGroup;
   quantity: number;
-  done: boolean | firebase.firestore.Timestamp;
-  removed: boolean | firebase.firestore.Timestamp;
-  added: firebase.firestore.Timestamp[];
+  done: boolean | Timestamp;
+  removed: boolean | Timestamp;
+  added: Timestamp[];
   times_added: number;
   images?: string[];
 }
@@ -29,9 +29,9 @@ export interface Item extends FirestoreItem {
 export interface FirestoreListPicture {
   filePath: string;
   notes: string;
-  created: firebase.firestore.Timestamp;
-  modified: firebase.firestore.Timestamp;
-  deleted?: firebase.firestore.Timestamp;
+  created: Timestamp;
+  modified: Timestamp;
+  deleted?: Timestamp;
 }
 
 export interface ListPicture extends FirestoreListPicture {
@@ -40,7 +40,7 @@ export interface ListPicture extends FirestoreListPicture {
 
 export interface FirestoreListPictureText {
   filePath: string;
-  created: firebase.firestore.Timestamp;
+  created: Timestamp;
   text: string;
   foodWords: string[];
 }
@@ -52,7 +52,7 @@ export interface ListPictureText extends FirestoreListPictureText {
 export interface FirestoreSuggestedFoodword {
   word: string;
   locale: string;
-  created: firebase.firestore.Timestamp;
+  created: Timestamp;
   creator_uid?: string;
   creator_email?: string;
 }
@@ -63,8 +63,8 @@ export interface SuggestedFoodword extends FirestoreSuggestedFoodword {
 
 export interface FirestoreListWordOption {
   word: string;
-  created: firebase.firestore.Timestamp;
-  modified: firebase.firestore.Timestamp;
+  created: Timestamp;
+  modified: Timestamp;
   alias?: string;
   ignore?: boolean;
 }
@@ -96,7 +96,7 @@ export interface FirestoreList {
   name: string;
   notes: string;
   order: number;
-  added: firebase.firestore.Timestamp;
+  added: Timestamp;
   owners: string[];
   ownersMetadata: Record<string, OwnerMetadata>;
   config: ListConfig;
@@ -104,7 +104,7 @@ export interface FirestoreList {
   // are created with these set. As of Aug 21.
   recent_items?: ListRecentItems[];
   active_items_count?: number;
-  modified: firebase.firestore.Timestamp;
+  modified: Timestamp;
 }
 
 export interface FirestoreDocumentMetadata {
@@ -127,8 +127,8 @@ export interface AboutInvitation {
 
 export interface FirestoreInvitation {
   email: string | null;
-  added: firebase.firestore.Timestamp;
-  expires: firebase.firestore.Timestamp;
+  added: Timestamp;
+  expires: Timestamp;
   inviter_uid: string;
   about: AboutInvitation;
   accepted: string[];

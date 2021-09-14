@@ -2,9 +2,33 @@ import { FunctionalComponent, h } from "preact";
 import { Route, Router } from "preact-router";
 import { useState, useEffect } from "preact/hooks";
 
-import "../style/custom.scss";
-import firebase from "firebase/app";
+import { initializeApp } from "firebase/app";
+import { Auth, User, getAuth, connectAuthEmulator } from "firebase/auth";
+import {
+  getFirestore,
+  connectFirestoreEmulator,
+  enableIndexedDbPersistence,
+  enableNetwork,
+  disableNetwork,
+  Firestore,
+  FirestoreError,
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  // onSnapshot,
+  where,
+  Timestamp,
+} from "firebase/firestore";
+import {
+  getStorage,
+  connectStorageEmulator,
+  FirebaseStorage,
+} from "firebase/storage";
+// import { getAnalytics } from "firebase/analytics";
+import { getPerformance, FirebasePerformance } from "firebase/performance";
 
+import "../style/custom.scss";
 import Home from "../routes/home";
 import Invited from "../routes/invited";
 import Signin from "../routes/signin";
@@ -32,209 +56,221 @@ if ((module as any).hot) {
 import { List, FirestoreList, ListConfig } from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
-const app = firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 const USE_EMULATOR = process.env.PREACT_APP_USE_EMULATOR
   ? Boolean(JSON.parse(process.env.PREACT_APP_USE_EMULATOR))
   : false;
 
 const App: FunctionalComponent = () => {
-  const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
-  const [user, setUser] = useState<firebase.User | null | false>(null);
-  const [db, setDB] = useState<firebase.firestore.Firestore | null>(null);
-  const [storage, setStorage] = useState<firebase.storage.Storage | null>(null);
-  const [perf, setPerf] = useState<firebase.performance.Performance | null>(
-    null
-  );
+  const [auth, setAuth] = useState<Auth | null>(null);
+  const [user, setUser] = useState<User | null | false>(null);
+  const [db, setDB] = useState<Firestore | null>(null);
+  const [storage, setStorage] = useState<FirebaseStorage | null>(null);
+  const [perf, setPerf] = useState<FirebasePerformance | null>(null);
   const [persistenceError, setPersistenceError] =
-    useState<firebase.firestore.FirestoreError | null>(null);
+    useState<FirestoreError | null>(null);
 
-  function authStateChanged(user: firebase.User | null) {
+  function authStateChanged(user: User | null) {
     setUser(user || false);
   }
 
   useEffect(() => {
-    import("firebase/auth")
-      .then(() => {
-        const appAuth = app.auth();
-        if (USE_EMULATOR) {
-          appAuth.useEmulator("http://localhost:9099");
-        }
-        setAuth(appAuth);
-        appAuth.onAuthStateChanged(authStateChanged);
-      })
-      .catch((error) => {
-        console.error("Unable to lazy-load firebase/auth:", error);
-      });
+    async function main() {
+      // import("firebase/auth")
+      //   .then(() => {
+      const appAuth = getAuth(app);
+      if (USE_EMULATOR) {
+        connectAuthEmulator(appAuth, "http://localhost:9099");
+      }
+      setAuth(appAuth);
+      appAuth.onAuthStateChanged(authStateChanged);
+      // })
+      // .catch((error) => {
+      //   console.error("Unable to lazy-load firebase/auth:", error);
+      // });
 
-    import("firebase/firestore")
-      .then(() => {
-        const db = firebase.firestore();
+      // import("firebase/firestore")
+      //   .then(() => {
+      const db = getFirestore(app);
 
-        // Clear any offline data.
-        // firebase.firestore().clearPersistence().catch(error => {
-        //   console.error('Could not enable persistence:', error.code);
-        // })
+      // Clear any offline data.
+      // firebase.firestore().clearPersistence().catch(error => {
+      //   console.error('Could not enable persistence:', error.code);
+      // })
 
-        if (USE_EMULATOR) {
-          db.useEmulator("localhost", 9999);
-        }
+      if (USE_EMULATOR) {
+        connectFirestoreEmulator(db, "localhost", 9999);
+      }
 
-        // Enable offline-ness
-        // It's important that this is done *before* you use the `db`.
-        db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
-          setPersistenceError(error);
-        });
+      // Enable offline-ness
+      // It's important that this is done *before* you use the `db`.
+      // db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
+      //   setPersistenceError(error);
+      // });
+      try {
+        await enableIndexedDbPersistence(db);
+      } catch (error) {
+        setPersistenceError(error as FirestoreError);
+      }
 
-        setDB(db);
-      })
-      .catch((error) => {
-        console.error("Unable to lazy-load firebase/firestore:", error);
-      });
+      setDB(db);
+      // })
+      // .catch((error) => {
+      //   console.error("Unable to lazy-load firebase/firestore:", error);
+      // });
 
-    import("firebase/storage")
-      .then(() => {
-        const storage = firebase.storage();
-        if (USE_EMULATOR) {
-          storage.useEmulator("localhost", 9199);
-        }
+      // import("firebase/storage")
+      // .then(() => {
+      const storage = getStorage(app);
+      if (USE_EMULATOR) {
+        connectStorageEmulator(storage, "localhost", 9199);
+      }
 
-        setStorage(storage);
-      })
-      .catch((error) => {
-        console.error("Unable to lazy-load firebase/storage:", error);
-      });
+      setStorage(storage);
+      // })
+      // .catch((error) => {
+      //   console.error("Unable to lazy-load firebase/storage:", error);
+      // });
 
-    import("firebase/analytics")
-      .then(() => {
-        // Enable analytics
-        firebase.analytics();
-      })
-      .catch((error) => {
-        console.error("Unable to lazy-load firebase/analytics:", error);
-      });
+      // // import("firebase/analytics")
+      // // .then(() => {
+      //   // Enable analytics
+      //   // firebase.analytics();
+      //   getAnalytics();
+      // // })
+      // // .catch((error) => {
+      // //   console.error("Unable to lazy-load firebase/analytics:", error);
+      // // });
 
-    import("firebase/performance")
-      .then(() => {
-        setPerf(firebase.performance());
-      })
-      .catch((error) => {
-        console.error("Unable to lazy-load firebase/performance:", error);
-      });
+      // import("firebase/performance")
+      // .then(() => {
+      setPerf(getPerformance(app));
+      // })
+      // .catch((error) => {
+      //   console.error("Unable to lazy-load firebase/performance:", error);
+      // });
+
+      // }, []);
+    }
+    main();
   }, []);
 
   const [lists, setLists] = useState<List[] | null>(null);
 
   const [snapshotsOffline, toggleSnapshotsOffline] = useState(false);
 
+  async function watchShoppinglists(db: Firestore, user: User) {
+    // const trace = perf
+    //   ? perf.trace("initial_shoppinglists_collection")
+    //   : null;
+    // let traceOnce = false;
+    // trace && trace.start();
+
+    // This is needed because it's added late. And instead of migrating
+    // all/any lists, we rely on a fallback default.
+    const defaultListConfig: ListConfig = {
+      disableGroups: false,
+      disableQuantity: false,
+      disableDefaultSuggestions: false,
+      disableFireworks: false,
+    };
+
+    const collectionRef = collection(db, "shoppinglists");
+    const q = query(collectionRef, where("owners", "array-contains", user.uid));
+    // const shoppinglistsDbRef = getDocs(collection(db, "shoppinglists"))
+    const querySnapshot = await getDocs(q);
+    // console.log(querySnapshot.metadata);
+    const source = querySnapshot.metadata.hasPendingWrites ? "Local" : "Server";
+    console.log(`source=${source}`);
+
+    if (
+      querySnapshot.metadata.fromCache &&
+      querySnapshot.metadata.hasPendingWrites
+    ) {
+      toggleSnapshotsOffline(true);
+    } else {
+      toggleSnapshotsOffline(false);
+    }
+
+    const newLists: List[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as FirestoreList;
+      const config = data.config || Object.assign({}, defaultListConfig);
+
+      // Because it used to be that `.disableGroups` used to be on the
+      // list itself, we need to respect that and migrate that over.
+      // Let's delete this in late 2020.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      if ((data as any).disableGroups && !data.config) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+        config.disableGroups = (data as any).disableGroups;
+      }
+
+      newLists.push({
+        id: doc.id,
+        name: data.name,
+        notes: data.notes,
+        order: data.order,
+        added: data.added || Timestamp.fromDate(new Date()),
+        owners: data.owners,
+        ownersMetadata: data.ownersMetadata || {},
+        metadata: doc.metadata,
+        config,
+        recent_items: data.recent_items || [],
+        active_items_count: data.active_items_count || 0,
+        modified:
+          data.modified ||
+          data.added ||
+          // For legacy reasons, if it doesn't have a .added or
+          // .modified make it something old.
+          Timestamp.fromMillis(
+            // Just make it really really old if it doesn't have a
+            // .modified attribute.
+            new Date().getTime() - 1000 * 60 * 60 * 24 * 90
+          ),
+      });
+    });
+
+    if (!newLists.length) {
+      const foodEmojis = ["🍌", "🥕", "🧃", "🥫", "🌽", "🍅", "🍉"];
+      const randomFoodEmoji =
+        foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
+      // Manually create their first ever list
+      addDoc(collectionRef, {
+        name: `Groceries ${randomFoodEmoji}`,
+        notes: "",
+        owners: [user.uid],
+        order: 0,
+        recent_items: [],
+        active_items_count: 0,
+        config: Object.assign({}, defaultListConfig),
+        added: Timestamp.fromDate(new Date()),
+        modified: Timestamp.fromDate(new Date()),
+      })
+        .then(() => {
+          console.log("Initial sample list created");
+        })
+        .catch((error) => {
+          console.error("Error creating first sample list", error);
+        });
+    } else if (newLists.length > 1) {
+      newLists.sort((a, b) => {
+        return b.modified.toDate().getTime() - a.modified.toDate().getTime();
+      });
+    }
+    setLists(newLists);
+
+    // if (trace && !traceOnce) {
+    //   trace.stop();
+    //   traceOnce = true;
+    // }
+  }
+
   useEffect(() => {
     let shoppinglistsDbRef: () => void;
     if (db && user) {
-      // const trace = perf
-      //   ? perf.trace("initial_shoppinglists_collection")
-      //   : null;
-      // let traceOnce = false;
-      // trace && trace.start();
-
-      // This is needed because it's added late. And instead of migrating
-      // all/any lists, we rely on a fallback default.
-      const defaultListConfig: ListConfig = {
-        disableGroups: false,
-        disableQuantity: false,
-        disableDefaultSuggestions: false,
-        disableFireworks: false,
-      };
-
-      shoppinglistsDbRef = db
-        .collection("shoppinglists")
-        .where("owners", "array-contains", user.uid)
-        .orderBy("order")
-        .onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
-          if (
-            snapshot.metadata.fromCache &&
-            snapshot.metadata.hasPendingWrites
-          ) {
-            toggleSnapshotsOffline(true);
-          } else {
-            toggleSnapshotsOffline(false);
-          }
-          const newLists: List[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data() as FirestoreList;
-            const config = data.config || Object.assign({}, defaultListConfig);
-
-            // Because it used to be that `.disableGroups` used to be on the
-            // list itself, we need to respect that and migrate that over.
-            // Let's delete this in late 2020.
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-            if ((data as any).disableGroups && !data.config) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-              config.disableGroups = (data as any).disableGroups;
-            }
-
-            newLists.push({
-              id: doc.id,
-              name: data.name,
-              notes: data.notes,
-              order: data.order,
-              added:
-                data.added || firebase.firestore.Timestamp.fromDate(new Date()),
-              owners: data.owners,
-              ownersMetadata: data.ownersMetadata || {},
-              metadata: doc.metadata,
-              config,
-              recent_items: data.recent_items || [],
-              active_items_count: data.active_items_count || 0,
-              modified:
-                data.modified ||
-                data.added ||
-                // For legacy reasons, if it doesn't have a .added or
-                // .modified make it something old.
-                firebase.firestore.Timestamp.fromMillis(
-                  // Just make it really really old if it doesn't have a
-                  // .modified attribute.
-                  new Date().getTime() - 1000 * 60 * 60 * 24 * 90
-                ),
-            });
-          });
-
-          if (!newLists.length) {
-            const foodEmojis = ["🍌", "🥕", "🧃", "🥫", "🌽", "🍅", "🍉"];
-            const randomFoodEmoji =
-              foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
-            // Manually create their first ever list
-            db.collection("shoppinglists")
-              .add({
-                name: `Groceries ${randomFoodEmoji}`,
-                notes: "",
-                owners: [user.uid],
-                order: 0,
-                recent_items: [],
-                active_items_count: 0,
-                config: Object.assign({}, defaultListConfig),
-                added: firebase.firestore.Timestamp.fromDate(new Date()),
-                modified: firebase.firestore.Timestamp.fromDate(new Date()),
-              })
-              .then(() => {
-                console.log("Initial sample list created");
-              })
-              .catch((error) => {
-                console.error("Error creating first sample list", error);
-              });
-          } else if (newLists.length > 1) {
-            newLists.sort((a, b) => {
-              return (
-                b.modified.toDate().getTime() - a.modified.toDate().getTime()
-              );
-            });
-          }
-          setLists(newLists);
-
-          // if (trace && !traceOnce) {
-          //   trace.stop();
-          //   traceOnce = true;
-          // }
-        });
+      watchShoppinglists(db, user);
     }
     return () => {
       if (shoppinglistsDbRef) {
@@ -330,11 +366,7 @@ const App: FunctionalComponent = () => {
 
 export default App;
 
-function DisplayPersistenceError({
-  error,
-}: {
-  error: firebase.firestore.FirestoreError | null;
-}) {
+function DisplayPersistenceError({ error }: { error: FirestoreError | null }) {
   if (error === null) return null;
   let message = (
     <span>
@@ -363,12 +395,12 @@ function DisplayPersistenceError({
   );
 }
 
-function DebugOffline({ db }: { db: firebase.firestore.Firestore }) {
+function DebugOffline({ db }: { db: Firestore }) {
   const [enableOffline, toggleEnableOffline] = useState(false);
   const [enablingError, setEnablingError] = useState<Error | null>(null);
   useEffect(() => {
     if (enableOffline) {
-      db.disableNetwork()
+      disableNetwork(db)
         .then(() => {
           setEnablingError(null);
         })
@@ -377,7 +409,7 @@ function DebugOffline({ db }: { db: firebase.firestore.Firestore }) {
           setEnablingError(error);
         });
     } else {
-      db.enableNetwork()
+      enableNetwork(db)
         .then(() => {
           setEnablingError(null);
         })

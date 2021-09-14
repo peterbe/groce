@@ -27,7 +27,7 @@ export function DisplayImage({
   className?: string;
   thumbnailWidth?: number | null;
   useObjectFit?: boolean;
-}) {
+}): h.JSX.Element {
   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
     filePath,

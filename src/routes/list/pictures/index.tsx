@@ -1,10 +1,24 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
 import { route } from "preact-router";
-import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import smoothscroll from "smoothscroll-polyfill";
+
+import { User } from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  onSnapshot,
+  Unsubscribe,
+  collection,
+  addDoc,
+  query,
+  where,
+  Timestamp,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 import style from "./style.css";
 import { Loading } from "../../../components/loading";
@@ -31,19 +45,9 @@ if (typeof window !== "undefined") {
   smoothscroll.polyfill();
 }
 
-interface Props {
-  db: firebase.firestore.Firestore;
-  storage: firebase.storage.Storage;
-  user: firebase.User;
-  ready: boolean;
-  list: List;
-  items: Item[] | null;
-  saveHandler: (text: string) => Promise<void>;
-  openImageModal: (url: string) => void;
-}
 type TabState = "uploads" | "options" | "suggested";
 
-export const Pictures: FunctionalComponent<Props> = ({
+export function Pictures({
   db,
   storage,
   user,
@@ -52,7 +56,16 @@ export const Pictures: FunctionalComponent<Props> = ({
   list,
   saveHandler,
   openImageModal,
-}: Props) => {
+}: {
+  db: Firestore;
+  storage: Storage;
+  user: User;
+  ready: boolean;
+  list: List;
+  items: Item[] | null;
+  saveHandler: (text: string) => Promise<void>;
+  openImageModal: (url: string) => void;
+}): h.JSX.Element {
   // const { addToast } = useToasts();
 
   const [listPictures, setListPictures] = useState<ListPicture[] | null>(null);
@@ -93,7 +106,9 @@ export const Pictures: FunctionalComponent<Props> = ({
 
   // Set up watcher on /pictures collection
   useEffect(() => {
-    const ref = db.collection(`shoppinglists/${list.id}/pictures`).onSnapshot(
+    const collectionRef = collection(db, `shoppinglists/${list.id}/pictures`);
+    const unsubscribe = onSnapshot(
+      query(collectionRef),
       (snapshot) => {
         const newListPictures: ListPicture[] = [];
         snapshot.forEach((doc) => {
@@ -121,13 +136,15 @@ export const Pictures: FunctionalComponent<Props> = ({
       }
     );
     return () => {
-      ref();
+      unsubscribe();
     };
   }, [db, list]);
 
   // Set up watcher on /texts collection
   useEffect(() => {
-    const ref = db.collection(`shoppinglists/${list.id}/texts`).onSnapshot(
+    const collectionRef = collection(db, `shoppinglists/${list.id}/texts`);
+    const unsubscribe = onSnapshot(
+      query(collectionRef),
       (snapshot) => {
         const newListPictureTexts: Map<string, ListPictureText> = new Map();
         snapshot.forEach((doc) => {
@@ -149,7 +166,7 @@ export const Pictures: FunctionalComponent<Props> = ({
       }
     );
     return () => {
-      ref();
+      unsubscribe();
     };
   }, [db, list]);
 
@@ -160,42 +177,41 @@ export const Pictures: FunctionalComponent<Props> = ({
     useState<Error | null>(null);
 
   useEffect(() => {
-    let ref: () => void;
+    let unsubscribe: null | Unsubscribe = null;
     if (user) {
-      ref = db
-        .collection("suggestedfoodwords")
-        .where("creator_uid", "==", user.uid)
-        .onSnapshot(
-          (snapshot) => {
-            const newSuggestedFoodwords: Omit<
-              SuggestedFoodword,
-              "creator_email" | "creator_uid"
-            >[] = [];
-            snapshot.forEach((doc) => {
-              const data = doc.data() as FirestoreSuggestedFoodword;
-              newSuggestedFoodwords.push({
-                id: doc.id,
-                locale: data.locale,
-                word: data.word,
-                created: data.created,
-              });
+      const collectionRef = collection(db, "suggestedfoodwords");
+      unsubscribe = onSnapshot(
+        query(collectionRef, where("creator_uid", "==", user.uid)),
+        (snapshot) => {
+          const newSuggestedFoodwords: Omit<
+            SuggestedFoodword,
+            "creator_email" | "creator_uid"
+          >[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreSuggestedFoodword;
+            newSuggestedFoodwords.push({
+              id: doc.id,
+              locale: data.locale,
+              word: data.word,
+              created: data.created,
             });
-            newSuggestedFoodwords.sort(
-              (a, b) =>
-                b.created.toDate().getTime() - a.created.toDate().getTime()
-            );
-            setSuggestedFoodwords(newSuggestedFoodwords);
-          },
-          (error) => {
-            console.error("Snapshot error:", error);
-            setSuggestedFoodwordsError(
-              error instanceof Error ? error : new Error(String(error))
-            );
-          }
-        );
+          });
+          newSuggestedFoodwords.sort(
+            (a, b) =>
+              b.created.toDate().getTime() - a.created.toDate().getTime()
+          );
+          setSuggestedFoodwords(newSuggestedFoodwords);
+        },
+        (error) => {
+          console.error("Snapshot error:", error);
+          setSuggestedFoodwordsError(
+            error instanceof Error ? error : new Error(String(error))
+          );
+        }
+      );
     }
     return () => {
-      if (ref) ref();
+      if (unsubscribe) unsubscribe();
     };
   }, [db, user]);
 
@@ -205,41 +221,44 @@ export const Pictures: FunctionalComponent<Props> = ({
 
   // Set up watcher on /wordoptions collection
   useEffect(() => {
-    const ref = db
-      .collection(`shoppinglists/${list.id}/wordoptions`)
-      .onSnapshot(
-        (snapshot) => {
-          const newListWordOptions: ListWordOption[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data() as FirestoreListWordOption;
-            const item = {
-              id: doc.id,
-              word: data.word,
-              alias: data.alias,
-              ignore: data.ignore,
-              modified: data.modified,
-              created: data.created,
-            };
-            newListWordOptions.push(item);
-          });
-          newListWordOptions.sort((a, b) => {
-            if (a.alias && !b.alias) {
-              return -1;
-            } else if (b.alias && !a.alias) {
-              return 1;
-            }
-            return a.word.localeCompare(b.word);
-          });
-          setListWordOptions(newListWordOptions);
-        },
-        (error) => {
-          console.error("Snapshot error:", error);
-          // setListPictureTextsError(error);
-          // XXX deal with this better
-        }
-      );
+    const collectionRef = collection(
+      db,
+      `shoppinglists/${list.id}/wordoptions`
+    );
+    const unsubscribe = onSnapshot(
+      query(collectionRef),
+      (snapshot) => {
+        const newListWordOptions: ListWordOption[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreListWordOption;
+          const item = {
+            id: doc.id,
+            word: data.word,
+            alias: data.alias,
+            ignore: data.ignore,
+            modified: data.modified,
+            created: data.created,
+          };
+          newListWordOptions.push(item);
+        });
+        newListWordOptions.sort((a, b) => {
+          if (a.alias && !b.alias) {
+            return -1;
+          } else if (b.alias && !a.alias) {
+            return 1;
+          }
+          return a.word.localeCompare(b.word);
+        });
+        setListWordOptions(newListWordOptions);
+      },
+      (error) => {
+        console.error("Snapshot error:", error);
+        // setListPictureTextsError(error);
+        // XXX deal with this better
+      }
+    );
     return () => {
-      ref();
+      unsubscribe();
     };
   }, [db, list]);
 
@@ -261,52 +280,57 @@ export const Pictures: FunctionalComponent<Props> = ({
   const [saveListPictureError, setSaveListPictureError] =
     useState<Error | null>(null);
 
-  function saveListPictureNotes(id: string, notes: string) {
-    return db
-      .collection(`shoppinglists/${list.id}/pictures`)
-      .doc(id)
-      .update({
+  async function saveListPictureNotes(id: string, notes: string) {
+    try {
+      await updateDoc(doc(db, `shoppinglists/${list.id}/pictures`, id), {
         notes,
-        modified: firebase.firestore.Timestamp.fromDate(new Date()),
-      })
-      .catch((error) => {
-        console.error(
-          `Error trying to update picture notes ${list.id}:`,
-          error
-        );
-        setSaveListPictureError(error);
+        modified: Timestamp.fromDate(new Date()),
       });
+    } catch (error) {
+      console.error(`Error trying to update picture notes ${list.id}:`, error);
+      setSaveListPictureError(
+        error instanceof Error ? error : new Error(String(error))
+      );
+    }
   }
 
-  function deleteListPicture(id: string) {
-    return db
-      .collection(`shoppinglists/${list.id}/pictures`)
-      .doc(id)
-      .update({
-        deleted: firebase.firestore.Timestamp.fromDate(new Date()),
-      })
-      .then(() => {
-        setUndoableDelete(id);
-      })
-      .catch((error) => {
-        console.error(`Error trying to delete picture ${list.id}:`, error);
-        setSaveListPictureError(error);
+  async function deleteListPicture(id: string) {
+    try {
+      await updateDoc(doc(db, `shoppinglists/${list.id}/pictures`, id), {
+        deleted: Timestamp.fromDate(new Date()),
       });
+    } catch (error) {
+      console.error(`Error trying to delete picture ${list.id}:`, error);
+      setSaveListPictureError(
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return;
+    }
+    setUndoableDelete(id);
   }
 
-  function undeleteListPicture(id: string) {
-    return db
-      .collection(`shoppinglists/${list.id}/pictures`)
-      .doc(id)
-      .update({
+  async function undeleteListPicture(id: string) {
+    try {
+      await updateDoc(doc(db, `shoppinglists/${list.id}/pictures`, id), {
         deleted: null,
-      })
-      .then(() => {
-        setUndoableDelete(null);
-      })
-      .catch((error) => {
-        setSaveListPictureError(error);
       });
+    } catch (error) {
+      setSaveListPictureError(error as Error);
+      return;
+    }
+    setUndoableDelete(null);
+    // return db
+    //   .collection(`shoppinglists/${list.id}/pictures`)
+    //   .doc(id)
+    //   .update({
+    //     deleted: null,
+    //   })
+    //   .then(() => {
+    //     setUndoableDelete(null);
+    //   })
+    //   .catch((error) => {
+    //     setSaveListPictureError(error);
+    //   });
   }
 
   async function saveNewTexts(words: string[]) {
@@ -421,18 +445,18 @@ export const Pictures: FunctionalComponent<Props> = ({
           suggestedFoodwordsError={suggestedFoodwordsError}
           suggestedFoodwords={suggestedFoodwords}
           addSuggestion={async (word: string) => {
-            await db.collection("suggestedfoodwords").add({
+            addDoc(collection(db, "suggestedfoodwords"), {
               word,
               locale: "en-US",
               creator_uid: user.uid,
               creator_email: user.email,
-              created: firebase.firestore.Timestamp.fromDate(new Date()),
+              created: Timestamp.fromDate(new Date()),
             });
           }}
           removeSuggestions={async (ids: string[]) => {
             await Promise.all(
               ids.map((id) => {
-                return db.collection("suggestedfoodwords").doc(id).delete();
+                return deleteDoc(doc(db, "suggestedfoodwords", id));
               })
             );
           }}
@@ -440,7 +464,7 @@ export const Pictures: FunctionalComponent<Props> = ({
       )}
     </div>
   );
-};
+}
 
 function FoodwordOptions({
   list,
@@ -449,7 +473,7 @@ function FoodwordOptions({
 }: {
   list: List;
   listWordOptions: ListWordOption[] | null;
-  db: firebase.firestore.Firestore;
+  db: Firestore;
 }) {
   const [saving, setSaving] = useState(false);
   const [word, setWord] = useState("");
@@ -474,8 +498,8 @@ function FoodwordOptions({
     }
     const newWordOption: FirestoreListWordOption = {
       word: word.trim(),
-      modified: firebase.firestore.Timestamp.fromDate(new Date()),
-      created: firebase.firestore.Timestamp.fromDate(new Date()),
+      modified: Timestamp.fromDate(new Date()),
+      created: Timestamp.fromDate(new Date()),
     };
     if (action === "alias") {
       newWordOption.alias = alias.trim();
@@ -483,21 +507,20 @@ function FoodwordOptions({
       newWordOption.ignore = true;
     }
 
-    await db
-      .collection(`shoppinglists/${list.id}/wordoptions`)
-      .add(newWordOption)
-      .catch((error) => {
-        setSaveError(error instanceof Error ? error : new Error(String(error)));
-      });
+    try {
+      await addDoc(
+        collection(db, `shoppinglists/${list.id}/wordoptions`),
+        newWordOption
+      );
+    } catch (error) {
+      setSaveError(error as Error);
+    }
   }
 
   async function removeWords(ids: string[]) {
     await Promise.all(
       ids.map((id) => {
-        return db
-          .collection(`shoppinglists/${list.id}/wordoptions`)
-          .doc(id)
-          .delete();
+        return deleteDoc(doc(db, `shoppinglists/${list.id}/wordoptions`, id));
       })
     );
   }

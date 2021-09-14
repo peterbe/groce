@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { Link} from "preact-router";
+import { Link } from "preact-router";
 
 import { useEffect } from "preact/hooks";
 
@@ -56,7 +56,7 @@ function Version() {
   );
 }
 
-export default function VersionOuter() {
+export default function VersionOuter(): h.JSX.Element {
   return (
     <div class={style.container}>
       <h1>Advanced options</h1>

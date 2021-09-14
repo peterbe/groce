@@ -1,6 +1,6 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState } from "preact/hooks";
-import firebase from "firebase/app";
+import { Timestamp } from "firebase/firestore";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -8,17 +8,11 @@ import { Item } from "../../types";
 
 dayjs.extend(relativeTime);
 
-interface Props {
-  items: Item[];
-  close: () => void;
-  maxAgeSeconds?: number;
-}
-
 interface ItemSummary {
   id: string;
   text: string;
   times_added: number;
-  added: firebase.firestore.Timestamp[];
+  added: Timestamp[];
   frequency: number;
 }
 
@@ -81,11 +75,11 @@ export function getItemsSummary(
 }
 
 function reduceTooClose(
-  dates: firebase.firestore.Timestamp[],
+  dates: Timestamp[],
   minDistanceSeconds = 60 * 60
-): firebase.firestore.Timestamp[] {
-  const checked: firebase.firestore.Timestamp[] = [];
-  let previous: null | firebase.firestore.Timestamp = null;
+): Timestamp[] {
+  const checked: Timestamp[] = [];
+  let previous: null | Timestamp = null;
   for (const date of dates) {
     if (!previous) {
       checked.push(date);
@@ -101,10 +95,15 @@ function reduceTooClose(
   return checked;
 }
 
-export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
-  const { items, close } = props;
-  const maxAgeSeconds = props.maxAgeSeconds || MAX_AGE_SECONDS;
-
+export function PopularityContest({
+  items,
+  close,
+  maxAgeSeconds,
+}: {
+  items: Item[];
+  close: () => void;
+  maxAgeSeconds?: number;
+}): h.JSX.Element {
   const [sortBy, setSortBy] = useState<SortKeys>("frequency");
   const [sortReverse, setSortReverse] = useState(false);
 
@@ -118,7 +117,7 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
   }
 
   const itemsSummary = getItemsSummary(items, {
-    maxAgeSeconds,
+    maxAgeSeconds: maxAgeSeconds || MAX_AGE_SECONDS,
     sortBy,
     sortReverse,
   });
@@ -147,8 +146,8 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
       <p>
         <small>
           Only items added more than <b>{MIN_TIMES_ADDED} times</b> in the last{" "}
-          <b>{formatFrequency(maxAgeSeconds)}</b> included (so,{" "}
-          {items.length - itemsSummary.length} excluded).
+          <b>{formatFrequency(maxAgeSeconds || MAX_AGE_SECONDS)}</b> included
+          (so, {items.length - itemsSummary.length} excluded).
         </small>
       </p>
 
@@ -225,7 +224,7 @@ export const PopularityContest: FunctionalComponent<Props> = (props: Props) => {
       )}
     </div>
   );
-};
+}
 
 // function omitTooCloseItems(minDistance: number, sequence: number[]) {
 //   const checked: number[] = [];

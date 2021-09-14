@@ -1,17 +1,18 @@
 import { FunctionalComponent, h } from "preact";
 import { Link, route } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
-import style from "./style.css";
-import firebase from "firebase/app";
 
+import { User } from "firebase/auth";
+import { Firestore, collection, addDoc, Timestamp } from "firebase/firestore";
+
+import style from "./style.css";
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
 import { List, ListConfig, OwnerMetadata } from "../../types";
-// import { list } from "../list/style.css";
 
 interface Props {
-  user: firebase.User | false | null;
-  db: firebase.firestore.Firestore | null;
+  user: User | false | null;
+  db: Firestore | null;
   lists: List[] | null;
 }
 
@@ -36,24 +37,20 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
         console.warn("List already exists by that name.");
         return;
       }
-      try {
-        await db.collection("shoppinglists").add({
-          name,
-          notes,
-          owners: [user.uid],
-          added: firebase.firestore.Timestamp.fromDate(new Date()),
-          modified: firebase.firestore.Timestamp.fromDate(new Date()),
-          order:
-            1 +
-            ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
-          recent_items: [],
-          active_items_count: 0,
-          config,
-        });
-        toggleAddNewList(false);
-      } catch (error) {
-        console.error("Error creating shopping list:", error);
-      }
+      await addDoc(collection(db, "shoppinglists"), {
+        name,
+        notes,
+        owners: [user.uid],
+        added: Timestamp.fromDate(new Date()),
+        modified: Timestamp.fromDate(new Date()),
+        order:
+          1 +
+          ((lists && Math.max(...lists.map((list) => list.order || 0))) || 0),
+        recent_items: [],
+        active_items_count: 0,
+        config,
+      });
+      toggleAddNewList(false);
     }
   }
 
@@ -352,12 +349,7 @@ function NewList({
   );
 }
 
-function PreviewList({
-  list,
-}: {
-  list: List;
-  db: firebase.firestore.Firestore;
-}) {
+function PreviewList({ list }: { list: List; db: Firestore }) {
   const items = list.recent_items || [];
   const activeItemsCount = list.active_items_count || 0;
 
