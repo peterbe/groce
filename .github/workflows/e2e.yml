@@ -35,7 +35,7 @@ jobs:
 
       - name: Start emulator
         run: |
-          yarn emulator > /tmp/emulator-stdout.log 2> /tmp/emulator-stderr.log &
+          yarn emulator --project groce-dev > /tmp/emulator-stdout.log 2> /tmp/emulator-stderr.log &
 
       - name: Wait for emulator
         run: |
