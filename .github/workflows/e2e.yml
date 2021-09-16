@@ -40,6 +40,8 @@ jobs:
       - name: Wait for emulator
         run: |
           curl --fail --retry-connrefused --retry 4 http://localhost:4000 > /dev/null
+          echo "Show emulators"
+          curl --fail http://localhost:4400
 
       - name: Debug emulator's stdout and stderr if tests failed
         if: failure()
