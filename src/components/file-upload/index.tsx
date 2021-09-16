@@ -1,6 +1,20 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
-import firebase from "firebase/app";
+import {
+  doc,
+  Firestore,
+  collection,
+  addDoc,
+  Timestamp,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
+import {
+  FirebaseStorage,
+  StorageError,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 import { Item, List } from "../../types";
 import style from "./style.css";
@@ -24,18 +38,7 @@ function zeroPad(num: number, places = 2): string {
   return `${num}`.padStart(places, "0");
 }
 
-interface Props {
-  db: firebase.firestore.Firestore;
-  storage: firebase.storage.Storage;
-  item: Item | null;
-  list: List;
-  prefix?: string;
-  onUploaded: ({ file, filePath }: { file: File; filePath: string }) => void;
-  onSaved?: () => void;
-  disabled?: boolean;
-}
-
-export const FileUpload: FunctionalComponent<Props> = ({
+export function FileUpload({
   db,
   storage,
   item,
@@ -44,7 +47,16 @@ export const FileUpload: FunctionalComponent<Props> = ({
   onSaved,
   onUploaded,
   disabled = false,
-}: Props) => {
+}: {
+  db: Firestore;
+  storage: FirebaseStorage;
+  item: Item | null;
+  list: List;
+  prefix?: string;
+  onUploaded: ({ file, filePath }: { file: File; filePath: string }) => void;
+  onSaved?: () => void;
+  disabled?: boolean;
+}): h.JSX.Element {
   const [file, setFile] = useState<File | null>(null);
   const [fileValidationError, setFileValidationError] = useState<Error | null>(
     null
@@ -52,8 +64,7 @@ export const FileUpload: FunctionalComponent<Props> = ({
   const [uploadingPercentage, setUploadingPercentage] = useState<number | null>(
     null
   );
-  const [uploadError, setUploadError] =
-    useState<firebase.storage.FirebaseStorageError | null>(null);
+  const [uploadError, setUploadError] = useState<StorageError | null>(null);
 
   function validateFile(file: File) {
     if (!["image/jpeg", "image/png"].includes(file.type)) {
@@ -69,19 +80,17 @@ export const FileUpload: FunctionalComponent<Props> = ({
   }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const itemID = item ? item.id : null
 
   useEffect(() => {
-    let uploadTask: null | firebase.storage.UploadTask = null;
-
     if (file && db && storage) {
       const metadata = {
         contentType: file.type,
       };
 
       const filePath = getImageFullPath(prefix, item ? item.id : list.id, file);
-      const storageRef = storage.ref();
-
-      uploadTask = storageRef.child(filePath).put(file, metadata);
+      const storageRef = ref(storage, filePath);
+      const uploadTask = uploadBytesResumable(storageRef, file, metadata);
       uploadTask.on(
         "state_changed",
         (snapshot) => {
@@ -102,55 +111,80 @@ export const FileUpload: FunctionalComponent<Props> = ({
         (error) => {
           setUploadError(error);
         },
-        () => {
+        async () => {
           onUploaded({ file, filePath });
           if (item) {
-            const itemRef = db
-              .collection(`shoppinglists/${list.id}/items`)
-              .doc(item.id);
-
-            itemRef
-              .update({
-                images: firebase.firestore.FieldValue.arrayUnion(filePath),
-              })
-              .then(() => {
-                if (onSaved) {
-                  onSaved();
-                }
-              })
-              .catch((error) => {
-                // XXX Deal with this better.
-                console.error(`Error trying to update item ${item.id}:`, error);
-              });
+            await updateDoc(
+              doc(db, `shoppinglists/${list.id}/items`, item.id),
+              {
+                images: arrayUnion(filePath),
+              }
+            );
+            // .then(() => {
+            //   if (onSaved) {
+            //     onSaved();
+            //   }
+            // })
+            // .catch((error) => {
+            //   // XXX Deal with this better.
+            //   console.error(`Error trying to update item ${item.id}:`, error);
+            // });
+            if (onSaved) {
+              onSaved();
+            }
           } else {
-            db.collection(`shoppinglists/${list.id}/pictures`)
-              .add({
-                filePath,
-                notes: "",
-                created: firebase.firestore.Timestamp.fromDate(new Date()),
-                modified: firebase.firestore.Timestamp.fromDate(new Date()),
-              })
-              .then(() => {
-                setFile(null);
-                setFileValidationError(null);
-                setUploadError(null);
-                setUploadingPercentage(null);
-                if (fileInputRef.current) {
-                  fileInputRef.current.value = "";
+            try {
+              await addDoc(
+                collection(db, `shoppinglists/${list.id}/pictures`),
+                {
+                  filePath,
+                  notes: "",
+                  created: Timestamp.fromDate(new Date()),
+                  modified: Timestamp.fromDate(new Date()),
                 }
-                if (onSaved) {
-                  onSaved();
-                }
-              })
-              .catch((error) => {
-                console.error("Error trying to save picture", error);
-                throw error;
-              });
+              );
+            } catch (error) {
+              console.error("Error trying to save picture", error);
+              throw error;
+            }
+            setFile(null);
+            setFileValidationError(null);
+            setUploadError(null);
+            setUploadingPercentage(null);
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+            if (onSaved) {
+              onSaved();
+            }
+            // db.collection(`shoppinglists/${list.id}/pictures`)
+            //   .add({
+            //     filePath,
+            //     notes: "",
+            //     created: Timestamp.fromDate(new Date()),
+            //     modified: Timestamp.fromDate(new Date()),
+            //   })
+            //   .then(() => {
+            //     setFile(null);
+            //     setFileValidationError(null);
+            //     setUploadError(null);
+            //     setUploadingPercentage(null);
+            //     if (fileInputRef.current) {
+            //       fileInputRef.current.value = "";
+            //     }
+            //     if (onSaved) {
+            //       onSaved();
+            //     }
+            //   })
+            //   .catch((error) => {
+            //     console.error("Error trying to save picture", error);
+            //     throw error;
+            //   });
           }
         }
       );
     }
-  }, [prefix, file, list.id, item ? item.id : null, storage, db]);
+  }, [prefix, file, list.id, itemID, storage, db]);
 
   return (
     <div class={`${style.file_upload}`}>
@@ -213,13 +247,9 @@ export const FileUpload: FunctionalComponent<Props> = ({
       <DisplayUploadError error={uploadError} />
     </div>
   );
-};
+}
 
-function DisplayUploadError({
-  error,
-}: {
-  error: firebase.storage.FirebaseStorageError | null;
-}) {
+function DisplayUploadError({ error }: { error: StorageError | null }) {
   if (!error) {
     return null;
   }

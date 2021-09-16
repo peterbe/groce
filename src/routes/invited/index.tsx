@@ -1,7 +1,16 @@
 import { FunctionalComponent, h } from "preact";
 import { Link, route } from "preact-router";
 import { useEffect, useState } from "preact/hooks";
-import firebase from "firebase/app";
+import { User } from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 
 import style from "./style.css";
 import { Alert } from "../../components/alerts";
@@ -9,8 +18,8 @@ import { GoBack } from "../../components/go-back";
 import { List, Invitation, FirestoreInvitation } from "../../types";
 
 interface Props {
-  db: firebase.firestore.Firestore | null;
-  user: firebase.User | false | null;
+  db: Firestore | null;
+  user: User | false | null;
   lists: List[] | null;
   listID: string;
   invitationID: string;
@@ -44,65 +53,78 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
 
   useEffect(() => {
     if (user && lists && db) {
-      db.collection(`shoppinglists/${listID}/invitations`)
-        .doc(invitationID)
-        .onSnapshot(
-          (doc) => {
-            if (doc.exists) {
-              const data = doc.data() as FirestoreInvitation;
-              setInvitation(
-                Object.assign(
-                  {
-                    id: doc.id,
-                  },
-                  data
-                )
-              );
-              // Was it your own invitation?
-              if (data.inviter_uid === user.uid) {
-                if (sessionStorage.getItem("invitationID")) {
-                  try {
-                    // get rid of it
-                    sessionStorage.removeItem("invitationID");
-                  } catch (error) {
-                    console.warn(
-                      "Unable to get rid of sessionStorage item",
-                      error
-                    );
-                  }
+      // const collectionRef = collection(db, `shoppinglists/${listID}/invitations`);
+      const docRef = doc(
+        db,
+        `shoppinglists/${listID}/invitations`,
+        invitationID
+      );
+      getDoc(docRef).then(
+        (doc) => {
+          if (doc.exists()) {
+            const data = doc.data() as FirestoreInvitation;
+            setInvitation(
+              Object.assign(
+                {
+                  id: doc.id,
+                },
+                data
+              )
+            );
+            // Was it your own invitation?
+            if (data.inviter_uid === user.uid) {
+              if (sessionStorage.getItem("invitationID")) {
+                try {
+                  // get rid of it
+                  sessionStorage.removeItem("invitationID");
+                } catch (error) {
+                  console.warn(
+                    "Unable to get rid of sessionStorage item",
+                    error
+                  );
                 }
               }
-            } else {
-              setInvitationError(new Error("Invite does not exist"));
             }
-          },
-          (error) => {
-            console.error("Invite doc error:", error);
-            setInvitationError(error);
+          } else {
+            setInvitationError(new Error("Invite does not exist"));
           }
-        );
+        },
+        (error) => {
+          console.error("Invite doc error:", error);
+          setInvitationError(error);
+        }
+      );
     }
   }, [db, listID, invitationID, user, lists]);
 
-  function acceptInvite() {
+  async function acceptInvite() {
     if (db && user && invitation) {
       const accepted = [...(invitation.accepted || [])];
       if (!accepted.includes(user.uid)) {
-        db.collection(`shoppinglists/${listID}/invitations`)
-          .doc(invitation.id)
-          .update({
-            accepted: firebase.firestore.FieldValue.arrayUnion(user.uid),
-            accepted_names: firebase.firestore.FieldValue.arrayUnion(
-              user.displayName || user.email || user.uid
-            ),
-          })
-          .then(() => {
-            console.log("Added self to invitation");
-          })
-          .catch((error) => {
-            console.error("Error adding self to invitation", error);
-            setInvitationError(error);
-          });
+        // const docRef = doc(
+        //   db,
+        //   `shoppinglists/${listID}/invitations`,
+        //   invitation.id
+        // );
+
+        // getDoc(docRef).then()
+        try {
+          await updateDoc(
+            doc(db, `shoppinglists/${listID}/invitations`, invitation.id),
+            {
+              accepted: arrayUnion(user.uid),
+              accepted_names: arrayUnion(
+                user.displayName || user.email || user.uid
+              ),
+            }
+          );
+        } catch (error) {
+          console.error("Error adding self to invitation", error);
+          setInvitationError(error as Error);
+        } finally {
+          setWaiting(true);
+        }
+
         try {
           sessionStorage.removeItem("invitationID");
         } catch (error) {
@@ -110,42 +132,36 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
         }
       } else {
         // Undo.
-        db.collection(`shoppinglists/${listID}/invitations`)
-          .doc(invitation.id)
-          .update({
-            accepted: firebase.firestore.FieldValue.arrayRemove(user.uid),
-            accepted_names: firebase.firestore.FieldValue.arrayRemove(
-              user.displayName || user.email || user.uid
-            ),
-          })
-          .then(() => {
-            console.log("Removed self from invitation");
-          })
-          .catch((error) => {
-            console.error("Error removing self from invitation", error);
-            setInvitationError(error);
-          });
+        try {
+          await updateDoc(
+            doc(db, `shoppinglists/${listID}/invitations`, invitation.id),
+            {
+              accepted: arrayRemove(user.uid),
+              accepted_names: arrayRemove(
+                user.displayName || user.email || user.uid
+              ),
+            }
+          );
+
+          // XXX update UI with something
+          console.log("Removed self from invitation");
+        } catch (error) {
+          console.error("Error removing self from invitation", error);
+          setInvitationError(error as Error);
+        } finally {
+          setWaiting(true);
+        }
       }
-      setWaiting(true);
     } else {
       throw new Error("Can't accept invite yet");
     }
   }
 
-  function discardInvitation() {
+  async function discardInvitation() {
     if (db && user && invitation && invitation.email === user.email) {
-      db.collection("shoppinglists")
-        .doc(listID)
-        .collection("invitations")
-        .doc(invitation.id)
-        .delete()
-        .then(() => {
-          console.log("Invitation discarded");
-          route("/");
-        })
-        .catch((error) => {
-          console.error("Error trying to discard invitation", error);
-        });
+      await deleteDoc(doc(db, "shoppinglists", invitation.id));
+      console.log("Invitation discarded");
+      route("/");
     }
   }
 
@@ -284,7 +300,7 @@ function ShowAcceptedUsers({
   user,
 }: {
   accepted: string[];
-  user: firebase.User | null;
+  user: User | null;
 }) {
   if (!accepted || !accepted.length) {
     return null;

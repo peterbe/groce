@@ -1,28 +1,35 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { route } from "preact-router";
 import { useState } from "preact/hooks";
-import firebase from "firebase/app";
+
+import { User } from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  Timestamp,
+  updateDoc,
+  deleteDoc,
+  arrayRemove,
+} from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
 import { InvitationsForm } from "./invites-form";
 import { List, ListConfig } from "../../types";
 import style from "./style.css";
 
-interface Props {
-  db: firebase.firestore.Firestore;
-  list: List;
-  user: firebase.User;
-  close: () => void;
-  togglePopularityContest: () => void;
-}
-
-export const ListOptions: FunctionalComponent<Props> = ({
+export function ListOptions({
   db,
   list,
   close,
   user,
   togglePopularityContest,
-}: Props) => {
+}: {
+  db: Firestore;
+  list: List;
+  user: User;
+  close: () => void;
+  togglePopularityContest: () => void;
+}): h.JSX.Element {
   const [name, setName] = useState(list.name);
   const [notes, setNotes] = useState(list.notes);
   const [disableGroups, setDisableGroups] = useState(
@@ -39,33 +46,34 @@ export const ListOptions: FunctionalComponent<Props> = ({
   );
   const [updateError, setUpdateError] = useState<Error | null>(null);
 
+  async function updateList() {
+    const config: ListConfig = {
+      disableGroups,
+      disableQuantity,
+      disableDefaultSuggestions,
+      disableFireworks,
+    };
+    try {
+      await updateDoc(doc(db, `shoppinglists`, list.id), {
+        name: name.trim(),
+        notes: notes.trim(),
+        config,
+        modified: Timestamp.fromDate(new Date()),
+      });
+      close();
+    } catch (error) {
+      setUpdateError(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+
   return (
     <div class={style.listoptions}>
       <form
         class={style.listoptions_section}
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
           if (!name.trim()) return;
-          const config: ListConfig = {
-            disableGroups,
-            disableQuantity,
-            disableDefaultSuggestions,
-            disableFireworks,
-          };
-          const doc = db.collection("shoppinglists").doc(list.id);
-          doc
-            .update({
-              name: name.trim(),
-              notes: notes.trim(),
-              config,
-              modified: firebase.firestore.Timestamp.fromDate(new Date()),
-            })
-            .then(() => {
-              close();
-            })
-            .catch((error) => {
-              setUpdateError(error);
-            });
+          await updateList();
         }}
       >
         <h4>List details</h4>
@@ -193,10 +201,7 @@ export const ListOptions: FunctionalComponent<Props> = ({
               id="newDisableFireworks"
               aria-describedby="newDisableFireworksHelp"
             />
-            <label
-              class="form-check-label"
-              htmlFor="newDisableFireworks"
-            >
+            <label class="form-check-label" htmlFor="newDisableFireworks">
               Disable fireworks
             </label>
           </div>
@@ -282,17 +287,34 @@ export const ListOptions: FunctionalComponent<Props> = ({
       )}
     </div>
   );
-};
+}
 
-function DeleteListOption({
-  db,
-  list,
-}: {
-  list: List;
-  db: firebase.firestore.Firestore;
-}) {
+function DeleteListOption({ db, list }: { list: List; db: Firestore }) {
   const [confirmDelete, toggleConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<Error | null>(null);
+
+  async function deleteList() {
+    try {
+      await deleteDoc(doc(db, "shoppinglists", list.id));
+    } catch (error) {
+      console.error("Unable to delete list:", error);
+      setDeleteError(error instanceof Error ? error : new Error(String(error)));
+      return;
+    }
+    close();
+    route("/shopping", true);
+    // const doc = db.collection("shoppinglists").doc(list.id);
+    //           doc
+    //             .delete()
+    //             .then(() => {
+    //               close();
+    //               route("/shopping", true);
+    //             })
+    //             .catch((error) => {
+    //               console.error("Unable to delete list:", error);
+    //               setDeleteError(error);
+    //             });
+  }
 
   return (
     <div class={style.listoptions_section}>
@@ -315,19 +337,20 @@ function DeleteListOption({
           <button
             type="button"
             class="btn btn-danger"
-            onClick={() => {
-              const doc = db.collection("shoppinglists").doc(list.id);
+            onClick={async () => {
+              await deleteList();
+              // const doc = db.collection("shoppinglists").doc(list.id);
 
-              doc
-                .delete()
-                .then(() => {
-                  close();
-                  route("/shopping", true);
-                })
-                .catch((error) => {
-                  console.error("Unable to delete list:", error);
-                  setDeleteError(error);
-                });
+              // doc
+              //   .delete()
+              //   .then(() => {
+              //     close();
+              //     route("/shopping", true);
+              //   })
+              //   .catch((error) => {
+              //     console.error("Unable to delete list:", error);
+              //     setDeleteError(error);
+              //   });
             }}
           >
             Yes, delete this list
@@ -351,11 +374,25 @@ function LeaveListOption({
   user,
 }: {
   list: List;
-  db: firebase.firestore.Firestore;
-  user: firebase.User;
+  db: Firestore;
+  user: User;
 }) {
   const [confirm, toggleConfirm] = useState(false);
   const [updateError, setUpdateError] = useState<Error | null>(null);
+
+  async function leaveList() {
+    try {
+      await updateDoc(doc(db, "shoppinglists", list.id), {
+        owners: arrayRemove(user.uid),
+      });
+    } catch (error) {
+      console.error("Unable to leave list:", error);
+      setUpdateError(error instanceof Error ? error : new Error(String(error)));
+      return;
+    }
+    close();
+    route("/", true);
+  }
 
   return (
     <div class={style.listoptions_section}>
@@ -378,21 +415,22 @@ function LeaveListOption({
           <button
             type="button"
             class="btn btn-danger"
-            onClick={() => {
-              const doc = db.collection("shoppinglists").doc(list.id);
+            onClick={async () => {
+              await leaveList();
+              // const doc = db.collection("shoppinglists").doc(list.id);
 
-              doc
-                .update({
-                  owners: firebase.firestore.FieldValue.arrayRemove(user.uid),
-                })
-                .then(() => {
-                  close();
-                  route("/", true);
-                })
-                .catch((error) => {
-                  console.error("Unable to leave list:", error);
-                  setUpdateError(error);
-                });
+              // doc
+              //   .update({
+              //     owners: firebase.firestore.FieldValue.arrayRemove(user.uid),
+              //   })
+              //   .then(() => {
+              //     close();
+              //     route("/", true);
+              //   })
+              //   .catch((error) => {
+              //     console.error("Unable to leave list:", error);
+              //     setUpdateError(error);
+              //   });
             }}
           >
             Yes, leave list

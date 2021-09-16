@@ -1,8 +1,19 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import firebase from "firebase/app";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+
+import { User } from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  onSnapshot,
+  collection,
+  addDoc,
+  query,
+  writeBatch,
+  deleteDoc,
+} from "firebase/firestore";
 
 import style from "./style.css";
 import { GoBack } from "../../components/go-back";
@@ -15,11 +26,6 @@ import {
 } from "../../types";
 
 dayjs.extend(relativeTime);
-
-interface Props {
-  db: firebase.firestore.Firestore | null;
-  user: firebase.User | false | null;
-}
 
 function sortFoodWords(
   foodWords: FoodWord[],
@@ -38,7 +44,7 @@ function sortFoodWords(
   });
 }
 
-const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
+function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
   useEffect(() => {
     document.title = "Food Words";
   }, []);
@@ -55,62 +61,117 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
   const isAdmin = user && ["peterbe@gmail.com"].includes(user.email || "");
 
   useEffect(() => {
-    if (db && locale) {
-      db.collection("foodwords").onSnapshot(
-        (snapshot) => {
-          const newFoodWords: FoodWord[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data() as FirestoreFoodWord;
-            newFoodWords.push({
-              id: doc.id,
-              locale: data.locale,
-              word: data.word,
-              hitCount: data.hitCount,
-            });
+    const collectionRef = collection(db, "foodwords");
+    const unsubscribe = onSnapshot(
+      query(collectionRef),
+      (snapshot) => {
+        const newFoodWords: FoodWord[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreFoodWord;
+          newFoodWords.push({
+            id: doc.id,
+            locale: data.locale,
+            word: data.word,
+            hitCount: data.hitCount,
           });
-          setFoodWords(sortFoodWords(newFoodWords, "word", false));
-        },
-        (error) => {
-          console.error("Error getting snapshot", error);
-          setFoodWordsError(error);
-        }
-      );
-    }
+        });
+        setFoodWords(sortFoodWords(newFoodWords, "word", false));
+      },
+      (error) => {
+        console.error("Error getting snapshot", error);
+        setFoodWordsError(error);
+      }
+    );
+
+    // db.collection("foodwords").onSnapshot(
+    //   (snapshot) => {
+    //     const newFoodWords: FoodWord[] = [];
+    //     snapshot.forEach((doc) => {
+    //       const data = doc.data() as FirestoreFoodWord;
+    //       newFoodWords.push({
+    //         id: doc.id,
+    //         locale: data.locale,
+    //         word: data.word,
+    //         hitCount: data.hitCount,
+    //       });
+    //     });
+    //     setFoodWords(sortFoodWords(newFoodWords, "word", false));
+    //   },
+    //   (error) => {
+    //     console.error("Error getting snapshot", error);
+    //     setFoodWordsError(error);
+    //   }
+    // );
+    return () => {
+      unsubscribe();
+    };
   }, [db, locale]);
 
   const [showSuggestedFoodwords, setShowSuggestedFoodwords] = useState(false);
 
   useEffect(() => {
-    if (db && locale) {
-      db.collection("suggestedfoodwords").onSnapshot(
-        (snapshot) => {
-          const newSuggestedFoodwords: SuggestedFoodword[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data() as FirestoreSuggestedFoodword;
-            newSuggestedFoodwords.push({
-              id: doc.id,
-              word: data.word,
-              locale: data.locale,
-              created: data.created,
-              creator_uid: data.creator_uid,
-              creator_email: data.creator_email,
-            });
+    const collectionRef = collection(db, "suggestedfoodwords");
+    const unsubscribe = onSnapshot(
+      query(collectionRef),
+      (snapshot) => {
+        const newSuggestedFoodwords: SuggestedFoodword[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreSuggestedFoodword;
+          newSuggestedFoodwords.push({
+            id: doc.id,
+            word: data.word,
+            locale: data.locale,
+            created: data.created,
+            creator_uid: data.creator_uid,
+            creator_email: data.creator_email,
           });
-          newSuggestedFoodwords.sort(
-            (a, b) => b.created.seconds - a.created.seconds
-          );
-          setSuggestedFoodwords(newSuggestedFoodwords);
-          if (newSuggestedFoodwords.length === 0) {
-            setShowSuggestedFoodwords(false);
-          }
-        },
-        (error) => {
-          console.error("Snapshot error:", error);
-          // XXX deal better
-          // setListPictureTextsError(error);
+        });
+        newSuggestedFoodwords.sort(
+          (a, b) => b.created.seconds - a.created.seconds
+        );
+        setSuggestedFoodwords(newSuggestedFoodwords);
+        if (newSuggestedFoodwords.length === 0) {
+          setShowSuggestedFoodwords(false);
         }
-      );
-    }
+      },
+      (error) => {
+        console.error("Snapshot error:", error);
+        // XXX deal better
+        // setListPictureTextsError(error);
+      }
+
+      // db.collection("suggestedfoodwords").onSnapshot(
+      //   (snapshot) => {
+      //     const newSuggestedFoodwords: SuggestedFoodword[] = [];
+      //     snapshot.forEach((doc) => {
+      //       const data = doc.data() as FirestoreSuggestedFoodword;
+      //       newSuggestedFoodwords.push({
+      //         id: doc.id,
+      //         word: data.word,
+      //         locale: data.locale,
+      //         created: data.created,
+      //         creator_uid: data.creator_uid,
+      //         creator_email: data.creator_email,
+      //       });
+      //     });
+      //     newSuggestedFoodwords.sort(
+      //       (a, b) => b.created.seconds - a.created.seconds
+      //     );
+      //     setSuggestedFoodwords(newSuggestedFoodwords);
+      //     if (newSuggestedFoodwords.length === 0) {
+      //       setShowSuggestedFoodwords(false);
+      //     }
+      //   },
+      //   (error) => {
+      //     console.error("Snapshot error:", error);
+      //     // XXX deal better
+      //     // setListPictureTextsError(error);
+      //   }
+    );
+
+    return () => {
+      unsubscribe();
+    };
   }, [db, locale]);
 
   const [filteredFoodWords, setFilteredFoodWords] = useState<FoodWord[]>([]);
@@ -134,23 +195,49 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
     setFilteredFoodWords(sortFoodWords(filteredFoodWords, sortBy, sortReverse));
   }, [filteredFoodWords, sortBy, sortReverse]);
 
-  useEffect(() => {
-    if (db && foodWords && isAdmin) {
-      const dupes: string[] = [];
-      const seen = new Set();
+  async function deleteDuplicateFoodwords(db: Firestore, words: FoodWord[]) {
+    const dupes: string[] = [];
+    const seen = new Set();
 
-      for (const word of foodWords) {
-        if (seen.has(word.word)) {
-          dupes.push(word.id);
-        } else {
-          seen.add(word.word);
-        }
+    for (const word of words) {
+      if (seen.has(word.word)) {
+        dupes.push(word.id);
+      } else {
+        seen.add(word.word);
       }
-      const batch = db.batch();
-      dupes.forEach((id) => {
-        batch.delete(db.collection("foodwords").doc(id));
-      });
-      batch.commit();
+    }
+    if (dupes.length === 0) {
+      return;
+    }
+    console.log(`${dupes.length} dupes to delete`);
+    const batch = writeBatch(db);
+    dupes.forEach((id) => {
+      const itemRef = doc(db, "foodwords", id);
+      batch.delete(itemRef);
+    });
+    await batch.commit();
+  }
+
+  useEffect(() => {
+    if (foodWords && isAdmin) {
+      deleteDuplicateFoodwords(db, foodWords);
+      // const dupes: string[] = [];
+      // const seen = new Set();
+
+      // for (const word of foodWords) {
+      //   if (seen.has(word.word)) {
+      //     dupes.push(word.id);
+      //   } else {
+      //     seen.add(word.word);
+      //   }
+      // }
+      // // const batch = db.batch();
+      // const batch = writeBatch(db);
+      // dupes.forEach((id) => {
+      //   const itemRef = doc(db, 'foodwords', id)
+      //   batch.delete(itemRef)
+      // });
+      // await batch.commit();
     }
   }, [db, foodWords, isAdmin]);
 
@@ -209,6 +296,13 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
     window.URL.revokeObjectURL(url);
     a.parentElement?.removeChild(a);
   }
+
+  // async function deleteSuggestedFoodword(suggestedFoodword: SuggestedFoodword) {
+  //   if (!db) {
+  //     return;
+  //   }
+  //   await deleteDoc(doc(db, `suggestedfoodwords`, suggestedFoodword.id));
+  // }
 
   if (!foodWords) {
     return <Loading text="Loading..." />;
@@ -292,11 +386,12 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
                       style={{ cursor: "pointer" }}
                       title="Delete"
                       onClick={async () => {
-                        if (db) {
-                          db.collection("suggestedfoodwords")
-                            .doc(suggestedFoodword.id)
-                            .delete();
+                        if (!db) {
+                          return;
                         }
+                        await deleteDoc(
+                          doc(db, "suggestedfoodwords", suggestedFoodword.id)
+                        );
                       }}
                     >
                       🗑
@@ -305,18 +400,16 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
                       style={{ cursor: "pointer" }}
                       title="Add! (ship it)"
                       onClick={async () => {
-                        if (db) {
-                          await db.collection("foodwords").add({
-                            locale: suggestedFoodword.locale,
-                            word: suggestedFoodword.word,
-                            hitCount: 0,
-                            notes: "",
-                          });
-                          await db
-                            .collection("suggestedfoodwords")
-                            .doc(suggestedFoodword.id)
-                            .delete();
-                        }
+                        await addDoc(collection(db, "foodwords"), {
+                          locale: suggestedFoodword.locale,
+                          word: suggestedFoodword.word,
+                          hitCount: 0,
+                          notes: "",
+                        });
+
+                        await deleteDoc(
+                          doc(db, "suggestedfoodwords", suggestedFoodword.id)
+                        );
                       }}
                     >
                       🛳
@@ -387,15 +480,8 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
                     <span
                       style={{ cursor: "pointer" }}
                       title="Delete"
-                      onClick={() => {
-                        if (db) {
-                          db.collection("foodwords")
-                            .doc(foodWord.id)
-                            .delete()
-                            .then(() => {
-                              setDeletedWord(foodWord);
-                            });
-                        }
+                      onClick={async () => {
+                        await deleteDoc(doc(db, "foodwords", foodWord.id));
                       }}
                     >
                       🗑
@@ -437,28 +523,36 @@ const FoodWords: FunctionalComponent<Props> = ({ db, user }: Props) => {
       )}
     </div>
   );
-};
+}
 
-const Outer: FunctionalComponent<Props> = (props: Props) => {
+export default function Outer({
+  db,
+  user,
+}: {
+  db: Firestore | null;
+  user: User | false | null;
+}): h.JSX.Element {
   return (
     <div class={style.food_words}>
       <h1>Food Words</h1>
 
-      <FoodWords {...props} />
+      {db ? (
+        <FoodWords db={db} user={user} />
+      ) : (
+        <Loading text="Loading app..." />
+      )}
 
       <GoBack />
     </div>
   );
-};
-
-export default Outer;
+}
 
 function MassAdd({
   db,
   locale,
   foodWords,
 }: {
-  db: firebase.firestore.Firestore;
+  db: Firestore;
   locale: string;
   foodWords: FoodWord[];
 }) {
@@ -492,7 +586,7 @@ function MassAdd({
           setSaving(newWords.length);
           await Promise.all(
             newWords.map((word) => {
-              return db.collection("foodwords").add({
+              return addDoc(collection(db, "foodwords"), {
                 locale,
                 word,
                 hitCount: 0,

@@ -1,8 +1,20 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { Link } from "preact-router";
 import style from "./style.css";
-import firebase from "firebase/app";
+
 import { useEffect, useState } from "preact/hooks";
+import { User } from "firebase/auth";
+import {
+  Firestore,
+  onSnapshot,
+  Unsubscribe,
+  FirestoreError,
+  collection,
+  addDoc,
+  query,
+  where,
+  Timestamp,
+} from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
@@ -21,16 +33,10 @@ interface FirestoreSubmission {
     email: string | null;
     displayName: string | null;
   };
-  added: firebase.firestore.Timestamp;
+  added: Timestamp;
 }
 interface Submission extends FirestoreSubmission {
   id: string;
-}
-
-interface Props {
-  user: firebase.User | false | null;
-  db: firebase.firestore.Firestore | null;
-  lists: List[] | null;
 }
 
 const PRESET_TOPICS = [
@@ -40,16 +46,19 @@ const PRESET_TOPICS = [
   "Constructive criticism",
 ];
 
-const Feedback: FunctionalComponent<Props> = (props: Props) => {
-  const { user, lists, db } = props;
-
+function Feedback({
+  user,
+  lists,
+  db,
+}: {
+  user: User | false;
+  db: Firestore;
+  lists: List[] | null;
+}) {
   useEffect(() => {
     document.title = "Feedback";
   }, []);
 
-  if (user === null) {
-    return <Loading />;
-  }
   if (!user) {
     return (
       <Alert
@@ -58,9 +67,6 @@ const Feedback: FunctionalComponent<Props> = (props: Props) => {
         message="Please use the menu to sign in. If that doesn't work consider sending an email to mail@peterbe.com"
       />
     );
-  }
-  if (!db) {
-    return <Loading />;
   }
   if (user.isAnonymous) {
     return (
@@ -84,9 +90,17 @@ const Feedback: FunctionalComponent<Props> = (props: Props) => {
       <Form user={user} lists={lists} db={db} />
     </div>
   );
-};
+}
 
-const FeedbackOuter: FunctionalComponent<Props> = (props: Props) => {
+export default function FeedbackOuter({
+  user,
+  lists,
+  db,
+}: {
+  user: User | false | null;
+  db: Firestore | null;
+  lists: List[] | null;
+}): h.JSX.Element {
   return (
     <div class={style.feedback}>
       <h1>Feedback</h1>
@@ -94,7 +108,11 @@ const FeedbackOuter: FunctionalComponent<Props> = (props: Props) => {
         Thank you for using this app. With your help, it can get better. Not
         just for you but for everybody. Please share you feedback.
       </p>
-      <Feedback {...props} />
+      {db && user !== null ? (
+        <Feedback user={user} db={db} lists={lists} />
+      ) : (
+        <Loading />
+      )}
 
       <GoBack />
 
@@ -104,9 +122,7 @@ const FeedbackOuter: FunctionalComponent<Props> = (props: Props) => {
       </p>
     </div>
   );
-};
-
-export default FeedbackOuter;
+}
 
 function Form({
   lists,
@@ -114,8 +130,8 @@ function Form({
   user,
 }: {
   lists: List[] | null;
-  db: firebase.firestore.Firestore;
-  user: firebase.User;
+  db: Firestore;
+  user: User;
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<Error | null>(null);
@@ -126,24 +142,24 @@ function Form({
   const [list, setList] = useState<List | null>(null);
 
   function submitFeedback() {
-    db.collection("feedback")
-      .add({
-        creator_uid: user.uid,
-        user: {
-          email: user.email,
-          displayName: user.displayName,
-        },
-        subject,
-        topic,
-        text,
-        list: list
-          ? {
-              id: list.id,
-              name: list.name,
-            }
-          : null,
-        added: firebase.firestore.Timestamp.fromDate(new Date()),
-      })
+    const collectionRef = collection(db, "feedback");
+    addDoc(collectionRef, {
+      creator_uid: user.uid,
+      user: {
+        email: user.email,
+        displayName: user.displayName,
+      },
+      subject,
+      topic,
+      text,
+      list: list
+        ? {
+            id: list.id,
+            name: list.name,
+          }
+        : null,
+      added: Timestamp.fromDate(new Date()),
+    })
       .then(() => {
         setSubmitted(true);
         setSubject("");
@@ -269,46 +285,45 @@ function Form({
   );
 }
 
-function Submissions({
-  db,
-  user,
-}: {
-  db: firebase.firestore.Firestore;
-  user: firebase.User;
-}) {
+function Submissions({ db, user }: { db: Firestore; user: User }) {
   const [submissions, setSubmissions] = useState<Submission[] | null>(null);
+  const [submissionsError, setSubmissionsError] =
+    useState<FirestoreError | null>(null);
+
   useEffect(() => {
-    let ref: () => void;
+    let unsubscribe: null | Unsubscribe = null;
     if (user) {
-      ref = db
-        .collection("feedback")
-        .where("creator_uid", "==", user.uid)
-        .orderBy("added", "desc")
-        .onSnapshot(
-          (snapshot) => {
-            const newSubmissions: Submission[] = [];
-            snapshot.forEach((doc) => {
-              const data = doc.data() as FirestoreSubmission;
-              newSubmissions.push({
-                id: doc.id,
-                subject: data.subject,
-                topic: data.topic,
-                text: data.text,
-                user: data.user,
-                added: data.added,
-                list: data.list,
-              });
+      const collectionRef = collection(db, "feedback");
+      const q = query(collectionRef, where("email", "==", user.uid));
+      const newSubmissions: Submission[] = [];
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreSubmission;
+            newSubmissions.push({
+              id: doc.id,
+              subject: data.subject,
+              topic: data.topic,
+              text: data.text,
+              user: data.user,
+              added: data.added,
+              list: data.list,
             });
-            setSubmissions(newSubmissions);
-          },
-          (error) => {
-            console.error("Error getting submission snapshot", error);
-          }
-        );
+          });
+          setSubmissions(newSubmissions);
+        },
+        (error) => {
+          console.error("Error getting submission snapshot", error);
+          setSubmissionsError(error);
+        }
+      );
     }
 
     return () => {
-      if (ref) ref();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, [db, user]);
 
@@ -319,6 +334,13 @@ function Submissions({
   return (
     <div class={style.submissions}>
       <h3>Your feedback submissions</h3>
+      {submissionsError && (
+        <Alert
+          heading="Error getting your submissions"
+          message={submissionsError}
+          offerReload={true}
+        />
+      )}
       {submissions.map((submission) => {
         return (
           <div key={submission.id} class="card" style={{ marginBottom: 20 }}>

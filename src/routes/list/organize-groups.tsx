@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import Sortable from "sortablejs";
-import firebase from "firebase/app";
+import { doc, Firestore, writeBatch } from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
 import { List, Item } from "../../types";
@@ -18,26 +18,27 @@ export function OrganizeGroups({
   items,
   close,
 }: {
-  db: firebase.firestore.Firestore;
+  db: Firestore;
   list: List;
   items: Item[];
   close: () => void;
-}) {
+}): h.JSX.Element {
   const [saveError, setSaveError] = useState<Error | null>(null);
 
-  function changeGroupText(
+  async function changeGroupText(
     group: Group,
     newText: string,
     order: null | number
   ) {
-    const collectionRef = db.collection(`shoppinglists/${list.id}/items`);
-    const batch = db.batch();
+    // const collectionRef = db.collection(`shoppinglists/${list.id}/items`);
+    const batch = writeBatch(db);
     let batchCount = 0;
     items.forEach((item) => {
       if (item.group.text.toLowerCase() === group.text.toLowerCase()) {
-        const itemDoc = collectionRef.doc(item.id);
+        // const itemDoc = collectionRef.doc(item.id);
+        const itemRef = doc(db, `shoppinglists/${list.id}/items`, item.id);
         batchCount++;
-        batch.update(itemDoc, {
+        batch.update(itemRef, {
           group: {
             text: newText,
             order: order !== null ? order : group.order,
@@ -46,17 +47,12 @@ export function OrganizeGroups({
       }
     });
     if (batchCount) {
-      batch
-        .commit()
-        .then(() => {
-          console.log(`${batchCount} Items edited`);
-        })
-        .catch((error) => {
-          console.error("Error doing batch edit", error);
-          setSaveError(
-            error instanceof Error ? error : new Error(String(error))
-          );
-        });
+      try {
+        await batch.commit();
+      } catch (error) {
+        console.error("Error doing batch edit", error);
+        setSaveError(error as Error);
+      }
     }
   }
 
@@ -64,17 +60,18 @@ export function OrganizeGroups({
     changeGroupText(group, "", 0);
   }
 
-  function saveNewOrders(order: Map<string, number>) {
-    const collectionRef = db.collection(`shoppinglists/${list.id}/items`);
-    const batch = db.batch();
+  async function saveNewOrders(order: Map<string, number>) {
+    // const collectionRef = db.collection(`shoppinglists/${list.id}/items`);
+    const batch = writeBatch(db);
     let batchCount = 0;
     items.forEach((item) => {
       if (order.has(item.group.text.toLowerCase())) {
         const newOrder = order.get(item.group.text.toLowerCase());
         if (item.group.order !== newOrder) {
-          const itemDoc = collectionRef.doc(item.id);
+          // const itemDoc = collectionRef.doc(item.id);
+          const itemRef = doc(db, `shoppinglists/${list.id}/items`, item.id);
           batchCount++;
-          batch.update(itemDoc, {
+          batch.update(itemRef, {
             group: {
               text: item.group.text,
               order: newOrder,
@@ -85,17 +82,12 @@ export function OrganizeGroups({
     });
 
     if (batchCount) {
-      batch
-        .commit()
-        .then(() => {
-          console.log(`${batchCount} Items edited`);
-        })
-        .catch((error) => {
-          console.error("Error doing batch edit", error);
-          setSaveError(
-            error instanceof Error ? error : new Error(String(error))
-          );
-        });
+      try {
+        await batch.commit();
+      } catch (error) {
+        console.error("Error doing batch edit", error);
+        setSaveError(error as Error);
+      }
     }
   }
 

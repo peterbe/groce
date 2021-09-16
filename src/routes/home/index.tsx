@@ -1,7 +1,22 @@
 import { FunctionalComponent, h } from "preact";
 import { Link } from "preact-router";
-import firebase from "firebase/app";
 import { useEffect, useState } from "preact/hooks";
+import {
+  Auth,
+  User,
+  GoogleAuthProvider,
+  signInWithRedirect,
+  signInAnonymously,
+} from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  onSnapshot,
+  Unsubscribe,
+  collectionGroup,
+  query,
+  where,
+} from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
 import { Loading } from "../../components/loading";
@@ -9,9 +24,9 @@ import { AddToHomeScreen } from "./add-to-homescreen";
 import { List, FirestoreInvitation, Invitation } from "../../types";
 
 interface Props {
-  user: firebase.User | false | null;
-  auth: firebase.auth.Auth | null;
-  db: firebase.firestore.Firestore | null;
+  user: User | false | null;
+  auth: Auth | null;
+  db: Firestore | null;
   lists: List[] | null;
 }
 
@@ -23,83 +38,118 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
   }, []);
 
   // If set, this string will be something like `<ID_OF_LIST>/<ID_OF_INVITATION>`
-  const [invitationIdentifier, setInvitationIdentifier] =
-    useState<string | null>(null);
+  const [invitationIdentifier, setInvitationIdentifier] = useState<
+    string | null
+  >(null);
+
+  // async function watchInvitations(db: Firestore) {
+
+  // }
   useEffect(() => {
+    let unsubscribe: null | Unsubscribe = null;
     if (db) {
       try {
         const identifier = sessionStorage.getItem("invitationID");
         if (identifier) {
           const [listID, invitationID] = identifier.split("/");
-          db.collection(`shoppinglists/${listID}/invitations`)
-            .doc(invitationID)
-            .onSnapshot(
-              (doc) => {
-                if (doc.exists) {
-                  setInvitationIdentifier(identifier);
-                } else {
-                  console.warn("Invitation, by identifier, does not exist");
-                }
-              },
-              (error) => {
-                console.error("Error getting invitation by identifier", error);
+          // const collectionRef = collection(
+          //   db,
+          unsubscribe = onSnapshot(
+            doc(db, `shoppinglists/${listID}/invitations`, invitationID),
+            (doc) => {
+              if (doc.exists()) {
+                setInvitationIdentifier(identifier);
+              } else {
+                console.warn("Invitation, by identifier, does not exist");
               }
-            );
+            }
+          );
+          // );
+          // const docRef = doc(
+          //   db,
+          //   `shoppinglists/${listID}/invitations`,
+          //   invitationID
+          // );
+          // const docSnap = await getDoc(docRef);
+
+          // db.collection(`shoppinglists/${listID}/invitations`)
+          //   .doc(invitationID)
+          //   .onSnapshot(
+          //     (doc) => {
+          //       if (doc.exists) {
+          //         setInvitationIdentifier(identifier);
+          //       } else {
+          //         console.warn("Invitation, by identifier, does not exist");
+          //       }
+          //     },
+          //     (error) => {
+          //       console.error("Error getting invitation by identifier", error);
+          //     }
+          //   );
         }
       } catch (error) {
         console.error("Error trying to get sessionStorage item", error);
       }
     }
-  }, [user, db]);
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [db]);
 
   const [invitations, setInvitations] = useState<Invitation[] | null>(null);
 
   // Are there any standing invitations in my name?
   useEffect(() => {
-    let ref: () => void;
+    let unsubscribe: null | Unsubscribe = null;
     let mounted = true;
 
     if (db && user && user.email && lists) {
-      db.collectionGroup("invitations")
-        .where("email", "==", user.email.toLowerCase())
-        .onSnapshot(
-          (snapshot) => {
-            const newInvitations: Invitation[] = [];
-            snapshot.forEach((doc) => {
-              const data = doc.data() as FirestoreInvitation;
-              if (new Date() > data.expires.toDate()) {
-                return;
-              }
-              if (user.uid === data.inviter_uid) {
-                // Your own invitation
-                return;
-              }
-              if (data.accepted.includes(user.uid)) {
-                return;
-              }
-              newInvitations.push({
-                id: doc.id,
-                email: data.email,
-                added: data.added,
-                expires: data.expires,
-                inviter_uid: data.inviter_uid,
-                about: data.about,
-                accepted: data.accepted,
-              });
-            });
-            if (mounted) {
-              setInvitations(newInvitations);
+      const collectionRef = collectionGroup(db, "invitations");
+      const q = query(
+        collectionRef,
+        where("email", "==", user.email.toLowerCase())
+      );
+      const newInvitations: Invitation[] = [];
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreInvitation;
+            if (new Date() > data.expires.toDate()) {
+              return;
             }
-          },
-          (error) => {
-            console.error("Error getting invitations snapshot", error);
+            if (user.uid === data.inviter_uid) {
+              // Your own invitation
+              return;
+            }
+            if (data.accepted.includes(user.uid)) {
+              return;
+            }
+            newInvitations.push({
+              id: doc.id,
+              email: data.email,
+              added: data.added,
+              expires: data.expires,
+              inviter_uid: data.inviter_uid,
+              about: data.about,
+              accepted: data.accepted,
+            });
+          });
+          if (mounted) {
+            setInvitations(newInvitations);
           }
-        );
+        },
+        (error) => {
+          console.error("Error getting invitations snapshot", error);
+        }
+      );
     }
     return () => {
       mounted = false;
-      if (ref) {
-        ref();
+      if (unsubscribe) {
+        unsubscribe();
       }
     };
   }, [db, user, lists]);
@@ -188,34 +238,19 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
 
         {auth && user === false && (
           <div class="login">
-            {/* <p>
-              <button
-                type="button"
-                class="btn btn-primary"
-                onClick={async () => {
-                  // console.log(auth);
-                  const provider = new firebase.auth.GoogleAuthProvider();
-                  try {
-                    await auth.signInWithPopup(provider);
-                  } catch (error) {
-                    console.log("ERROR:", error);
-                  }
-                }}
-              >
-                Sign in with Google (popup)
-              </button>
-            </p> */}
             <p>
               <button
                 type="button"
                 class="btn btn-primary btn-lg"
                 onClick={async () => {
-                  const provider = new firebase.auth.GoogleAuthProvider();
+                  const provider = new GoogleAuthProvider();
                   try {
-                    await auth.signInWithRedirect(provider);
+                    await signInWithRedirect(auth, provider);
                   } catch (error) {
                     console.error("Error signing in with redirect", error);
-                    setSigninError(error instanceof Error ? error : new Error(String(error)));
+                    setSigninError(
+                      error instanceof Error ? error : new Error(String(error))
+                    );
                   }
                 }}
               >
@@ -229,10 +264,12 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 onClick={async () => {
                   // const provider = new firebase.auth.GoogleAuthProvider();
                   try {
-                    await auth.signInAnonymously();
+                    await signInAnonymously(auth);
                   } catch (error) {
                     console.error("Error signing in anonymously", error);
-                    setSigninError(error instanceof Error ? error : new Error(String(error)));
+                    setSigninError(
+                      error instanceof Error ? error : new Error(String(error))
+                    );
                   }
                 }}
               >
@@ -264,7 +301,7 @@ function PendingInvitation({
   invitationID,
   close,
 }: {
-  user: firebase.User | false | null;
+  user: User | false | null;
   invitationID: string;
   close: () => void;
 }) {

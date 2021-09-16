@@ -1,8 +1,25 @@
-import { FunctionalComponent, h, Fragment } from "preact";
+import { h, Fragment } from "preact";
 import { Link } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
 import style from "./style.css";
-import firebase from "firebase/app";
+import { User } from "firebase/auth";
+import {
+  doc,
+  Firestore,
+  onSnapshot,
+  Unsubscribe,
+  collection,
+  addDoc,
+  query,
+  Timestamp,
+  writeBatch,
+  updateDoc,
+  deleteDoc,
+  FieldValue,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
+import { FirebaseStorage, ref, deleteObject } from "firebase/storage";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
@@ -18,23 +35,21 @@ import { GROUP_SUGGESTIONS, ITEM_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List, StorageSpec } from "../../types";
 import { stripEmojis } from "../../utils";
 
-interface Props {
-  user: firebase.User | false | null;
-  db: firebase.firestore.Firestore | null;
-  storage: firebase.storage.Storage | null;
-  id: string;
-  lists: List[] | null;
-  photosMode: boolean;
-}
-
-const ShoppingList: FunctionalComponent<Props> = ({
+function ShoppingList({
   user,
   db,
   storage,
   id,
   lists,
   photosMode,
-}: Props) => {
+}: {
+  user: User | false | null;
+  db: Firestore | null;
+  storage: FirebaseStorage | null;
+  id: string;
+  lists: List[] | null;
+  photosMode: boolean;
+}): h.JSX.Element {
   const [items, setItems] = useState<Item[] | null>(null);
 
   const list = lists ? lists.find((list) => list.id === id) : null;
@@ -74,10 +89,11 @@ const ShoppingList: FunctionalComponent<Props> = ({
   >(new Map());
 
   useEffect(() => {
-    let ref: () => void;
+    let unsubscribe: null | Unsubscribe = null;
     if (db && list) {
-      ref = db.collection(`shoppinglists/${id}/items`).onSnapshot(
-        // { includeMetadataChanges: true },
+      const collectionRef = collection(db, `shoppinglists/${id}/items`);
+      unsubscribe = onSnapshot(
+        query(collectionRef),
         (snapshot) => {
           if (
             snapshot.metadata.fromCache &&
@@ -87,7 +103,6 @@ const ShoppingList: FunctionalComponent<Props> = ({
           } else {
             toggleSnapshotsOffline(false);
           }
-
           const newItems: Item[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as FirestoreItem;
@@ -147,11 +162,12 @@ const ShoppingList: FunctionalComponent<Props> = ({
       );
     }
     return () => {
-      if (ref) {
-        ref();
+      if (unsubscribe) {
+        unsubscribe();
       }
     };
-  }, [id, list, user, db, storage]);
+    // }, [id, list, user, db, storage]);
+  }, [id, list, user, db]); // XXX ARE ALL OF THESE NEEDED!
 
   const [clearedItems, setClearedItems] = useState<Item[]>([]);
 
@@ -170,56 +186,113 @@ const ShoppingList: FunctionalComponent<Props> = ({
     };
   }, [clearedItems, clearTimerRef]);
 
-  function clearDoneItems() {
+  async function clearDoneItems() {
     if (db && items) {
+      // try {
+      //   await runTransaction(db, async (transaction) => {
+      //     const sfDoc = await transaction.get(sfDocRef);
+      //     if (!sfDoc.exists()) {
+      //       throw "Document does not exist!";
+      //     }
+
+      //     const newPopulation = sfDoc.data().population + 1;
+      //     transaction.update(sfDocRef, { population: newPopulation });
+      //   });
+      //   console.log("Transaction successfully committed!");
+      // } catch (e) {
+      //   console.log("Transaction failed: ", e);
+      // }
+
+      // try {
+      // const collectionRef = collection(db, `shoppinglists/${id}/items`);
+      //   const itemsDoc
+
+      // } catch (error) {
+      //   console.log("Transaction failed: ", error);
+      //   // XXX DEAL WITH THIS BETTER
+
+      // }
       const cleared: Item[] = [];
-      const collectionRef = db.collection(`shoppinglists/${id}/items`);
-      const batch = db.batch();
+      const batch = writeBatch(db);
       items
         .filter((item) => item.done && !item.removed)
         .forEach((item) => {
-          const itemDoc = collectionRef.doc(item.id);
-          batch.update(itemDoc, {
-            removed: firebase.firestore.Timestamp.fromDate(new Date()),
+          const itemRef = doc(db, `shoppinglists/${id}/items`, item.id);
+          batch.update(itemRef, {
+            removed: Timestamp.fromDate(new Date()),
           });
           cleared.push(item);
         });
-
-      batch
-        .commit()
-        .then(() => {
-          console.log("All items cleared");
-        })
-        .catch((error) => {
-          console.error("Error doing batch operation", error);
-          // XXX Deal with this!
-        });
+      try {
+        await batch.commit();
+      } catch (error) {
+        console.error("Error doing batch operation", error);
+        // XXX Deal with this!
+        return;
+      }
       setClearedItems(cleared);
+
+      // const collectionRef = db.collection(`shoppinglists/${id}/items`);
+      // const batch = db.batch();
+      // items
+      //   .filter((item) => item.done && !item.removed)
+      //   .forEach((item) => {
+      //     const itemDoc = collectionRef.doc(item.id);
+      //     batch.update(itemDoc, {
+      //       removed: Timestamp.fromDate(new Date()),
+      //     });
+      //     cleared.push(item);
+      //   });
+
+      // batch
+      //   .commit()
+      //   .then(() => {
+      //     console.log("All items cleared");
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error doing batch operation", error);
+      //     // XXX Deal with this!
+      //   });
+      // setClearedItems(cleared);
     }
   }
 
-  function undoClearDoneItems() {
+  async function undoClearDoneItems() {
     if (db && items) {
-      const collectionRef = db.collection(`shoppinglists/${id}/items`);
-      const batch = db.batch();
+      // const collectionRef = db.collection(`shoppinglists/${id}/items`);
+      // const batch = db.batch();
+      const batch = writeBatch(db);
       clearedItems.forEach((item) => {
-        const itemDoc = collectionRef.doc(item.id);
-        console.log(item);
-        batch.update(itemDoc, {
+        // const itemRef = doc(db, "cities", "SF");
+        const itemRef = doc(db, `shoppinglists/${id}/items`, item.id);
+        batch.update(itemRef, {
           removed: false,
         });
+        // const itemDoc = collectionRef.doc(item.id);
+        // // console.log(item);
+        // batch.update(itemDoc, {
+        //   removed: false,
+        // });
       });
 
-      batch
-        .commit()
-        .then(() => {
-          console.log("Undo all items cleared");
-        })
-        .catch((error) => {
-          console.error("Error doing batch operation", error);
-          // XXX Deal with this!
-        });
+      try {
+        await batch.commit();
+      } catch (error) {
+        console.error("Error doing batch operation", error);
+        // XXX Deal with this!
+        return;
+      }
       setClearedItems([]);
+      // batch
+      //   .commit()
+      //   .then(() => {
+      //     console.log("Undo all items cleared");
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error doing batch operation", error);
+      //     // XXX Deal with this!
+      //   });
+      // setClearedItems([]);
     }
   }
 
@@ -244,27 +317,19 @@ const ShoppingList: FunctionalComponent<Props> = ({
 
     if (previousItem) {
       // Update it as not removed and not done
-      return db
-        .collection(`shoppinglists/${id}/items`)
-        .doc(previousItem.id)
-        .set({
-          text: previousItem.text,
-          description: "",
-          group: previousItem.group,
-          images: previousItem.images || [],
-          quantity: 0,
-          done: false,
-          removed: false,
-          added: [
-            firebase.firestore.Timestamp.fromDate(new Date()),
-            ...previousItem.added,
-          ],
-          times_added: (previousItem.times_added || 1) + 1,
-        })
-        .catch((error) => {
-          console.error("Unable to update:", error);
-          throw error;
-        });
+
+      await updateDoc(doc(db, `shoppinglists/${id}/items`, previousItem.id), {
+        text: previousItem.text,
+        description: "",
+        group: previousItem.group,
+        images: previousItem.images || [],
+        quantity: 0,
+        done: false,
+        removed: false,
+        added: [Timestamp.fromDate(new Date()), ...previousItem.added],
+        times_added: (previousItem.times_added || 1) + 1,
+      });
+      return;
     }
     if (!list?.config.disableDefaultSuggestions) {
       // Perhaps what you typed was almost like one of the suggestions.
@@ -281,178 +346,200 @@ const ShoppingList: FunctionalComponent<Props> = ({
     }
 
     // A fresh add
-    return db
-      .collection(`shoppinglists/${id}/items`)
-      .add({
-        text: text.trim(),
-        description: "",
-        group: {
-          order: 0,
-          text: "",
-        },
-        quantity: 0,
-        done: false,
-        removed: false,
-        added: [firebase.firestore.Timestamp.fromDate(new Date())],
-        times_added: 1,
-      })
-      .catch((error) => {
-        console.error("Error trying to add new item:", error);
-        throw error;
-      });
+    const collectionRef = collection(db, `shoppinglists/${id}/items`);
+    await addDoc(collectionRef, {
+      text: text.trim(),
+      description: "",
+      group: {
+        order: 0,
+        text: "",
+      },
+      quantity: 0,
+      done: false,
+      removed: false,
+      added: [Timestamp.fromDate(new Date())],
+      times_added: 1,
+    });
+    // .catch((error) => {
+    //   console.error("Error trying to add new item:", error);
+    //   throw error;
+    // });
   }
 
-  function updateItemDoneToggle(item: Item) {
-    if (db) {
-      const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
-      itemRef
-        .update({
-          done: item.done
-            ? false
-            : firebase.firestore.Timestamp.fromDate(new Date()),
-        })
-        // .then(() => {
-        //   console.log("Updated", item.id);
-        // })
-        .catch((error) => {
-          // XXX Deal with this better.
-          console.error(`Error trying to update item ${item.id}:`, error);
-        });
-    }
-  }
-
-  function deleteItem(item: Item) {
+  async function updateItemDoneToggle(item: Item) {
     if (!db) {
       return;
     }
-    const collectionRef = db.collection(`shoppinglists/${id}/items`);
-    const itemRef = collectionRef.doc(item.id);
-    itemRef.delete();
+    await updateDoc(doc(db, `shoppinglists/${id}/items`, item.id), {
+      done: item.done ? false : Timestamp.fromDate(new Date()),
+    });
   }
 
-  function updateItem(
+  async function deleteItem(item: Item) {
+    if (!db) {
+      return;
+    }
+    await deleteDoc(doc(db, `shoppinglists/${id}/items`, item.id));
+  }
+
+  async function updateItem(
     item: Item,
     text: string,
     description: string,
     group: string,
     quantity: number
   ) {
-    if (db) {
-      const collectionRef = db.collection(`shoppinglists/${id}/items`);
-      const itemRef = collectionRef.doc(item.id);
-
-      const normalizeGroupText = (s: string) => stripEmojis(s).toLowerCase();
-      const thisGroup = normalizeGroupText(group.trim());
-
-      let groupOrder = 0;
-      if (group.trim() && items) {
-        // Seek the highest group order of any item that matches this.
-        groupOrder = Math.max(
-          ...items
-            .filter(
-              (item) =>
-                item.group.text &&
-                normalizeGroupText(item.group.text) === thisGroup
-            )
-            .map((item) => item.group.order)
-        );
-      }
-      const groupText = group.trim();
-      const groupItem = {
-        order: groupOrder,
-        text: groupText,
-      };
-      itemRef
-        .update({
-          text: text.trim(),
-          description: description.trim(),
-          group: groupItem,
-          quantity,
-        })
-        .then(() => {
-          if (items && groupItem.text) {
-            // If the groupItem.text was changed, make sure all the other
-            // items' groupItem.text reflects that.
-            const correctGroupText = groupItem.text;
-
-            const normalizedGroupText = normalizeGroupText(groupItem.text);
-            const relatedItems = items.filter((relatedItem) => {
-              return (
-                relatedItem.id !== item.id &&
-                relatedItem.group.text &&
-                relatedItem.group.text !== correctGroupText &&
-                normalizeGroupText(relatedItem.group.text) ===
-                  normalizedGroupText
-              );
-            });
-            if (relatedItems.length) {
-              const batch = db.batch();
-              relatedItems.forEach((relatedItem) => {
-                const itemDoc = collectionRef.doc(relatedItem.id);
-                batch.update(itemDoc, {
-                  group: {
-                    text: correctGroupText,
-                    order: groupOrder,
-                  },
-                });
-              });
-              batch
-                .commit()
-                .then(() => {
-                  console.log(
-                    `Correct group on ${relatedItems.length} other items`
-                  );
-                })
-                .catch((error) => {
-                  console.error("Error doing batch operation", error);
-                });
-            }
-          }
-        })
-        .catch((error) => {
-          // XXX Deal with this better.
-          console.error(`Error trying to update item ${item.id}:`, error);
-        });
+    if (!db) {
+      return;
     }
+
+    const normalizeGroupText = (s: string) => stripEmojis(s).toLowerCase();
+    const thisGroup = normalizeGroupText(group.trim());
+    let groupOrder = 0;
+    if (group.trim() && items) {
+      // Seek the highest group order of any item that matches this.
+      groupOrder = Math.max(
+        ...items
+          .filter(
+            (item) =>
+              item.group.text &&
+              normalizeGroupText(item.group.text) === thisGroup
+          )
+          .map((item) => item.group.order)
+      );
+    }
+    const groupText = group.trim();
+    const groupItem = {
+      order: groupOrder,
+      text: groupText,
+    };
+
+    await updateDoc(doc(db, `shoppinglists/${id}/items`, item.id), {
+      text: text.trim(),
+      description: description.trim(),
+      group: groupItem,
+      quantity,
+    });
+
+    if (items && groupItem.text) {
+      // If the groupItem.text was changed, make sure all the other
+      // items' groupItem.text reflects that.
+      const correctGroupText = groupItem.text;
+
+      const normalizedGroupText = normalizeGroupText(groupItem.text);
+      const relatedItems = items.filter((relatedItem) => {
+        return (
+          relatedItem.id !== item.id &&
+          relatedItem.group.text &&
+          relatedItem.group.text !== correctGroupText &&
+          normalizeGroupText(relatedItem.group.text) === normalizedGroupText
+        );
+      });
+      if (relatedItems.length) {
+        const batch = writeBatch(db);
+
+        // const batch = db.batch();
+        relatedItems.forEach((relatedItem) => {
+          // const itemDoc = collectionRef.doc(relatedItem.id);
+          const itemRef = doc(db, `shoppinglists/${id}/items`, relatedItem.id);
+          batch.update(itemRef, {
+            group: {
+              text: correctGroupText,
+              order: groupOrder,
+            },
+          });
+        });
+        try {
+          await batch.commit();
+        } catch (error) {
+          console.error("Error doing batch operation", error);
+          // XXX Deal with this!
+          return;
+        }
+
+        // batch
+        //   .commit()
+        //   .then(() => {
+        //     console.log(
+        //       `Correct group on ${relatedItems.length} other items`
+        //     );
+        //   })
+        //   .catch((error) => {
+        //     console.error("Error doing batch operation", error);
+        //   });
+      }
+    }
+
+    // const collectionRef = db.collection(`shoppinglists/${id}/items`);
+    // const itemRef = collectionRef.doc(item.id);
+
+    // const groupText = group.trim();
+    // const groupItem = {
+    //   order: groupOrder,
+    //   text: groupText,
+    // };
+    // itemRef
+    //   .update({
+    //     text: text.trim(),
+    //     description: description.trim(),
+    //     group: groupItem,
+    //     quantity,
+    //   })
+    //   .then(() => {
+
+    //   })
+    //   .catch((error) => {
+    //     // XXX Deal with this better.
+    //     console.error(`Error trying to update item ${item.id}:`, error);
+    //   });
   }
 
-  function updateItemImage(item: Item, spec: StorageSpec) {
-    if (db) {
-      let operation: firebase.firestore.FieldValue;
-      if (spec.add) {
-        operation = firebase.firestore.FieldValue.arrayUnion(spec.add);
-      } else if (spec.remove) {
-        operation = firebase.firestore.FieldValue.arrayRemove(spec.remove);
-      } else {
-        throw new Error("Invalid spec!");
-      }
-      if (db) {
-        const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
-        itemRef
-          .update({
-            images: operation,
-          })
-          .then(() => {
-            if (spec.remove && storage) {
-              // Create a reference to the file to delete
-              const storageRef = storage.ref();
-              storageRef
-                .child(spec.remove)
-                .delete()
-                .then(() => {
-                  // TODO: Delete all the thumbnails too some day.
-                })
-                .catch((error) => {
-                  console.log("Unknown error deleting image", error);
-                });
-            }
-          })
-          .catch((error) => {
-            // XXX Deal with this better.
-            console.error(`Error trying to update item ${item.id}:`, error);
-          });
-      }
+  async function updateItemImage(item: Item, spec: StorageSpec) {
+    if (!db) {
+      return;
     }
+
+    let operation: FieldValue;
+    if (spec.add) {
+      operation = arrayUnion(spec.add);
+    } else if (spec.remove) {
+      operation = arrayRemove(spec.remove);
+    } else {
+      throw new Error("Invalid spec!");
+    }
+
+    await updateDoc(doc(db, `shoppinglists/${id}/items`, item.id), {
+      images: operation,
+    });
+    if (spec.remove && storage) {
+      const objectRef = ref(storage, spec.remove);
+      await deleteObject(objectRef);
+    }
+
+    // const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
+    // itemRef
+    //   .update({
+    //     images: operation,
+    //   })
+    //   .then(() => {
+    //     if (spec.remove && storage) {
+    //       // Create a reference to the file to delete
+    //       const storageRef = storage.ref();
+    //       storageRef
+    //         .child(spec.remove)
+    //         .delete()
+    //         .then(() => {
+    //           // TODO: Delete all the thumbnails too some day.
+    //         })
+    //         .catch((error) => {
+    //           console.log("Unknown error deleting image", error);
+    //         });
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     // XXX Deal with this better.
+    //     console.error(`Error trying to update item ${item.id}:`, error);
+    //   });
   }
 
   const [modalImageURL, setModalImageURL] = useState("");
@@ -835,7 +922,7 @@ const ShoppingList: FunctionalComponent<Props> = ({
       <ImageModal url={modalImageURL} close={closeImageModal} />
     </div>
   );
-};
+}
 
 export default ShoppingList;
 

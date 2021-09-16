@@ -1,19 +1,24 @@
-import { FunctionalComponent, Fragment, h } from "preact";
+import { Fragment, h } from "preact";
 import { useState } from "preact/hooks";
 import { route } from "preact-router";
 import style from "./style.css";
-import firebase from "firebase/app";
+import {
+  Auth,
+  User,
+  GoogleAuthProvider,
+  signInWithRedirect,
+  linkWithPopup,
+} from "firebase/auth";
 
 import { GoBack } from "../../components/go-back";
 import { Alert } from "../../components/alerts";
 
 interface Props {
-  user: firebase.User | false | null;
-  auth: firebase.auth.Auth | null;
+  user: User | false | null;
+  auth: Auth | null;
 }
 
-const Signin: FunctionalComponent<Props> = (props: Props) => {
-  const { user, auth } = props;
+function Signin({ user, auth }: Props) {
   const [signInError, setSignInError] = useState<Error | null>(null);
   return (
     <div>
@@ -47,10 +52,11 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
               type="button"
               class="btn btn-primary btn-lg"
               onClick={async () => {
-                const provider = new firebase.auth.GoogleAuthProvider();
+                const provider = new GoogleAuthProvider();
                 if (user && user.isAnonymous) {
                   try {
-                    await user.linkWithPopup(provider);
+                    await linkWithPopup(user, provider);
+                    // await user.linkWithPopup(provider);
                     route("/", true);
                   } catch (error) {
                     setSignInError(
@@ -59,7 +65,7 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
                   }
                 } else {
                   try {
-                    await auth.signInWithPopup(provider);
+                    await signInWithRedirect(auth, provider);
                     route("/", true);
                   } catch (error) {
                     setSignInError(
@@ -103,14 +109,12 @@ const Signin: FunctionalComponent<Props> = (props: Props) => {
       <GoBack />
     </div>
   );
-};
+}
 
-const SigninOuter: FunctionalComponent<Props> = (props: Props) => {
+export default function SigninOuter(props: Props): h.JSX.Element {
   return (
     <div class={style.signin}>
       <Signin {...props} />
     </div>
   );
-};
-
-export default SigninOuter;
+}
