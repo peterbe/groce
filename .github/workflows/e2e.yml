@@ -33,11 +33,20 @@ jobs:
 
       - name: Start emulator
         run: |
-          firebase emulators:start > /tmp/emulator-stdout.log 2> /tmp/emulator-stderr.log &
+          ./node_modules/.bin/firebase emulators:start > /tmp/emulator-stdout.log 2> /tmp/emulator-stderr.log &
 
       - name: Wait for emulator
         run: |
           curl --fail --retry-connrefused --retry 4 http://localhost:4000 > /dev/null
+
+      - name: Debug emulator's stdout and stderr if tests failed
+        if: failure()
+        run: |
+          echo "EMULATOR STDOUT........................................."
+          cat /tmp/emulator-stdout.log
+          echo ""
+          echo "EMULATOR STDERR........................................."
+          cat /tmp/emulator-stderr.log
 
       - name: Build and serve
         run: |
@@ -78,15 +87,6 @@ jobs:
       #     # Just a slight delay to wait until the dev server is ready.
       #     sleep 15
       #     curl --retry-connrefused --retry 10 http://localhost:8080 > /dev/null
-
-      - name: Debug emulator's stdout and stderr if tests failed
-        if: failure()
-        run: |
-          echo "EMULATOR STDOUT........................................."
-          cat /tmp/emulator-stdout.log
-          echo ""
-          echo "EMULATOR STDERR........................................."
-          cat /tmp/emulator-stderr.log
 
       - name: Debug server's stdout and stderr if tests failed
         if: failure()
