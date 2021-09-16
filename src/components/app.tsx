@@ -13,7 +13,7 @@ import {
   Firestore,
   FirestoreError,
   collection,
-  getDocs,
+  onSnapshot,
   addDoc,
   query,
   where,
@@ -180,93 +180,94 @@ const App: FunctionalComponent = () => {
     };
 
     const collectionRef = collection(db, "shoppinglists");
-    const q = query(collectionRef, where("owners", "array-contains", user.uid));
-    const querySnapshot = await getDocs(q);
-    // console.log(querySnapshot.metadata);
-    // const source = querySnapshot.metadata.hasPendingWrites ? "Local" : "Server";
-    // console.log(`source=${source}`);
+    const unsubscribe = onSnapshot(
+      query(collectionRef, where("owners", "array-contains", user.uid)),
+      (snapshot) => {
+        // const source = querySnapshot.metadata.hasPendingWrites ? "Local" : "Server";
+        // console.log(`source=${source}`);
 
-    if (
-      querySnapshot.metadata.fromCache &&
-      querySnapshot.metadata.hasPendingWrites
-    ) {
-      toggleSnapshotsOffline(true);
-    } else {
-      toggleSnapshotsOffline(false);
-    }
+        if (snapshot.metadata.fromCache && snapshot.metadata.hasPendingWrites) {
+          toggleSnapshotsOffline(true);
+        } else {
+          toggleSnapshotsOffline(false);
+        }
 
-    const newLists: List[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data() as FirestoreList;
-      const config = data.config || Object.assign({}, defaultListConfig);
+        const newLists: List[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as FirestoreList;
+          const config = data.config || Object.assign({}, defaultListConfig);
 
-      // Because it used to be that `.disableGroups` used to be on the
-      // list itself, we need to respect that and migrate that over.
-      // Let's delete this in late 2020.
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      if ((data as any).disableGroups && !data.config) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-        config.disableGroups = (data as any).disableGroups;
-      }
+          // Because it used to be that `.disableGroups` used to be on the
+          // list itself, we need to respect that and migrate that over.
+          // Let's delete this in late 2020.
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          if ((data as any).disableGroups && !data.config) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+            config.disableGroups = (data as any).disableGroups;
+          }
 
-      newLists.push({
-        id: doc.id,
-        name: data.name,
-        notes: data.notes,
-        order: data.order,
-        added: data.added || Timestamp.fromDate(new Date()),
-        owners: data.owners,
-        ownersMetadata: data.ownersMetadata || {},
-        metadata: doc.metadata,
-        config,
-        recent_items: data.recent_items || [],
-        active_items_count: data.active_items_count || 0,
-        modified:
-          data.modified ||
-          data.added ||
-          // For legacy reasons, if it doesn't have a .added or
-          // .modified make it something old.
-          Timestamp.fromMillis(
-            // Just make it really really old if it doesn't have a
-            // .modified attribute.
-            new Date().getTime() - 1000 * 60 * 60 * 24 * 90
-          ),
-      });
-    });
-
-    if (!newLists.length) {
-      const foodEmojis = ["🍌", "🥕", "🧃", "🥫", "🌽", "🍅", "🍉"];
-      const randomFoodEmoji =
-        foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
-      // Manually create their first ever list
-      addDoc(collectionRef, {
-        name: `Groceries ${randomFoodEmoji}`,
-        notes: "",
-        owners: [user.uid],
-        order: 0,
-        recent_items: [],
-        active_items_count: 0,
-        config: Object.assign({}, defaultListConfig),
-        added: Timestamp.fromDate(new Date()),
-        modified: Timestamp.fromDate(new Date()),
-      })
-        .then(() => {
-          console.log("Initial sample list created");
-        })
-        .catch((error) => {
-          console.error("Error creating first sample list", error);
+          newLists.push({
+            id: doc.id,
+            name: data.name,
+            notes: data.notes,
+            order: data.order,
+            added: data.added || Timestamp.fromDate(new Date()),
+            owners: data.owners,
+            ownersMetadata: data.ownersMetadata || {},
+            metadata: doc.metadata,
+            config,
+            recent_items: data.recent_items || [],
+            active_items_count: data.active_items_count || 0,
+            modified:
+              data.modified ||
+              data.added ||
+              // For legacy reasons, if it doesn't have a .added or
+              // .modified make it something old.
+              Timestamp.fromMillis(
+                // Just make it really really old if it doesn't have a
+                // .modified attribute.
+                new Date().getTime() - 1000 * 60 * 60 * 24 * 90
+              ),
+          });
         });
-    } else if (newLists.length > 1) {
-      newLists.sort((a, b) => {
-        return b.modified.toDate().getTime() - a.modified.toDate().getTime();
-      });
-    }
-    setLists(newLists);
 
-    // if (trace && !traceOnce) {
-    //   trace.stop();
-    //   traceOnce = true;
-    // }
+        if (!newLists.length) {
+          const foodEmojis = ["🍌", "🥕", "🧃", "🥫", "🌽", "🍅", "🍉"];
+          const randomFoodEmoji =
+            foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
+          // Manually create their first ever list
+          addDoc(collectionRef, {
+            name: `Groceries ${randomFoodEmoji}`,
+            notes: "",
+            owners: [user.uid],
+            order: 0,
+            recent_items: [],
+            active_items_count: 0,
+            config: Object.assign({}, defaultListConfig),
+            added: Timestamp.fromDate(new Date()),
+            modified: Timestamp.fromDate(new Date()),
+          })
+            .then(() => {
+              console.log("Initial sample list created");
+            })
+            .catch((error) => {
+              console.error("Error creating first sample list", error);
+            });
+        } else if (newLists.length > 1) {
+          newLists.sort((a, b) => {
+            return (
+              b.modified.toDate().getTime() - a.modified.toDate().getTime()
+            );
+          });
+        }
+        setLists(newLists);
+
+        // if (trace && !traceOnce) {
+        //   trace.stop();
+        //   traceOnce = true;
+        // }
+      }
+    );
   }
 
   useEffect(() => {
