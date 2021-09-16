@@ -19,7 +19,7 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-
+import { FirebaseStorage, } from "firebase/storage";
 import style from "./style.css";
 import { Loading } from "../../../components/loading";
 import { FileUpload } from "../../../components/file-upload";
@@ -58,7 +58,7 @@ export function Pictures({
   openImageModal,
 }: {
   db: Firestore;
-  storage: Storage;
+  storage: FirebaseStorage;
   user: User;
   ready: boolean;
   list: List;

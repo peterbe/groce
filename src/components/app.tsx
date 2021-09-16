@@ -16,7 +16,6 @@ import {
   getDocs,
   addDoc,
   query,
-  // onSnapshot,
   where,
   Timestamp,
 } from "firebase/firestore";
@@ -26,7 +25,9 @@ import {
   FirebaseStorage,
 } from "firebase/storage";
 // import { getAnalytics } from "firebase/analytics";
-import { getPerformance, FirebasePerformance } from "firebase/performance";
+
+// For TypeScript
+import { FirebasePerformance } from "firebase/performance";
 
 import "../style/custom.scss";
 import Home from "../routes/home";
@@ -143,13 +144,15 @@ const App: FunctionalComponent = () => {
       // //   console.error("Unable to lazy-load firebase/analytics:", error);
       // // });
 
-      // import("firebase/performance")
-      // .then(() => {
-      setPerf(getPerformance(app));
-      // })
-      // .catch((error) => {
-      //   console.error("Unable to lazy-load firebase/performance:", error);
-      // });
+      import("firebase/performance")
+      .then((module) => {
+        console.log(module);
+
+        // setPerf(getPerformance(app));
+      })
+      .catch((error) => {
+        console.error("Unable to lazy-load firebase/performance:", error);
+      });
 
       // }, []);
     }
