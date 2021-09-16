@@ -49,7 +49,7 @@ function ShoppingList({
   id: string;
   lists: List[] | null;
   photosMode: boolean;
-}) {
+}): h.JSX.Element {
   const [items, setItems] = useState<Item[] | null>(null);
 
   const list = lists ? lists.find((list) => list.id === id) : null;
@@ -160,7 +160,6 @@ function ShoppingList({
           setItemsError(error);
         }
       );
-
     }
     return () => {
       if (unsubscribe) {

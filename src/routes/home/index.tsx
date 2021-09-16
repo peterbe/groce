@@ -101,9 +101,6 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
   const [invitations, setInvitations] = useState<Invitation[] | null>(null);
 
   // Are there any standing invitations in my name?
-  // async function watchInvitations(db: Firestore, user: User) {
-  //   if (!user.email) return;
-  // }
   useEffect(() => {
     let unsubscribe: null | Unsubscribe = null;
     let mounted = true;

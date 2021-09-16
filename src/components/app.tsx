@@ -27,7 +27,7 @@ import {
 // import { getAnalytics } from "firebase/analytics";
 
 // For TypeScript
-import { FirebasePerformance } from "firebase/performance";
+// import { FirebasePerformance } from "firebase/performance";
 
 import "../style/custom.scss";
 import Home from "../routes/home";

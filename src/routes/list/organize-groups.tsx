@@ -22,7 +22,7 @@ export function OrganizeGroups({
   list: List;
   items: Item[];
   close: () => void;
-}) {
+}): h.JSX.Element {
   const [saveError, setSaveError] = useState<Error | null>(null);
 
   async function changeGroupText(
