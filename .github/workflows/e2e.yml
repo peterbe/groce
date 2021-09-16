@@ -35,7 +35,7 @@ jobs:
 
       - name: Start emulator
         run: |
-          ./node_modules/.bin/firebase emulators:start > /tmp/emulator-stdout.log 2> /tmp/emulator-stderr.log &
+          yarn emulator > /tmp/emulator-stdout.log 2> /tmp/emulator-stderr.log &
 
       - name: Wait for emulator
         run: |
