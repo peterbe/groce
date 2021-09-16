@@ -28,6 +28,8 @@ jobs:
       - name: Install
         if: steps.cached-node_modules.outputs.cache-hit != 'true'
         env:
+          # This is because package.json contains `minimalcss` which depends
+          # on `puppeteer`.
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
         run: yarn --frozen-lockfile
 
