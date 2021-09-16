@@ -23,7 +23,7 @@ jobs:
         with:
           path: |
             node_modules
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.github/workflows/e2e.yml') }}
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('functions/yarn.lock') }}-${{ hashFiles('.github/workflows/e2e.yml') }}
 
       - name: Install
         if: steps.cached-node_modules.outputs.cache-hit != 'true'
