@@ -27,6 +27,8 @@ jobs:
 
       - name: Install
         if: steps.cached-node_modules.outputs.cache-hit != 'true'
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
         run: yarn --frozen-lockfile
 
       - name: Start emulator
@@ -47,7 +49,6 @@ jobs:
       - name: Wait for server
         run: |
           curl --fail --retry-connrefused --retry 4 http://localhost:8080 > /dev/null
-
 
       #     # These are NOT secrets. It's public stuff.
       #     export PREACT_APP_FIREBASE_APIKEY=AIzaSyBfbOjXiFeMOBljhjZUxGSXHR5Ry0ienOs
