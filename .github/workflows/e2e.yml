@@ -41,9 +41,10 @@ jobs:
 
       - name: Build and serve
         run: |
-          export PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1)
-          yarn build --prerenderUrls ./prerender-urls.js --no-inline-css
-          yarn post-process-build
+          ./bin/build
+          # export PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1)
+          # yarn build --prerenderUrls ./prerender-urls.js --no-inline-css
+          # yarn post-process-build
           yarn serve > /tmp/stdout.log 2> /tmp/stderr.log &
 
       - name: Wait for server
