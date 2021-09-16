@@ -30,14 +30,3 @@ function fromEntries<T>(iterable: Array<[string, T]>): { [key: string]: T } {
     return obj;
   }, {});
 }
-
-// export const firebaseConfig = {
-//   "apiKey": "AIzaSyBfbOjXiFeMOBljhjZUxGSXHR5Ry0ienOs",
-//   "authDomain": "thatsgroce.firebaseapp.com",
-//   "databaseURL": "https://thatsgroce.firebaseio.com",
-//   "projectId": "thatsgroce",
-//   "storageBucket": "thatsgroce.appspot.com",
-//   "messagingSenderId": "190607180135",
-//   "appId": "1:190607180135:web:011ff0f368bd93b4cbefc2",
-//   "measurementId": "G-97FY43FWT4"
-// }
