@@ -26,7 +26,19 @@ jobs:
 
       - name: Wait for emulator
         run: |
-          curl --fail --retry-connrefused --retry 10 http://localhost:4000 > /dev/null
+          curl --fail --retry-connrefused --retry 4 http://localhost:4000 > /dev/null
+
+      - name: Build and serve
+        run: |
+          export PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1)
+          yarn build --prerenderUrls ./prerender-urls.js --no-inline-css
+          yarn post-process-build
+          yarn serve
+
+      - name: Wait for server
+        run: |
+          curl --fail --retry-connrefused --retry 4 http://localhost:8080 > /dev/null
+
 
       #     # These are NOT secrets. It's public stuff.
       #     export PREACT_APP_FIREBASE_APIKEY=AIzaSyBfbOjXiFeMOBljhjZUxGSXHR5Ry0ienOs
