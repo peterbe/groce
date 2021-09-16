@@ -41,14 +41,13 @@ jobs:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
 
           # These are NOT secrets. It's public stuff.
-          PREACT_APP_FIREBASE_APIKEY: AIzaSyBfbOjXiFeMOBljhjZUxGSXHR5Ry0ienOs
-          PREACT_APP_FIREBASE_AUTHDOMAIN: thatsgroce.firebaseapp.com
-          PREACT_APP_FIREBASE_DATABASEURL: https://thatsgroce.firebaseio.com
-          PREACT_APP_FIREBASE_PROJECTID: thatsgroce
-          PREACT_APP_FIREBASE_STORAGEBUCKET: thatsgroce.appspot.com
-          PREACT_APP_FIREBASE_MESSAGINGSENDERID: 190607180135
-          PREACT_APP_FIREBASE_APPID: 1:190607180135:web:011ff0f368bd93b4cbefc2
-          PREACT_APP_FIREBASE_MEASUREMENTID: G-97FY43FWT4
+          PREACT_APP_FIREBASE_APIKEY: AIzaSyBlMzrsBR_KWXDdgntBgnCThjRqr-0I8js
+          PREACT_APP_FIREBASE_AUTHDOMAIN: groce-dev.firebaseapp.com
+          PREACT_APP_FIREBASE_DATABASEURL: https://groce-dev.firebaseio.com
+          PREACT_APP_FIREBASE_PROJECTID: groce-dev
+          PREACT_APP_FIREBASE_STORAGEBUCKET: groce-dev.appspot.com
+          PREACT_APP_FIREBASE_MESSAGINGSENDERID: 170241343352
+          PREACT_APP_FIREBASE_APPID: 1:170241343352:web:5282dd555337af2a62d28d
         run: ./bin/build
 
       - name: Run tests
