@@ -17,7 +17,18 @@ jobs:
           node-version: '16'
           cache: 'yarn'
 
+      - name: Cache node_modules
+        uses: actions/cache@v2.1.6
+        id: cached-node_modules
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.github/workflows/node.yml') }}
+
       - name: Install
+        if: steps.cached-node_modules.outputs.cache-hit != 'true'
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
         run: yarn --frozen-lockfile
 
       - name: Lint
