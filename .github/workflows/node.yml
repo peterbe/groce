@@ -66,8 +66,8 @@ jobs:
       - name: Wait for dev server
         run: |
           # Just a slight delay to wait until the dev server is ready.
-          sleep 15
-          curl --retry-connrefused --retry 10 http://localhost:8080 > /dev/null
+          sleep 10
+          curl --retry-connrefused --retry 5 http://localhost:8080 > /dev/null
 
       - name: Debug server's stdout and stderr if tests failed
         if: failure()
