@@ -52,6 +52,8 @@ jobs:
         run: ./bin/build
 
       - name: Run tests
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
         run: |
           # Remember, these tests depend on the build!
           # It's for the headless tests's server.
