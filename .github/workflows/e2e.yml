@@ -50,14 +50,14 @@ jobs:
           echo "EMULATOR STDERR........................................."
           cat /tmp/emulator-stderr.log
 
-      - name: Build and serve
+      - name: Build
         env:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
         run: |
           ./bin/build
-          # export PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1)
-          # yarn build --prerenderUrls ./prerender-urls.js --no-inline-css
-          # yarn post-process-build
+
+      - name: Serve
+        run: |
           yarn serve > /tmp/stdout.log 2> /tmp/stderr.log &
 
       - name: Wait for server
