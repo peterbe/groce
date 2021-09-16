@@ -51,6 +51,8 @@ jobs:
           cat /tmp/emulator-stderr.log
 
       - name: Build and serve
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
         run: |
           ./bin/build
           # export PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1)
