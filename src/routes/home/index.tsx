@@ -109,7 +109,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
     let mounted = true;
 
     if (db && user && user.email && lists) {
-      const collectionRef = collectionGroup(db, "shoppinglists");
+      const collectionRef = collectionGroup(db, "invitations");
       const q = query(
         collectionRef,
         where("email", "==", user.email.toLowerCase())

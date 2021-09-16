@@ -68,7 +68,7 @@ const App: FunctionalComponent = () => {
   const [user, setUser] = useState<User | null | false>(null);
   const [db, setDB] = useState<Firestore | null>(null);
   const [storage, setStorage] = useState<FirebaseStorage | null>(null);
-  const [perf, setPerf] = useState<FirebasePerformance | null>(null);
+  // const [perf, setPerf] = useState<FirebasePerformance | null>(null);
   const [persistenceError, setPersistenceError] =
     useState<FirestoreError | null>(null);
 
@@ -144,15 +144,15 @@ const App: FunctionalComponent = () => {
       // //   console.error("Unable to lazy-load firebase/analytics:", error);
       // // });
 
-      import("firebase/performance")
-      .then((module) => {
-        console.log(module);
+      // import("firebase/performance")
+      // .then((module) => {
+      //   console.log(module);
 
-        // setPerf(getPerformance(app));
-      })
-      .catch((error) => {
-        console.error("Unable to lazy-load firebase/performance:", error);
-      });
+      //   // setPerf(getPerformance(app));
+      // })
+      // .catch((error) => {
+      //   console.error("Unable to lazy-load firebase/performance:", error);
+      // });
 
       // }, []);
     }
@@ -181,11 +181,10 @@ const App: FunctionalComponent = () => {
 
     const collectionRef = collection(db, "shoppinglists");
     const q = query(collectionRef, where("owners", "array-contains", user.uid));
-    // const shoppinglistsDbRef = getDocs(collection(db, "shoppinglists"))
     const querySnapshot = await getDocs(q);
     // console.log(querySnapshot.metadata);
-    const source = querySnapshot.metadata.hasPendingWrites ? "Local" : "Server";
-    console.log(`source=${source}`);
+    // const source = querySnapshot.metadata.hasPendingWrites ? "Local" : "Server";
+    // console.log(`source=${source}`);
 
     if (
       querySnapshot.metadata.fromCache &&
