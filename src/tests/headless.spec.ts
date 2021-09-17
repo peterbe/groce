@@ -25,9 +25,7 @@ test("basics as guest", async ({ page }) => {
   await page.waitForSelector(`text=temporarily signed in`);
   await page.click('a:has-text("Groceries")');
 
-  await expect(
-    page.locator("text=List is empty at the moment.").first()
-  ).toBeVisible();
+  await page.waitForSelector(`text=List is empty at the moment.`);
 
   await page.fill('input[aria-label="New shopping list item"]', "Carrots");
   await page.keyboard.press("Enter");
