@@ -32,8 +32,6 @@ test("basics as guest", async ({ page }) => {
   ).toBeVisible();
 
   await page.fill('input[aria-label="New shopping list item"]', "Carrots");
-
-  page.locator('button[type="submit"]').first().click();
+  await page.keyboard.press("Enter");
   await expect(page.locator("text=Carrots 🥕").first()).toBeVisible();
-  // await page.pause();
 });
