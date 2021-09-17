@@ -7,7 +7,8 @@ import {
   User,
   GoogleAuthProvider,
   signInWithRedirect,
-  linkWithPopup,
+  // linkWithPopup,
+  linkWithRedirect,
 } from "firebase/auth";
 
 import { GoBack } from "../../components/go-back";
@@ -55,7 +56,7 @@ function Signin({ user, auth }: Props) {
                 const provider = new GoogleAuthProvider();
                 if (user && user.isAnonymous) {
                   try {
-                    await linkWithPopup(user, provider);
+                    await linkWithRedirect(user, provider);
                     // await user.linkWithPopup(provider);
                     route("/", true);
                   } catch (error) {

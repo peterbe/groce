@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
 const testURL = (pathname: string) => `http://localhost:8080${pathname}`;
 
@@ -34,4 +34,23 @@ test("basics as guest", async ({ page }) => {
   await page.fill('input[aria-label="New shopping list item"]', "Carrots");
   await page.keyboard.press("Enter");
   await expect(page.locator("text=Carrots 🥕").first()).toBeVisible();
+});
+
+test("submit feedback", async ({ page }) => {
+  await page.goto(testURL("/feedback"));
+  await expect(
+    page.locator(`text=You have to be signed in to post feedback`).first()
+  ).toBeVisible();
+
+  await page.goto(testURL("/"));
+  await page.click("text=Get started without signing in");
+  await page.waitForSelector("text=temporarily signed in");
+
+  await page.goto(testURL("/feedback"));
+  await page.waitForSelector(`text=You're not actually signed in.`);
+  await page.click("text=Sign in properly");
+  expect(page.url()).toBe(testURL("/signin"));
+  await page.click("text=Sign in with Google");
+
+  // await page.pause();
 });
