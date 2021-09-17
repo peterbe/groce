@@ -111,6 +111,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
         saveHandler(newText);
         setNewText("");
       }}
+      role="new-item"
     >
       <div class="input-group">
         <input
@@ -122,7 +123,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
           }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
             setNewText(currentTarget.value);
           }}
-          aria-label="Text input with segmented dropdown button"
+          aria-label="New shopping list item"
           placeholder="Add new item..."
           disabled={!ready}
         />

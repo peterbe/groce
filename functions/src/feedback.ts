@@ -22,7 +22,7 @@ export const onFeedbackAdded = functions.firestore
         functions.config().postmark.server_api_token
       );
 
-      const response = await client.sendEmail({
+      const params = {
         From: "That's Groce! <mail@peterbe.com>",
         To: "peterbe@gmail.com",
         Subject: `New feedback on That's Groce!: ${data.subject}`,
@@ -34,7 +34,13 @@ User: ${data.user.displayName || "*no name*"} (${data.user.email ||
           "*no email*"})
 
 Sent: ${new Date().toLocaleString()}`
-      });
-      console.log("sendEmail response:", response);
+      };
+      if (!process.env.FUNCTIONS_EMULATOR) {
+        const response = await client.sendEmail(params);
+        console.log("sendEmail response:", response);
+      } else {
+        console.log("Emulating sending of email:");
+        console.log(params);
+      }
     })
   );

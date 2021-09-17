@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+export PREACT_APP_FIREBASE_APIKEY=AIzaSyBlMzrsBR_KWXDdgntBgnCThjRqr-0I8js
+export PREACT_APP_FIREBASE_AUTHDOMAIN=groce-dev.firebaseapp.com
+export PREACT_APP_FIREBASE_DATABASEURL=https://groce-dev.firebaseio.com
+export PREACT_APP_FIREBASE_PROJECTID=groce-dev
+export PREACT_APP_FIREBASE_STORAGEBUCKET=groce-dev.appspot.com
+export PREACT_APP_FIREBASE_MESSAGINGSENDERID=170241343352
+export PREACT_APP_FIREBASE_APPID=1:170241343352:web:5282dd555337af2a62d28d
+
+export PREACT_APP_USE_EMULATOR=true
+yarn build
+
+yarn serve

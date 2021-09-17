@@ -1,22 +1,20 @@
-import { FunctionalComponent, h } from "preact";
+import { h } from "preact";
 import { useState } from "preact/hooks";
 import { Link } from "preact-router";
 
-interface Props {
-  heading: string;
-  message: string | JSX.Element | Error;
-  type?: "danger" | "warning" | "info" | "secondary" | "success";
-  offerReload?: boolean;
-  linkToHomepage?: boolean;
-}
-
-export const Alert: FunctionalComponent<Props> = ({
+export function Alert({
   heading,
   message,
   type,
   offerReload,
   linkToHomepage = true,
-}: Props) => {
+}: {
+  heading: string;
+  message: string | h.JSX.Element | Error;
+  type?: "danger" | "warning" | "info" | "secondary" | "success";
+  offerReload?: boolean;
+  linkToHomepage?: boolean;
+}): h.JSX.Element {
   const [reloading, setReloading] = useState(false);
   return (
     <div class={`alert alert-${type || "danger"}`} role="alert">
@@ -53,4 +51,4 @@ export const Alert: FunctionalComponent<Props> = ({
       )}
     </div>
   );
-};
+}

@@ -262,7 +262,6 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 type="button"
                 class="btn btn-secondary btn-lg"
                 onClick={async () => {
-                  // const provider = new firebase.auth.GoogleAuthProvider();
                   try {
                     await signInAnonymously(auth);
                   } catch (error) {

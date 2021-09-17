@@ -1,5 +1,5 @@
 import { Fragment, h } from "preact";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { route } from "preact-router";
 import style from "./style.css";
 import {
@@ -7,19 +7,23 @@ import {
   User,
   GoogleAuthProvider,
   signInWithRedirect,
-  linkWithPopup,
+  // linkWithPopup,
+  linkWithRedirect,
 } from "firebase/auth";
 
+import { Loading } from "../../components/loading";
 import { GoBack } from "../../components/go-back";
 import { Alert } from "../../components/alerts";
 
-interface Props {
-  user: User | false | null;
-  auth: Auth | null;
-}
-
-function Signin({ user, auth }: Props) {
+function Signin({ user, auth }: { user: User | false; auth: Auth }) {
   const [signInError, setSignInError] = useState<Error | null>(null);
+  useEffect(() => {
+    if (user && !user.isAnonymous) {
+      document.title = "Sign out?";
+    } else {
+      document.title = "Sign in";
+    }
+  }, [user]);
   return (
     <div>
       <h2>{user && !user.isAnonymous ? "You are signed in" : "Sign in"}</h2>
@@ -31,7 +35,7 @@ function Signin({ user, auth }: Props) {
         </p>
       )}
 
-      {user && !user.isAnonymous && auth && (
+      {user && !user.isAnonymous && (
         <p>
           <button
             type="button"
@@ -45,7 +49,7 @@ function Signin({ user, auth }: Props) {
           </button>
         </p>
       )}
-      {(!user || user.isAnonymous) && auth && (
+      {(!user || user.isAnonymous) && (
         <Fragment>
           <p style={{ marginTop: 10 }}>
             <button
@@ -55,7 +59,7 @@ function Signin({ user, auth }: Props) {
                 const provider = new GoogleAuthProvider();
                 if (user && user.isAnonymous) {
                   try {
-                    await linkWithPopup(user, provider);
+                    await linkWithRedirect(user, provider);
                     // await user.linkWithPopup(provider);
                     route("/", true);
                   } catch (error) {
@@ -91,12 +95,10 @@ function Signin({ user, auth }: Props) {
             type="button"
             class="btn btn-warning btn-sm"
             onClick={async () => {
-              if (auth) {
-                try {
-                  await auth.signOut();
-                } catch (error) {
-                  console.error("Unable to sign out", error);
-                }
+              try {
+                await auth.signOut();
+              } catch (error) {
+                console.error("Unable to sign out", error);
               }
             }}
           >
@@ -111,10 +113,16 @@ function Signin({ user, auth }: Props) {
   );
 }
 
-export default function SigninOuter(props: Props): h.JSX.Element {
+export default function SigninOuter({
+  user,
+  auth,
+}: {
+  user: User | false | null;
+  auth: Auth | null;
+}): h.JSX.Element {
   return (
     <div class={style.signin}>
-      <Signin {...props} />
+      {auth && user !== null ? <Signin user={user} auth={auth} /> : <Loading />}
     </div>
   );
 }

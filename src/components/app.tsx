@@ -99,7 +99,6 @@ const App: FunctionalComponent = () => {
       // firebase.firestore().clearPersistence().catch(error => {
       //   console.error('Could not enable persistence:', error.code);
       // })
-
       if (USE_EMULATOR) {
         connectFirestoreEmulator(db, "localhost", 9999);
       }
