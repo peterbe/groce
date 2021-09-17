@@ -36,10 +36,8 @@ jobs:
       - name: Lint
         run: yarn lint
 
-      - name: Build
+      - name: Run dev server
         env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
-
           # These are NOT secrets. It's public stuff.
           PREACT_APP_FIREBASE_APIKEY: AIzaSyBlMzrsBR_KWXDdgntBgnCThjRqr-0I8js
           PREACT_APP_FIREBASE_AUTHDOMAIN: groce-dev.firebaseapp.com
@@ -48,23 +46,12 @@ jobs:
           PREACT_APP_FIREBASE_STORAGEBUCKET: groce-dev.appspot.com
           PREACT_APP_FIREBASE_MESSAGINGSENDERID: 170241343352
           PREACT_APP_FIREBASE_APPID: 1:170241343352:web:5282dd555337af2a62d28d
-        run: ./bin/build
-
-      # - name: Run tests
-      #   env:
-      #     PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
-      #   run: |
-      #     # Remember, these tests depend on the build!
-      #     # It's for the headless tests's server.
-      #     yarn test
-
-      - name: Run dev server
         run: yarn dev > /tmp/stdout.log 2> /tmp/stderr.log &
 
       - name: Wait for dev server
         run: |
           # Just a slight delay to wait until the dev server is ready.
-          sleep 10
+          sleep 5
           curl --retry-connrefused --retry 5 http://localhost:8080 > /dev/null
 
       - name: Debug server's stdout and stderr if tests failed
