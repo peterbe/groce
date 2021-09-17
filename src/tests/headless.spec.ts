@@ -49,8 +49,26 @@ test("submit feedback", async ({ page }) => {
   await page.goto(testURL("/feedback"));
   await page.waitForSelector(`text=You're not actually signed in.`);
   await page.click("text=Sign in properly");
+  await expect(page).toHaveTitle("Sign in");
   expect(page.url()).toBe(testURL("/signin"));
-  await page.click("text=Sign in with Google");
+
+  await page.click(`button:has-text("Sign in with Google")`);
+  await page.waitForSelector(`text=Add new account`);
+  await page.waitForLoadState("networkidle");
+
+  await page.click(`text="Add new account"`);
+  await page.waitForSelector(`text=Auto-generate user information`);
+  await page.click(`text="Auto-generate user information"`);
+  await page.waitForLoadState("networkidle");
+  await page.click(`text="Sign in with"`);
+
+  await page.goto(testURL("/feedback"));
+  await page.waitForSelector(`text=Submit feedback`);
+  await page.fill("#id_subject", "Hey there!");
+  await page.fill("#id_text", "This is the text");
+  await page.click(`text=Submit feedback`);
+
+  await page.waitForSelector(`text=Feedback submitted`);
 
   // await page.pause();
 });
