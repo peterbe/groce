@@ -36,10 +36,9 @@ test("basics as guest", async ({ page }) => {
   //   path: "test-screenshots/empty-list-waited.png",
   //   fullPage: true,
   // });
-
-  await page.fill('input[aria-label="New shopping list item"]', "Carrots");
-  await page.keyboard.press("Enter");
-  await expect(page.locator("text=Carrots 🥕").first()).toBeVisible();
+  // await page.fill('input[aria-label="New shopping list item"]', "Carrots");
+  // await page.keyboard.press("Enter");
+  // await expect(page.locator("text=Carrots 🥕").first()).toBeVisible();
 });
 
 test("submit feedback", async ({ page }) => {
