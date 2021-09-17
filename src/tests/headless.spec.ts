@@ -22,9 +22,10 @@ test("other pages anonymous", async ({ page }) => {
 test("basics as guest", async ({ page }) => {
   await page.goto(testURL("/"));
   await page.click("text=Get started without signing in");
-  await expect(
-    page.locator("text=temporarily signed in").first()
-  ).toBeVisible();
+  // await expect(
+  //   page.locator("text=temporarily signed in").first()
+  // ).toBeVisible();
+  await page.waitForSelector(`text=temporarily signed in`);
   await page.click('a:has-text("Groceries")');
 
   await expect(
