@@ -25,6 +25,10 @@ test("basics as guest", async ({ page }) => {
   await page.waitForSelector(`text=temporarily signed in`);
   await page.click('a:has-text("Groceries")');
 
+  await page.screenshot({
+    path: "test-screenshots/empty-list.png",
+    fullPage: true,
+  });
   await page.waitForSelector(`text=List is empty at the moment.`);
 
   await page.fill('input[aria-label="New shopping list item"]', "Carrots");

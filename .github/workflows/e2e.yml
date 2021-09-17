@@ -89,3 +89,10 @@ jobs:
 
       - name: Run end-to-end tests
         run: yarn e2e
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: Test Screenshots
+          path: test-screenshots/
+          if-no-files-found: ignore
