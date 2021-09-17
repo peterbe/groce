@@ -67,45 +67,16 @@ jobs:
           PREACT_APP_FIREBASE_STORAGEBUCKET: groce-dev.appspot.com
           PREACT_APP_FIREBASE_MESSAGINGSENDERID: 170241343352
           PREACT_APP_FIREBASE_APPID: 1:170241343352:web:5282dd555337af2a62d28d
-          # PREACT_APP_FIREBASE_MEASUREMENTID: G-97FY43FWT4
+
+          PREACT_APP_USE_EMULATOR: true
         run: |
           ./bin/build
 
       - name: Serve
-        run: |
-          yarn serve > /tmp/stdout.log 2> /tmp/stderr.log &
+        run: yarn serve > /tmp/stdout.log 2> /tmp/stderr.log &
 
       - name: Wait for server
-        run: |
-          curl --fail --retry-connrefused --retry 4 http://localhost:8080 > /dev/null
-
-      #     # These are NOT secrets. It's public stuff.
-      #     export PREACT_APP_FIREBASE_APIKEY=AIzaSyBfbOjXiFeMOBljhjZUxGSXHR5Ry0ienOs
-      #     export PREACT_APP_FIREBASE_AUTHDOMAIN=thatsgroce.firebaseapp.com
-      #     export PREACT_APP_FIREBASE_DATABASEURL=https://thatsgroce.firebaseio.com
-      #     export PREACT_APP_FIREBASE_PROJECTID=thatsgroce
-      #     export PREACT_APP_FIREBASE_STORAGEBUCKET=thatsgroce.appspot.com
-      #     export PREACT_APP_FIREBASE_MESSAGINGSENDERID=190607180135
-      #     export PREACT_APP_FIREBASE_APPID=1:190607180135:web:011ff0f368bd93b4cbefc2
-      #     export PREACT_APP_FIREBASE_MEASUREMENTID=G-97FY43FWT4
-
-      #     ./bin/build
-
-      # - name: Run tests
-      #   run: |
-      #     # Remember, these tests depend on the build!
-      #     # It's for the headless tests's server.
-      #     yarn test
-
-      # - name: Run dev server
-      #   run: |
-      #     yarn dev > /tmp/stdout.log 2> /tmp/stderr.log &
-
-      # - name: Wait for dev server
-      #   run: |
-      #     # Just a slight delay to wait until the dev server is ready.
-      #     sleep 15
-      #     curl --retry-connrefused --retry 10 http://localhost:8080 > /dev/null
+        run: curl --fail --retry-connrefused --retry 4 http://localhost:8080 > /dev/null
 
       - name: Debug server's stdout and stderr if tests failed
         if: failure()
@@ -115,3 +86,6 @@ jobs:
           echo ""
           echo "STDERR.................................................."
           cat /tmp/stderr.log
+
+      - name: Run end-to-end tests
+        run: yarn e2e

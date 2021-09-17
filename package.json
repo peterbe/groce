@@ -10,7 +10,7 @@
     "dev": "PREACT_APP_GIT_VERSION_INFO=$(git log --pretty=format:'%H|%cI' -n 1) preact watch --refresh",
     "emulator": "firebase emulators:start --only 'auth,firestore,functions,storage'",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "test": "jest ./tests"
+    "e2e": "playwright test"
   },
   "husky": {
     "hooks": {
@@ -45,26 +45,21 @@
     "sortablejs": "1.14.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.14.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@types/cheerio": "0.22.30",
-    "@types/enzyme": "^3.10.9",
-    "@types/jest": "^27.0.1",
     "@types/webpack-env": "^1.16.2",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "cheerio": "1.0.0-rc.10",
     "css-loader": "^5.2.6",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-preact-pure": "^3.1.0",
     "eslint": "^7.32.0",
     "eslint-config-preact": "^1.1.1",
+    "eslint-plugin-playwright": "0.5.0",
     "firebase-tools": "9.18.0",
     "got": "11.8.2",
     "http-server": "0.12.3",
     "husky": "^7.0.2",
-    "jest": "^27.1.0",
-    "jest-preset-preact": "^4.0.5",
-    "jest-puppeteer": "5.0.4",
     "lint-staged": "^11.0.0",
     "minimalcss": "0.11.2",
     "preact-cli": "^3.2.2",
@@ -80,8 +75,13 @@
     "parser": "@typescript-eslint/parser",
     "extends": [
       "preact",
+      "plugin:playwright/playwright-test",
       "plugin:@typescript-eslint/recommended"
     ],
+    "rules": {
+      "# eslint-config-preact drags in 'plugin:jest/recommended' so disabling": 0,
+      "jest/no-test-callback": 0
+    },
     "ignorePatterns": [
       "build/"
     ]

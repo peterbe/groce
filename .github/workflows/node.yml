@@ -50,17 +50,16 @@ jobs:
           PREACT_APP_FIREBASE_APPID: 1:170241343352:web:5282dd555337af2a62d28d
         run: ./bin/build
 
-      - name: Run tests
-        env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
-        run: |
-          # Remember, these tests depend on the build!
-          # It's for the headless tests's server.
-          yarn test
+      # - name: Run tests
+      #   env:
+      #     PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+      #   run: |
+      #     # Remember, these tests depend on the build!
+      #     # It's for the headless tests's server.
+      #     yarn test
 
       - name: Run dev server
-        run: |
-          yarn dev > /tmp/stdout.log 2> /tmp/stderr.log &
+        run: yarn dev > /tmp/stdout.log 2> /tmp/stderr.log &
 
       - name: Wait for dev server
         run: |
