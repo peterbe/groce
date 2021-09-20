@@ -349,7 +349,7 @@ export function ListItem({
       setChecked(true);
       setTimeout(() => {
         toggleDone(item);
-      }, 400);
+      }, 300);
     }
   }
 
@@ -374,10 +374,16 @@ export function ListItem({
             if (!item.done && !disableFireworks && event.target) {
               party.sparkles(event.target as HTMLElement, {
                 // Defaults: Click "Configuration" on
-                // https://party.js.org/docs/templates#sparkles
+                // https://party.js.org/docs/ref/templates
                 // size: party.variation.range(0.5, 1.5),
-                // speed: party.variation.range(200, 400),
+                // Default is 100,200
+                speed: party.variation.range(150, 250),
                 // count: party.variation.range(5, 15)
+                // Size of individual stars
+                // size: party.variation.range(0.5, 1.5),
+
+                // I wish I could control the range/radius too
+                // https://github.com/yiliansource/party-js/issues/72
               });
             }
             toggleDoneWrapper(item);
