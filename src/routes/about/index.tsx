@@ -77,12 +77,11 @@ const About: FunctionalComponent = () => {
         </figcaption>
       </figure>
 
-      <h4 id="photo-to-list">
-        Photos of your cookbook ingredients
-      </h4>
-      <p>Not only can it be useful to have a photo gallery of cookbook meals,
-        it can analyze the photo for <i>food words</i> and make suggestions
-        to add items to your shopping list.
+      <h4 id="photo-to-list">Photos of your cookbook ingredients</h4>
+      <p>
+        Not only can it be useful to have a photo gallery of cookbook meals, it
+        can analyze the photo for <i>food words</i> and make suggestions to add
+        items to your shopping list.
       </p>
       <figure class="figure">
         <video
@@ -93,13 +92,16 @@ const About: FunctionalComponent = () => {
           style={{ width: "90%" }}
           class="shadow"
         >
-          <source src="/lazy-assets/photos-of-ingredients-720.mp4" type="video/mp4" />
+          <source
+            src="/lazy-assets/photos-of-ingredients-720.mp4"
+            type="video/mp4"
+          />
         </video>
         <figcaption class="figure-caption">
-          Demo of taking a photo of your cookbook ingredients to add to your shopping list.
+          Demo of taking a photo of your cookbook ingredients to add to your
+          shopping list.
         </figcaption>
       </figure>
-
 
       <h4>
         Everything is <b>real-time</b>
