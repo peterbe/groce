@@ -17,7 +17,7 @@ export const scheduledCleanupThumbnails = functions.pubsub
 
       const now = new Date().getTime();
       const range = [...Array(5).keys()];
-      range.forEach(async i => {
+      range.forEach(async (i) => {
         const ms = (OLD_DAYS - i) * 24 * 60 * 60 * 1000;
         const date = new Date(now - ms);
         const yyyy = date.getFullYear();
@@ -41,10 +41,10 @@ async function deleteByPrefix(prefix: string) {
   let countDeleted = 0;
   const bucket = admin.storage().bucket();
   const [files] = await bucket.getFiles({
-    prefix
+    prefix,
   });
   let totalSize = 0;
-  files.forEach(async file => {
+  files.forEach(async (file) => {
     count++;
     const { name, metadata } = file;
     // https://github.com/googleapis/nodejs-storage/blob/master/samples/getMetadata.js

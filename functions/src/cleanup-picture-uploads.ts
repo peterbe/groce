@@ -22,7 +22,7 @@ export const scheduledCleanupPictureUploads = functions.pubsub
         .where("deleted", "!=", null)
         .get();
       let i = 0;
-      picturesSnapshot.forEach(async doc => {
+      picturesSnapshot.forEach(async (doc) => {
         const id = doc.id;
         if (!id) {
           throw new Error("Doc does not have ID");

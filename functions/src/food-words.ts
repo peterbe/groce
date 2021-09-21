@@ -14,14 +14,14 @@ type LocaleFoodWordMap = Map<string, FoodWordMap>;
 // CURRENTLY COMMENTED OUT!
 export const onFoodWordUpdateMaps = functions.firestore
   .document("foodwords/{foodWordID}")
-  .onWrite(async change => {
+  .onWrite(async (change) => {
     const newValue = change.after.data();
     const previousValue = change.before.data();
     const locale = previousValue
       ? previousValue.locale
       : newValue
-        ? newValue.locale
-        : "en-US";
+      ? newValue.locale
+      : "en-US";
 
     if (previousValue && newValue) {
       logger.info(`Changed value: ${newValue.word} (${newValue.locale})`);
@@ -60,18 +60,15 @@ export const onFoodWordUpdateMaps = functions.firestore
         .collection("normalizedfoodwords")
         .doc(locale)
         .set({
-          words: wordsObj
+          words: wordsObj,
         });
     }
   });
 
 async function getAllFoodWords(): Promise<LocaleFoodWordMap> {
-  const snapshot = await admin
-    .firestore()
-    .collection("foodwords")
-    .get();
+  const snapshot = await admin.firestore().collection("foodwords").get();
   const allFoodWords: Map<string, FoodWordMap> = new Map();
-  snapshot.forEach(snapshot => {
+  snapshot.forEach((snapshot) => {
     const { id } = snapshot;
     const { word, locale } = snapshot.data() as FoodWord;
     if (!allFoodWords.has(locale)) {

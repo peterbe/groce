@@ -21,7 +21,7 @@ export const onShoppinglistItemWrite = functions.firestore
       .collection("shoppinglists")
       .doc(context.params.listID)
       .get()
-      .then(doc => {
+      .then((doc) => {
         if (!doc.exists) {
           return Promise.resolve("Shopping list does not exist :(");
         }
@@ -40,9 +40,9 @@ export const onShoppinglistItemWrite = functions.firestore
           .collection("items")
           .where("removed", "==", false)
           .get()
-          .then(snapshot => {
+          .then((snapshot) => {
             const items: BriefItem[] = [];
-            snapshot.forEach(doc => {
+            snapshot.forEach((doc) => {
               // doc.data() is never undefined for query doc snapshots
               // console.log("ITEM...", doc.id, " => ", doc.data());
               const data = doc.data();
@@ -51,7 +51,7 @@ export const onShoppinglistItemWrite = functions.firestore
                 description: data.description,
                 added: data.added[0].toDate(),
                 quantity: data.quantity || 0,
-                done: data.done
+                done: data.done,
               });
             });
             items.sort((a, b) => {
@@ -66,12 +66,12 @@ export const onShoppinglistItemWrite = functions.firestore
 
             const recentItems = items
               .slice(0, CUTOFF_RECENT_ITEMS)
-              .map(item => {
+              .map((item) => {
                 return {
                   text: item.text,
                   description: item.description,
                   quantity: item.quantity,
-                  done: item.done
+                  done: item.done,
                 };
               });
 
@@ -92,24 +92,24 @@ export const onShoppinglistItemWrite = functions.firestore
               .update({
                 recent_items: recentItems,
                 active_items_count: items.length,
-                modified: admin.firestore.Timestamp.fromDate(new Date())
+                modified: admin.firestore.Timestamp.fromDate(new Date()),
               })
               .then(() => {
                 return Promise.resolve(
                   `Wrote recent_items: ${JSON.stringify(recentItems)}`
                 );
               })
-              .catch(error => {
+              .catch((error) => {
                 console.error("Error trying to write recent_items", error);
                 return Promise.reject(error);
               });
           })
-          .catch(error => {
+          .catch((error) => {
             console.error("Error getting items snapshot", error);
             return Promise.reject(error);
           });
       })
-      .catch(error => {
+      .catch((error) => {
         console.log("Error getting shopping list:", error);
         return Promise.reject(error);
       });
@@ -147,7 +147,7 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
       getters.push(admin.auth().getUser(uid));
     }
     const users = await Promise.all(
-      owners.map(uid => admin.auth().getUser(uid))
+      owners.map((uid) => admin.auth().getUser(uid))
     );
     for (const user of users) {
       const owner: OwnerMetadata = {};
@@ -173,7 +173,7 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
         .collection("shoppinglists")
         .doc(context.params.listID)
         .update({
-          ownersMetadata
+          ownersMetadata,
         });
     }
   });

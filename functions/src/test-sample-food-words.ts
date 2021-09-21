@@ -3450,5 +3450,5 @@ export const FOOD_WORDS = [
   "Yuzu Citrus",
   "Zante Currants",
   "Zanzibar",
-  "Zucchini"
+  "Zucchini",
 ];

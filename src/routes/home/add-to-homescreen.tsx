@@ -17,9 +17,8 @@ export const AddToHomeScreen: FunctionalComponent = () => {
     const isIos = /iphone|ipad|ipod/.test(userAgent);
 
     // Detects if device is in standalone mode
-    const isInStandaloneMode = () => window.matchMedia(
-      "(display-mode: standalone)"
-    ).matches;
+    const isInStandaloneMode = () =>
+      window.matchMedia("(display-mode: standalone)").matches;
     // const isInStandaloneMode =
     //   "standalone" in window.navigator && window.navigator.standalone;
 

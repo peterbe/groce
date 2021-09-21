@@ -7,3 +7,5 @@ size-plugin.json
 .pytest_cache/
 build/
 functions/lib/
+favicon_package_v0.16
+dummy.*

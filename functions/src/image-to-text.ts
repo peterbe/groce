@@ -27,98 +27,92 @@ export const onFileUploadToText = functions
     // According to https://console.cloud.google.com/functions/list?project=thatsgroce
     // the default is 256MB.
     // Going to increase it a bit since it's moderately compute'y.
-    memory: "512MB"
+    memory: "512MB",
   })
   .storage.object()
   .onFinalize(
-    wrappedLogError(
-      async (object): Promise<void> => {
-        const { contentType, name } = object;
+    wrappedLogError(async (object): Promise<void> => {
+      const { contentType, name } = object;
 
-        if (!name) {
-          logger.warn(`object without a name ${object}`);
-          return;
-        }
-        if (!name.startsWith("list-pictures")) {
-          logger.debug(
-            `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`
-          );
-          return;
-        }
-        // console.log(`KEYS: ${JSON.stringify([...Object.keys(object)])}`);
-        const fileName = path.basename(name);
-        const listID = fileName.split("-")[0];
-        if (!listID) {
-          logger.warn(
-            `First part of the name (${name}) doesn't appear to be a list ID`
-          );
-          return;
-        }
+      if (!name) {
+        logger.warn(`object without a name ${object}`);
+        return;
+      }
+      if (!name.startsWith("list-pictures")) {
+        logger.debug(
+          `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`
+        );
+        return;
+      }
+      // console.log(`KEYS: ${JSON.stringify([...Object.keys(object)])}`);
+      const fileName = path.basename(name);
+      const listID = fileName.split("-")[0];
+      if (!listID) {
+        logger.warn(
+          `First part of the name (${name}) doesn't appear to be a list ID`
+        );
+        return;
+      }
 
-        if (!["image/jpeg", "image/png"].includes(contentType || "")) {
-          // Technically many more formats are supported but we can't make
-          // thumbnails out of them. Perhaps that's a mistake.
-          // https://cloud.google.com/vision/docs/supported-files#file_formats
-          logger.warn(
-            `${contentType} content type is not supported for image-to-text`
-          );
-          return;
-        }
+      if (!["image/jpeg", "image/png"].includes(contentType || "")) {
+        // Technically many more formats are supported but we can't make
+        // thumbnails out of them. Perhaps that's a mistake.
+        // https://cloud.google.com/vision/docs/supported-files#file_formats
+        logger.warn(
+          `${contentType} content type is not supported for image-to-text`
+        );
+        return;
+      }
 
-        const doc = await admin
-          .firestore()
-          .collection("shoppinglists")
-          .doc(listID)
-          .get();
+      const doc = await admin
+        .firestore()
+        .collection("shoppinglists")
+        .doc(listID)
+        .get();
 
-        if (!doc.exists) {
-          logger.error(`Shopping list (${listID}) does not exist`);
-          return;
-        }
+      if (!doc.exists) {
+        logger.error(`Shopping list (${listID}) does not exist`);
+        return;
+      }
 
-        const list = doc.data();
-        const DEFAULT_LOCALE = "en-US";
-        const locale = (list && list.locale) || DEFAULT_LOCALE;
+      const list = doc.data();
+      const DEFAULT_LOCALE = "en-US";
+      const locale = (list && list.locale) || DEFAULT_LOCALE;
 
-        const label = "Total time for allFoodWords, text, listItemTexts";
-        console.time(label);
-        const [
-          allFoodWords,
-          text,
-          listItemTexts,
-          listWordOptions
-        ] = await Promise.all([
+      const label = "Total time for allFoodWords, text, listItemTexts";
+      console.time(label);
+      const [allFoodWords, text, listItemTexts, listWordOptions] =
+        await Promise.all([
           getAllFoodWords(locale),
           extractText(object.bucket, name),
           getAllListItemTexts(listID),
-          getListWordOptions(listID)
+          getListWordOptions(listID),
         ]);
-        console.timeEnd(label);
+      console.timeEnd(label);
 
-        const foodWords = await extractFoodWords(
+      const foodWords = await extractFoodWords(
+        text,
+        [...allFoodWords.keys(), ...listItemTexts],
+        listWordOptions
+      );
+
+      await admin
+        .firestore()
+        .collection(`shoppinglists/${listID}/texts`)
+        .add({
+          filePath: name,
           text,
-          [...allFoodWords.keys(), ...listItemTexts],
-          listWordOptions
-        );
+          foodWords,
+          created: admin.firestore.Timestamp.fromDate(new Date()),
+        });
 
-        await admin
-          .firestore()
-          .collection(`shoppinglists/${listID}/texts`)
-          .add({
-            filePath: name,
-            text,
-            foodWords,
-            created: admin.firestore.Timestamp.fromDate(new Date())
-          });
-
-        if (!process.env.FUNCTIONS_EMULATOR) {
-          await incrementFoodWordHitCounts(foodWords, allFoodWords);
-        }
-
-        // This forces the the global cache to always be up-to-date.
-        await getAllFoodWords(locale, true);
+      if (!process.env.FUNCTIONS_EMULATOR) {
+        await incrementFoodWordHitCounts(foodWords, allFoodWords);
       }
-    )
+
+      // This forces the the global cache to always be up-to-date.
+      await getAllFoodWords(locale, true);
+    })
   );
 
 async function incrementFoodWordHitCounts(
@@ -127,15 +121,12 @@ async function incrementFoodWordHitCounts(
 ): Promise<void> {
   const batch = admin.firestore().batch();
   let countUpdates = 0;
-  foodWords.forEach(word => {
+  foodWords.forEach((word) => {
     const id = allFoodWords.get(word.toLowerCase());
     if (id) {
-      const ref = admin
-        .firestore()
-        .collection("foodwords")
-        .doc(id);
+      const ref = admin.firestore().collection("foodwords").doc(id);
       batch.update(ref, {
-        hitCount: admin.firestore.FieldValue.increment(1)
+        hitCount: admin.firestore.FieldValue.increment(1),
       });
       countUpdates++;
     }
@@ -150,12 +141,14 @@ async function extractFoodWords(
   foodWordOptions: FoodWordOption[]
 ): Promise<string[]> {
   const options: Options = {
-    ignore: foodWordOptions.filter(o => o.ignore).map(o => o.word),
+    ignore: foodWordOptions.filter((o) => o.ignore).map((o) => o.word),
     aliases: new Map(
-      foodWordOptions.filter(o => !o.ignore && o.alias).map(o => {
-        return [o.word, o.alias!];
-      })
-    )
+      foodWordOptions
+        .filter((o) => !o.ignore && o.alias)
+        .map((o) => {
+          return [o.word, o.alias!];
+        })
+    ),
   };
   logger.debug("Foodword options:", options);
   const label = "Time to extract foodwords from text";
@@ -173,7 +166,7 @@ async function getAllListItemTexts(listID: string): Promise<string[]> {
     .firestore()
     .collection(`shoppinglists/${listID}/items`)
     .get();
-  const texts = snapshot.docs.map(snapshot => snapshot.data().text);
+  const texts = snapshot.docs.map((snapshot) => snapshot.data().text);
   console.timeEnd(label);
   logger.info(`Found ${texts.length} existing list item texts.`);
   return texts;
@@ -187,12 +180,12 @@ async function getListWordOptions(listID: string): Promise<FoodWordOption[]> {
     .collection(`shoppinglists/${listID}/wordoptions`)
     .get();
   const foodWordOptions: FoodWordOption[] = [];
-  snapshot.docs.forEach(doc => {
+  snapshot.docs.forEach((doc) => {
     const data = doc.data();
     foodWordOptions.push({
       word: data.word,
       ignore: data.ignore || false,
-      alias: data.alias || null
+      alias: data.alias || null,
     });
   });
   console.timeEnd(label);
@@ -236,7 +229,7 @@ async function extractText(bucketName: string, name: string): Promise<string> {
 }
 
 function mockExtractText(): Promise<string> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const prefix = `MOCK TEXT! ${new Date()}\n`;
     resolve(prefix + MOCK_TEXTS[Math.floor(Math.random() * MOCK_TEXTS.length)]);
   });
@@ -274,7 +267,7 @@ async function getAllFoodWords(
     .get();
   const allFoodWords: FoodWordMap = new Map();
   const localeLC = locale.toLowerCase();
-  foodWordsSnapshot.forEach(snapshot => {
+  foodWordsSnapshot.forEach((snapshot) => {
     const data = snapshot.data() as FoodWord;
     // NOTE that the query doesn't use a `.where("locale", "==", locale)`
     // because it's actually slower than extracting all and filtering
@@ -293,7 +286,7 @@ async function getAllFoodWords(
 }
 
 function mockAllFoodwords(): Promise<FoodWordMap> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const allFoodWords: FoodWordMap = new Map();
     FOOD_WORDS.forEach((word, i) => {
       allFoodWords.set(word.toLowerCase(), `fakeFoodWord-${i + 1}`);

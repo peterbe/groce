@@ -30,10 +30,11 @@ export const onFeedbackAdded = functions.firestore
 Subject: ${data.subject}
 Topic: ${data.topic}
 Text: ${data.text}
-User: ${data.user.displayName || "*no name*"} (${data.user.email ||
-          "*no email*"})
+User: ${data.user.displayName || "*no name*"} (${
+          data.user.email || "*no email*"
+        })
 
-Sent: ${new Date().toLocaleString()}`
+Sent: ${new Date().toLocaleString()}`,
       };
       if (!process.env.FUNCTIONS_EMULATOR) {
         const response = await client.sendEmail(params);
