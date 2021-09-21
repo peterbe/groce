@@ -61,7 +61,7 @@
     "got": "11.8.2",
     "http-server": "0.12.3",
     "husky": "^7.0.2",
-    "lint-staged": "^11.0.0",
+    "lint-staged": "^11.1.2",
     "minimalcss": "0.11.2",
     "preact-cli": "^3.2.2",
     "prettier": "^2.4.1",
