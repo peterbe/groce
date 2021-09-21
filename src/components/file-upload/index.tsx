@@ -80,7 +80,7 @@ export function FileUpload({
   }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const itemID = item ? item.id : null
+  const itemID = item ? item.id : null;
 
   useEffect(() => {
     if (file && db && storage) {

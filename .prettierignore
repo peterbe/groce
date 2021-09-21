@@ -1,4 +1,11 @@
 package.json
-package-lock.json
 yarn.lock
-#build
+.builds
+src/.babelrc
+src/google*.html
+size-plugin.json
+.pytest_cache/
+build/
+functions/lib/
+favicon_package_v0.16
+dummy.*

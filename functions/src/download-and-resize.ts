@@ -41,10 +41,7 @@ export const downloadAndResizeAndStore = functions
       return;
     }
     const fileExtension = path.extname(imagePath);
-    const extension = fileExtension
-      .split(".")
-      .slice(-1)[0]
-      .toLowerCase();
+    const extension = fileExtension.split(".").slice(-1)[0].toLowerCase();
     if (!["jpg", "png", "jpeg"].includes(extension)) {
       res.status(400).send(`invalid extension (${extension})`);
       return;
@@ -70,10 +67,7 @@ export const downloadAndResizeAndStore = functions
     const fileName = path.basename(imagePath);
     const fileNameWithoutExtension = path.basename(fileName, fileExtension);
     const modifiedFileName = `${fileNameWithoutExtension}_${width}${fileExtension}`;
-    const pathname = (imagePath as string)
-      .split("/")
-      .slice(1, -1)
-      .join("/");
+    const pathname = (imagePath as string).split("/").slice(1, -1).join("/");
     const destinationPath = `thumbnails/${pathname}/${modifiedFileName}`;
     console.log(`From ${imagePath} to ${destinationPath}`);
 
@@ -145,14 +139,14 @@ export const downloadAndResizeAndStore = functions
         contentType,
         metadata: {
           imagePath,
-          width
-        }
+          width,
+        },
       };
       label = `Upload?${destinationPath}`;
       console.time(label);
       await bucket.upload(modifiedFile, {
         destination: destinationPath,
-        metadata
+        metadata,
       });
       console.timeEnd(label);
       console.log(`Uploaded ${modifiedFile} to ${destinationPath}`);
@@ -194,7 +188,7 @@ function resize(file: string, width: number) {
     .rotate()
     .resize(width, undefined, {
       fit: "inside",
-      withoutEnlargement: true
+      withoutEnlargement: true,
     })
     .toBuffer();
 }

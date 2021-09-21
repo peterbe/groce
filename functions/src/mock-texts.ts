@@ -183,5 +183,5 @@ chilies, seeded and sliced, to garnish
 E
 2
 3
-cooke`
+cooke`,
 ];

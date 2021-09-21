@@ -8,7 +8,7 @@ const rollbar = rollbarConfig
   ? new Rollbar({
       accessToken: rollbarConfig.accesstoken,
       captureUncaught: true,
-      captureUnhandledRejections: true
+      captureUnhandledRejections: true,
     })
   : null;
 
@@ -32,7 +32,7 @@ export function logError(error: unknown, req?: functions.https.Request) {
 export function wrappedLogError<T>(
   fn: (...args: any[]) => Promise<T>
 ): (...args: any[]) => Promise<T> {
-  return async function(...args: any[]) {
+  return async function (...args: any[]) {
     try {
       return await fn(...args);
     } catch (error) {

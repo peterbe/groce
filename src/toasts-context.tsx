@@ -25,7 +25,9 @@ function getNextID() {
   return _nextID++;
 }
 
-export function ToastsProvider(props: { children: h.JSX.Element[] | h.JSX.Element }) {
+export function ToastsProvider(props: {
+  children: h.JSX.Element[] | h.JSX.Element;
+}) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   function addToast(header: string | Partial<NewToast>) {

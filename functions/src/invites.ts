@@ -18,8 +18,8 @@ export const onInviteAccept = functions.firestore
         acceptedAfter
       )}`
     );
-    const removedUID = [...acceptedBefore].filter(x => !acceptedAfter.has(x));
-    const addedUID = [...acceptedAfter].filter(x => !acceptedBefore.has(x));
+    const removedUID = [...acceptedBefore].filter((x) => !acceptedAfter.has(x));
+    const addedUID = [...acceptedAfter].filter((x) => !acceptedBefore.has(x));
 
     console.log(
       `addedUID: ${JSON.stringify(addedUID)}  removedUID: ${JSON.stringify(
@@ -30,14 +30,14 @@ export const onInviteAccept = functions.firestore
 
     if (addedUID.length) {
       await Promise.all(
-        addedUID.map(uid => {
+        addedUID.map((uid) => {
           console.log(`ADDING ${uid} from list ${listID}`);
           return admin
             .firestore()
             .collection("shoppinglists")
             .doc(listID)
             .update({
-              owners: admin.firestore.FieldValue.arrayUnion(uid)
+              owners: admin.firestore.FieldValue.arrayUnion(uid),
             });
         })
       );
@@ -45,7 +45,7 @@ export const onInviteAccept = functions.firestore
 
     if (removedUID.length) {
       await Promise.all(
-        removedUID.map(uid => {
+        removedUID.map((uid) => {
           console.log(`REMOVING ${uid} from list ${listID}`);
 
           return admin
@@ -53,7 +53,7 @@ export const onInviteAccept = functions.firestore
             .collection("shoppinglists")
             .doc(listID)
             .update({
-              owners: admin.firestore.FieldValue.arrayRemove(uid)
+              owners: admin.firestore.FieldValue.arrayRemove(uid),
             });
         })
       );

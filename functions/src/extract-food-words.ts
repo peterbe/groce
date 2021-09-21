@@ -10,7 +10,7 @@ export function getFoodWords(
   listItems: string[],
   options: Options = {}
 ) {
-  const possibleFoodWords = [...new Set(listItems.map(t => t.toLowerCase()))];
+  const possibleFoodWords = [...new Set(listItems.map((t) => t.toLowerCase()))];
 
   possibleFoodWords.sort((a, b) => b.length - a.length);
 
@@ -32,7 +32,7 @@ export function getFoodWords(
   const textLC = text.toLowerCase();
 
   const ignoresLC = new Set(
-    (options.ignore || []).map(word => word.toLowerCase())
+    (options.ignore || []).map((word) => word.toLowerCase())
   );
   const aliases: Map<string, string> = new Map();
   if (options.aliases) {
@@ -69,12 +69,12 @@ export function getFoodWords(
 
     finds.push({
       word: alias || found,
-      index: match.index || 0
+      index: match.index || 0,
     });
     text = text.replace(rex, " ");
   }
   // Sort by the location they were found in the text.
   finds.sort((a, b) => a.index - b.index);
 
-  return finds.map(find => find.word);
+  return finds.map((find) => find.word);
 }
