@@ -113,6 +113,15 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
   .onWrite(
     wrappedLogError(async (change, context): Promise<void> => {
       const { listID } = context.params;
+
+      // If the change is that the shopping list was deleted, bail.
+      if (!change.after.data()) {
+        functions.logger.warn(
+          "Shoppinglist deleted. Not going to update owners metadata"
+        );
+        return;
+      }
+
       const doc = await admin
         .firestore()
         .collection("shoppinglists")
@@ -155,12 +164,49 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
       if (
         JSON.stringify(ownersMetadata) !== JSON.stringify(ownersMetadataBefore)
       ) {
-        console.log(
-          `SAVE new ownersMetadata := ${JSON.stringify(ownersMetadata)}`
-        );
         await admin.firestore().collection("shoppinglists").doc(listID).update({
           ownersMetadata,
         });
       }
     })
   );
+
+export const onShoppinglistDelete = functions.firestore
+  .document("shoppinglists/{listID}")
+  .onDelete(async (snapshot, context) => {
+    const { listID } = context.params;
+    const batch = admin.firestore().batch();
+    const subCollectionNames = ["items", "invitations", "pictures", "texts"];
+    const counts: Map<string, number> = new Map();
+    for (const subCollectionName of subCollectionNames) {
+      const itemsSnapshot = await admin
+        .firestore()
+        .collection("shoppinglists")
+        .doc(listID)
+        .collection(subCollectionName)
+        .get();
+      itemsSnapshot.forEach((snapshot) => {
+        batch.delete(
+          admin
+            .firestore()
+            .collection(`shoppinglists/${listID}/${subCollectionName}`)
+            .doc(snapshot.id)
+        );
+        counts.set(subCollectionName, (counts.get(subCollectionName) || 0) + 1);
+      });
+    }
+    await batch.commit();
+    if (counts.size > 0) {
+      let msg = "After deleting shopping list also deleted: ";
+      msg += [...counts.entries()]
+        .map(([name, count]) => {
+          return `${count} ${name}`;
+        })
+        .join(", ");
+      functions.logger.info(msg);
+    } else {
+      functions.logger.info(
+        `No subcollections to delete when deleting ${listID}`
+      );
+    }
+  });
