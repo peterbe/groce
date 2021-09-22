@@ -110,53 +110,57 @@ interface OwnerMetadata {
 }
 export const onShoppinglistWriteOwnersMetadata = functions.firestore
   .document("shoppinglists/{listID}")
-  .onWrite(async (change, context) => {
-    const { listID } = context.params;
-    const doc = await admin
-      .firestore()
-      .collection("shoppinglists")
-      .doc(listID)
-      .get();
+  .onWrite(
+    wrappedLogError(async (change, context): Promise<void> => {
+      const { listID } = context.params;
+      const doc = await admin
+        .firestore()
+        .collection("shoppinglists")
+        .doc(listID)
+        .get();
 
-    if (!doc.exists) {
-      return console.error(`No shopping list with ID ${listID}`);
-    }
-    const data = doc.data();
-    if (!data) {
-      return console.error(`Shopping list with ID ${listID} contains no data`);
-    }
-    const owners: string[] = data.owners;
-    const ownersMetadataBefore: Record<string, OwnerMetadata> =
-      data.ownersBefore || {};
-    const ownersMetadata: Record<string, OwnerMetadata> = {};
-    const getters = [];
-    for (const uid of owners) {
-      getters.push(admin.auth().getUser(uid));
-    }
-    const users = await Promise.all(
-      owners.map((uid) => admin.auth().getUser(uid))
-    );
-    for (const user of users) {
-      const owner: OwnerMetadata = {};
-      if (user.email) {
-        owner.email = user.email;
+      if (!doc.exists) {
+        return console.error(`No shopping list with ID ${listID}`);
       }
-      if (user.displayName) {
-        owner.displayName = user.displayName;
+      const data = doc.data();
+      if (!data) {
+        return console.error(
+          `Shopping list with ID ${listID} contains no data`
+        );
       }
-      if (user.photoURL) {
-        owner.photoURL = user.photoURL;
+      const owners: string[] = data.owners;
+      const ownersMetadataBefore: Record<string, OwnerMetadata> =
+        data.ownersBefore || {};
+      const ownersMetadata: Record<string, OwnerMetadata> = {};
+      const getters = [];
+      for (const uid of owners) {
+        getters.push(admin.auth().getUser(uid));
       }
-      ownersMetadata[user.uid] = owner;
-    }
-    if (
-      JSON.stringify(ownersMetadata) !== JSON.stringify(ownersMetadataBefore)
-    ) {
-      console.log(
-        `SAVE new ownersMetadata := ${JSON.stringify(ownersMetadata)}`
+      const users = await Promise.all(
+        owners.map((uid) => admin.auth().getUser(uid))
       );
-      await admin.firestore().collection("shoppinglists").doc(listID).update({
-        ownersMetadata,
-      });
-    }
-  });
+      for (const user of users) {
+        const owner: OwnerMetadata = {};
+        if (user.email) {
+          owner.email = user.email;
+        }
+        if (user.displayName) {
+          owner.displayName = user.displayName;
+        }
+        if (user.photoURL) {
+          owner.photoURL = user.photoURL;
+        }
+        ownersMetadata[user.uid] = owner;
+      }
+      if (
+        JSON.stringify(ownersMetadata) !== JSON.stringify(ownersMetadataBefore)
+      ) {
+        console.log(
+          `SAVE new ownersMetadata := ${JSON.stringify(ownersMetadata)}`
+        );
+        await admin.firestore().collection("shoppinglists").doc(listID).update({
+          ownersMetadata,
+        });
+      }
+    })
+  );
