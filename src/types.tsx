@@ -20,6 +20,9 @@ export interface FirestoreItem {
   added: Timestamp[];
   times_added: number;
   images?: string[];
+  imagesThumbnailData?: {
+    [image: string]: string;
+  };
 }
 
 export interface Item extends FirestoreItem {

@@ -117,6 +117,7 @@ function ShoppingList({
               added: data.added,
               times_added: data.times_added || 1,
               images: data.images || [],
+              imagesThumbnailData: data.imagesThumbnailData,
             };
             newItems.push(item);
           });
