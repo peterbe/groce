@@ -8,11 +8,8 @@ import {
   Firestore,
   Timestamp,
   updateDoc,
-  getDocs,
-  collection,
   deleteDoc,
   arrayRemove,
-  writeBatch,
 } from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
