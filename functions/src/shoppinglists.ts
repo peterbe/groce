@@ -110,7 +110,7 @@ interface OwnerMetadata {
 }
 export const onShoppinglistWriteOwnersMetadata = functions.firestore
   .document("shoppinglists/{listID}")
-  .onWrite(async (snapshot, context) => {
+  .onWrite(async (change, context) => {
     const doc = await admin
       .firestore()
       .collection("shoppinglists")
