@@ -111,20 +111,19 @@ interface OwnerMetadata {
 export const onShoppinglistWriteOwnersMetadata = functions.firestore
   .document("shoppinglists/{listID}")
   .onWrite(async (change, context) => {
+    const { listID } = context.params;
     const doc = await admin
       .firestore()
       .collection("shoppinglists")
-      .doc(context.params.listID)
+      .doc(listID)
       .get();
 
     if (!doc.exists) {
-      return console.error(`No shopping list with ID ${context.params.listID}`);
+      return console.error(`No shopping list with ID ${listID}`);
     }
     const data = doc.data();
     if (!data) {
-      return console.error(
-        `Shopping list with ID ${context.params.listID} contains no data`
-      );
+      return console.error(`Shopping list with ID ${listID} contains no data`);
     }
     const owners: string[] = data.owners;
     const ownersMetadataBefore: Record<string, OwnerMetadata> =
@@ -156,12 +155,8 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
       console.log(
         `SAVE new ownersMetadata := ${JSON.stringify(ownersMetadata)}`
       );
-      await admin
-        .firestore()
-        .collection("shoppinglists")
-        .doc(context.params.listID)
-        .update({
-          ownersMetadata,
-        });
+      await admin.firestore().collection("shoppinglists").doc(listID).update({
+        ownersMetadata,
+      });
     }
   });
