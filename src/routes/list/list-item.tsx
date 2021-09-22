@@ -251,6 +251,7 @@ export function ListItem({
               <DisplayFilesEditMode
                 item={item}
                 images={item.images}
+                imagesThumbnailData={item.imagesThumbnailData}
                 updateItemImage={updateItemImage}
                 openImageModal={openImageModal}
                 uploadedFiles={uploadedFiles}
@@ -415,6 +416,7 @@ export function ListItem({
             <span class="align-middle">
               <DisplayFilesViewMode
                 images={item.images}
+                imagesThumbnailData={item.imagesThumbnailData}
                 openImageModal={openImageModal}
                 uploadedFiles={uploadedFiles}
               />
@@ -453,10 +455,12 @@ function DisplayFilesViewMode({
   images,
   openImageModal,
   uploadedFiles,
+  imagesThumbnailData,
 }: {
   images: string[];
   openImageModal: (url: string) => void;
   uploadedFiles: Map<string, File>;
+  imagesThumbnailData: { [image: string]: string } | undefined;
 }) {
   return (
     <span>
@@ -466,6 +470,9 @@ function DisplayFilesViewMode({
             <DisplayImage
               filePath={filePath}
               file={uploadedFiles.get(filePath)}
+              placeholderImageData={
+                imagesThumbnailData ? imagesThumbnailData[filePath] : undefined
+              }
               openImageModal={openImageModal}
               // When looking at thumbnails in "edit mode" the width
               // of the thumbnails is 80. Re-use that here so if you
@@ -490,12 +497,14 @@ function DisplayFilesEditMode({
   updateItemImage,
   openImageModal,
   uploadedFiles,
+  imagesThumbnailData,
 }: {
   images: string[];
   item: Item;
   updateItemImage: (item: Item, spec: StorageSpec) => void;
   openImageModal: (url: string) => void;
   uploadedFiles: Map<string, File>;
+  imagesThumbnailData: { [image: string]: string } | undefined;
 }) {
   return (
     <ul class="list-group list-group-flush">
@@ -508,6 +517,9 @@ function DisplayFilesEditMode({
             <DisplayImage
               filePath={filePath}
               file={uploadedFiles.get(filePath)}
+              placeholderImageData={
+                imagesThumbnailData ? imagesThumbnailData[filePath] : undefined
+              }
               openImageModal={openImageModal}
               // Make sure this matches what we use in "view mode"
               // where it explicitly sets the `thumbnailWidth` to match

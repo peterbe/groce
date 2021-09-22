@@ -18,6 +18,7 @@ export function DisplayImage({
   className = "rounded",
   thumbnailWidth = null,
   useObjectFit = false,
+  placeholderImageData = undefined,
 }: {
   filePath: string;
   file: File | undefined;
@@ -27,6 +28,7 @@ export function DisplayImage({
   className?: string;
   thumbnailWidth?: number | null;
   useObjectFit?: boolean;
+  placeholderImageData?: string | undefined;
 }): h.JSX.Element {
   const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
   const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
@@ -86,6 +88,9 @@ export function DisplayImage({
     style.height = maxHeight;
     style["object-fit"] = "cover";
   }
+  // if (placeholderImageData) {
+  //   console.log(`placeholderImageData=${placeholderImageData.length}`);
+  // }
 
   return (
     <a
@@ -103,9 +108,14 @@ export function DisplayImage({
             ? thumbnailURL
             : file
             ? URL.createObjectURL(file)
+            : placeholderImageData
+            ? placeholderImageData
             : PLACEHOLDER_IMAGE
         }
       />
+      {/* {placeholderImageData && (
+        <img class={className} style={style} src={placeholderImageData} />
+      )} */}
     </a>
   );
 }

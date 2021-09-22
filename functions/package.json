@@ -3,7 +3,7 @@
   "scripts": {
     "lint": "tslint --project tsconfig.json && prettier -c src/*.ts",
     "build": "tsc",
-    "serve": "yarn run build && firebase emulators:start --only functions",
+    "serve": "yarn run build && firebase emulators:start --only 'auth,firestore,functions,storage'",
     "shell": "yarn run build && firebase functions:shell",
     "start": "yarn run shell",
     "deploy": "firebase deploy --only functions",
@@ -12,20 +12,21 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@google-cloud/vision": "2.3.8",
+    "@google-cloud/vision": "2.4.0",
     "firebase-admin": "^9.11.1",
-    "firebase-functions": "^3.15.5",
-    "postmark": "2.7.7",
+    "firebase-functions": "^3.15.7",
+    "postmark": "2.7.8",
     "prettier": "2.4.1",
+    "raw-body": "2.4.1",
     "rollbar": "2.24.0",
     "sharp": "0.29.1"
   },
   "devDependencies": {
-    "@types/sharp": "0.29.0",
+    "@types/sharp": "0.29.2",
     "firebase-functions-test": "^0.3.2",
-    "firebase-tools": "9.17.0",
+    "firebase-tools": "9.18.0",
     "tslint": "^6.1.3",
-    "typescript": "^4.4.2"
+    "typescript": "^4.4.3"
   },
   "resolutions": {
     "@types/express": "4.17.13",
