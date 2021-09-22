@@ -53,6 +53,7 @@ jobs:
 
       - name: Wait for emulator
         run: |
+          sleep 5
           echo "Show emulator home"
           curl --retry-connrefused --retry 5 http://localhost:4000
           echo "Show emulators"
