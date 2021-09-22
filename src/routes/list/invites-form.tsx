@@ -398,15 +398,13 @@ function SetInvitationEmail({
           Email set
           <button
             type="button"
-            class="close"
-            data-dismiss="alert"
+            class="btn-close"
+            data-bs-dismiss="alert"
             aria-label="Close"
             onClick={() => {
               setSubmitted(false);
             }}
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
+          />
         </div>
       )}
     </form>

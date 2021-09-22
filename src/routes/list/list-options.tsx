@@ -8,8 +8,11 @@ import {
   Firestore,
   Timestamp,
   updateDoc,
+  getDocs,
+  collection,
   deleteDoc,
   arrayRemove,
+  writeBatch,
 } from "firebase/firestore";
 
 import { Alert } from "../../components/alerts";
@@ -54,7 +57,7 @@ export function ListOptions({
       disableFireworks,
     };
     try {
-      await updateDoc(doc(db, `shoppinglists`, list.id), {
+      await updateDoc(doc(db, "shoppinglists", list.id), {
         name: name.trim(),
         notes: notes.trim(),
         config,
@@ -303,17 +306,6 @@ function DeleteListOption({ db, list }: { list: List; db: Firestore }) {
     }
     close();
     route("/shopping", true);
-    // const doc = db.collection("shoppinglists").doc(list.id);
-    //           doc
-    //             .delete()
-    //             .then(() => {
-    //               close();
-    //               route("/shopping", true);
-    //             })
-    //             .catch((error) => {
-    //               console.error("Unable to delete list:", error);
-    //               setDeleteError(error);
-    //             });
   }
 
   return (
@@ -339,18 +331,6 @@ function DeleteListOption({ db, list }: { list: List; db: Firestore }) {
             class="btn btn-danger"
             onClick={async () => {
               await deleteList();
-              // const doc = db.collection("shoppinglists").doc(list.id);
-
-              // doc
-              //   .delete()
-              //   .then(() => {
-              //     close();
-              //     route("/shopping", true);
-              //   })
-              //   .catch((error) => {
-              //     console.error("Unable to delete list:", error);
-              //     setDeleteError(error);
-              //   });
             }}
           >
             Yes, delete this list

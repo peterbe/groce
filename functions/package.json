@@ -3,7 +3,7 @@
   "scripts": {
     "lint": "tslint --project tsconfig.json && prettier -c src/*.ts",
     "build": "tsc",
-    "serve": "yarn run build && firebase emulators:start --only 'auth,firestore,functions,storage'",
+    "serve": "yarn run build && firebase emulators:start --only 'auth,firestore,functions,storage,pubsub'",
     "shell": "yarn run build && firebase functions:shell",
     "start": "yarn run shell",
     "deploy": "firebase deploy --only functions",
