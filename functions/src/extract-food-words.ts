@@ -1,14 +1,11 @@
 const escapeNeedle = (needle: string) =>
   needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export type Options = {
-  ignore?: string[];
-  aliases?: Map<string, string>;
-};
 export function getFoodWords(
   text: string,
   listItems: string[],
-  options: Options = {}
+  aliases: Map<string, string>,
+  ignoreWords: string[]
 ) {
   const possibleFoodWords = [...new Set(listItems.map((t) => t.toLowerCase()))];
 
@@ -31,14 +28,10 @@ export function getFoodWords(
 
   const textLC = text.toLowerCase();
 
-  const ignoresLC = new Set(
-    (options.ignore || []).map((word) => word.toLowerCase())
-  );
-  const aliases: Map<string, string> = new Map();
-  if (options.aliases) {
-    for (const [key, value] of options.aliases.entries()) {
-      aliases.set(key.toLowerCase(), value);
-    }
+  const ignoresLC = new Set(ignoreWords.map((word) => word.toLowerCase()));
+  const aliasesLC: Map<string, string> = new Map();
+  for (const [key, value] of aliases.entries()) {
+    aliasesLC.set(key.toLowerCase(), value);
   }
 
   for (const word of possibleFoodWords) {
@@ -51,7 +44,13 @@ export function getFoodWords(
     // Now, if 'garlic' doesn't appear at all anywhere in the text,
     // word boundaries or not, we don't need to bother to
     // do a regex search for `/\bgarlic\b/`.
-    if (textLC.indexOf(word) === -1) {
+    // Note, the 'index' is also important because you can't use the
+    // regex `match.index` because the `text` that the regex runs on
+    // is constantly changing because when words are found, they are
+    // removed from the text. So, us the original `indexOf` position
+    // as the memory of exact order.
+    const index = textLC.indexOf(word);
+    if (index === -1) {
       continue;
     }
 
@@ -65,11 +64,11 @@ export function getFoodWords(
       continue;
     }
     const found = match[0];
-    const alias = aliases.get(found.toLowerCase());
+    const alias = aliasesLC.get(found.toLowerCase());
 
     finds.push({
       word: alias || found,
-      index: match.index || 0,
+      index,
     });
     text = text.replace(rex, " ");
   }

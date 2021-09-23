@@ -14,10 +14,13 @@ import {
   writeBatch,
   deleteDoc,
 } from "firebase/firestore";
+import type { Unsubscribe } from "firebase/firestore";
 
 import style from "./style.css";
+import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";
 import { Loading } from "../../components/loading";
+import { FUNCTION_BASE_URL, USE_EMULATOR } from "../../function-utils";
 import {
   FirestoreFoodWord,
   FoodWord,
@@ -51,6 +54,8 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
 
   const [foodWords, setFoodWords] = useState<FoodWord[] | null>(null);
   const [foodWordsError, setFoodWordsError] = useState<Error | null>(null);
+  const [suggestedFoodWordsError, setSuggestedFoodWordsError] =
+    useState<Error | null>(null);
   const [locale] = useState("en-US");
   const [sortBy, setSortBy] = useState<"word" | "hitCount">("word");
   const [sortReverse, setSortReverse] = useState(false);
@@ -72,6 +77,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
             id: doc.id,
             locale: data.locale,
             word: data.word,
+            aliasTo: data.aliasTo,
             hitCount: data.hitCount,
           });
         });
@@ -83,25 +89,6 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
       }
     );
 
-    // db.collection("foodwords").onSnapshot(
-    //   (snapshot) => {
-    //     const newFoodWords: FoodWord[] = [];
-    //     snapshot.forEach((doc) => {
-    //       const data = doc.data() as FirestoreFoodWord;
-    //       newFoodWords.push({
-    //         id: doc.id,
-    //         locale: data.locale,
-    //         word: data.word,
-    //         hitCount: data.hitCount,
-    //       });
-    //     });
-    //     setFoodWords(sortFoodWords(newFoodWords, "word", false));
-    //   },
-    //   (error) => {
-    //     console.error("Error getting snapshot", error);
-    //     setFoodWordsError(error);
-    //   }
-    // );
     return () => {
       unsubscribe();
     };
@@ -110,80 +97,66 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
   const [showSuggestedFoodwords, setShowSuggestedFoodwords] = useState(false);
 
   useEffect(() => {
-    const collectionRef = collection(db, "suggestedfoodwords");
-    const unsubscribe = onSnapshot(
-      query(collectionRef),
-      (snapshot) => {
-        const newSuggestedFoodwords: SuggestedFoodword[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data() as FirestoreSuggestedFoodword;
-          newSuggestedFoodwords.push({
-            id: doc.id,
-            word: data.word,
-            locale: data.locale,
-            created: data.created,
-            creator_uid: data.creator_uid,
-            creator_email: data.creator_email,
+    let unsubscribe: Unsubscribe | null = null;
+    if (user && !user.isAnonymous) {
+      const collectionRef = collection(db, "suggestedfoodwords");
+      unsubscribe = onSnapshot(
+        query(collectionRef),
+        (snapshot) => {
+          const newSuggestedFoodwords: SuggestedFoodword[] = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data() as FirestoreSuggestedFoodword;
+            newSuggestedFoodwords.push({
+              id: doc.id,
+              word: data.word,
+              locale: data.locale,
+              created: data.created,
+              creator_uid: data.creator_uid,
+              creator_email: data.creator_email,
+            });
           });
-        });
-        newSuggestedFoodwords.sort(
-          (a, b) => b.created.seconds - a.created.seconds
-        );
-        setSuggestedFoodwords(newSuggestedFoodwords);
-        if (newSuggestedFoodwords.length === 0) {
-          setShowSuggestedFoodwords(false);
+          newSuggestedFoodwords.sort(
+            (a, b) => b.created.seconds - a.created.seconds
+          );
+          setSuggestedFoodwords(newSuggestedFoodwords);
+          if (newSuggestedFoodwords.length === 0) {
+            setShowSuggestedFoodwords(false);
+          }
+        },
+        (error) => {
+          console.error("Snapshot error:", error);
+          setSuggestedFoodWordsError(error);
         }
-      },
-      (error) => {
-        console.error("Snapshot error:", error);
-        // XXX deal better
-        // setListPictureTextsError(error);
-      }
-
-      // db.collection("suggestedfoodwords").onSnapshot(
-      //   (snapshot) => {
-      //     const newSuggestedFoodwords: SuggestedFoodword[] = [];
-      //     snapshot.forEach((doc) => {
-      //       const data = doc.data() as FirestoreSuggestedFoodword;
-      //       newSuggestedFoodwords.push({
-      //         id: doc.id,
-      //         word: data.word,
-      //         locale: data.locale,
-      //         created: data.created,
-      //         creator_uid: data.creator_uid,
-      //         creator_email: data.creator_email,
-      //       });
-      //     });
-      //     newSuggestedFoodwords.sort(
-      //       (a, b) => b.created.seconds - a.created.seconds
-      //     );
-      //     setSuggestedFoodwords(newSuggestedFoodwords);
-      //     if (newSuggestedFoodwords.length === 0) {
-      //       setShowSuggestedFoodwords(false);
-      //     }
-      //   },
-      //   (error) => {
-      //     console.error("Snapshot error:", error);
-      //     // XXX deal better
-      //     // setListPictureTextsError(error);
-      //   }
-    );
+      );
+    }
 
     return () => {
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
-  }, [db, locale]);
+  }, [db, locale, user]);
 
   const [filteredFoodWords, setFilteredFoodWords] = useState<FoodWord[]>([]);
   const [filterWord, setFilterWord] = useState("");
   useEffect(() => {
     if (foodWords) {
+      const filterWordLC = filterWord.toLowerCase().trim();
       setFilteredFoodWords(
         foodWords.filter((word) => {
-          if (filterWord.toLowerCase() === "nonascii") {
-            return !/^[ -~]+$/.test(word.word);
-          } else if (filterWord) {
-            return word.word.toLowerCase().includes(filterWord.toLowerCase());
+          if (filterWordLC === "aliasto") {
+            return Boolean(word.aliasTo);
+          } else if (filterWordLC === "nonascii") {
+            return (
+              word.word !==
+              word.word.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            );
+          } else if (filterWordLC) {
+            return (
+              word.word.toLowerCase().includes(filterWordLC) ||
+              (word.aliasTo &&
+                word.aliasTo.toLowerCase().includes(filterWordLC))
+            );
           }
           return true;
         })
@@ -221,23 +194,6 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
   useEffect(() => {
     if (foodWords && isAdmin) {
       deleteDuplicateFoodwords(db, foodWords);
-      // const dupes: string[] = [];
-      // const seen = new Set();
-
-      // for (const word of foodWords) {
-      //   if (seen.has(word.word)) {
-      //     dupes.push(word.id);
-      //   } else {
-      //     seen.add(word.word);
-      //   }
-      // }
-      // // const batch = db.batch();
-      // const batch = writeBatch(db);
-      // dupes.forEach((id) => {
-      //   const itemRef = doc(db, 'foodwords', id)
-      //   batch.delete(itemRef)
-      // });
-      // await batch.commit();
     }
   }, [db, foodWords, isAdmin]);
 
@@ -281,9 +237,22 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
   }
 
   function downloadToFile(fileName = "sample-food-words.ts") {
-    const words = foodWords?.map((foodWord) => foodWord.word);
-    let text = `// Generated ${new Date().toISOString()}\n`;
-    text += `export const FOOD_WORDS = ${JSON.stringify(words, null, 2)};\n`;
+    const words = foodWords?.map((foodWord) => {
+      if (foodWord.aliasTo) {
+        return { word: foodWord.word, aliasTo: foodWord.aliasTo };
+      }
+      return { word: foodWord.word };
+    });
+    let text = `// Generated ${new Date().toISOString()}\n\n`;
+    text += `type FoodWordInfo = {
+  word: string;
+  aliasTo?: string;
+};\n`;
+    text += `export const FOOD_WORDS: FoodWordInfo[] = ${JSON.stringify(
+      words,
+      null,
+      2
+    )};\n`;
 
     const a = document.createElement("a");
     a.style.cssText = "display: none";
@@ -296,13 +265,6 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
     window.URL.revokeObjectURL(url);
     a.parentElement?.removeChild(a);
   }
-
-  // async function deleteSuggestedFoodword(suggestedFoodword: SuggestedFoodword) {
-  //   if (!db) {
-  //     return;
-  //   }
-  //   await deleteDoc(doc(db, `suggestedfoodwords`, suggestedFoodword.id));
-  // }
 
   if (!foodWords) {
     return <Loading text="Loading..." />;
@@ -320,7 +282,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
           class="alert alert-danger alert-dismissible fade show"
           role="alert"
         >
-          Sorry. An error occurred trying to food words.
+          Sorry. An error occurred trying fetch food words.
           <br />
           <a
             href="/foodwords"
@@ -345,6 +307,38 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
           />
         </div>
       )}
+
+      {suggestedFoodWordsError && (
+        <div
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          Sorry. An error occurred trying to fetch suggested food words.
+          <br />
+          <a
+            href="/foodwords"
+            class="btn btn-warning"
+            onClick={(event) => {
+              event.preventDefault();
+              window.location.reload();
+            }}
+          >
+            Reload
+          </a>
+          <br />
+          <code>{suggestedFoodWordsError.toString()}</code>
+          <button
+            type="button"
+            class="btn-close btn-small"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+            onClick={() => {
+              setSuggestedFoodWordsError(null);
+            }}
+          />
+        </div>
+      )}
+
       {deletedWord && (
         <p>
           Deleted <b>{deletedWord.word}</b>
@@ -428,51 +422,63 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
         </table>
       )}
 
-      <input
-        type="search"
-        class="form-control"
-        placeholder="Search..."
-        value={filterWord}
-        onInput={(event) => {
-          if (event.currentTarget.value === "") {
-            setFilterWord("");
-          }
-        }}
-        onChange={(event) => {
-          setFilterWord(event.currentTarget.value);
-        }}
-      />
+      <div style={{ marginBottom: 10 }}>
+        <input
+          type="search"
+          aria-describedby="searchHelp"
+          class="form-control"
+          placeholder="Search..."
+          value={filterWord}
+          onInput={(event) => {
+            if (event.currentTarget.value === "") {
+              setFilterWord("");
+            }
+          }}
+          onChange={(event) => {
+            setFilterWord(event.currentTarget.value);
+          }}
+        />
+        <div id="searchHelp" class="form-text">
+          Possible magic search words:{" "}
+          <code
+            onClick={() => {
+              if (filterWord === "aliasto") {
+                setFilterWord("");
+              } else {
+                setFilterWord("aliasto");
+              }
+            }}
+          >
+            aliasto
+          </code>
+          ,{" "}
+          <code
+            onClick={() => {
+              if (filterWord === "nonascii") {
+                setFilterWord("");
+              } else {
+                setFilterWord("nonascii");
+              }
+            }}
+          >
+            nonascii
+          </code>
+        </div>
+      </div>
+
       <table class="table table-sm table-hover align-middle table-borderless">
         <thead>
           <tr>
             {isAdmin && <th scope="col">Delete</th>}
             <th scope="col">{getSortHeading("word", "Word")}</th>
-            {/* <th scope="col">Notes</th> */}
             <th scope="col">{getSortHeading("hitCount", "Hit count")}</th>
           </tr>
-          {/* <tr>
-            {isAdmin && <th scope="col" />}
-            <th scope="col">
-              <input
-                type="search"
-                class="form-control"
-                placeholder="Search..."
-                value={filterWord}
-                onInput={(event) => {
-                  if (event.currentTarget.value === "") {
-                    setFilterWord("");
-                  }
-                }}
-                onChange={(event) => {
-                  setFilterWord(event.currentTarget.value);
-                }}
-              />
-            </th>
-            <th scope="col" />
-          </tr> */}
         </thead>
         <tbody>
           {filteredFoodWords.map((foodWord) => {
+            const stringNormalized = foodWord.word
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "");
             return (
               <tr key={foodWord.id}>
                 {isAdmin && (
@@ -488,10 +494,29 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
                     </span>
                   </td>
                 )}
-                <td>{foodWord.word}</td>
-                {/* <td>
-                  {foodWord.notes ? <small>{foodWord.notes}</small> : null}
-                </td> */}
+                <td>
+                  {foodWord.word}
+                  {foodWord.aliasTo && (
+                    <span
+                      class="badge bg-secondary"
+                      style={{ marginLeft: 5, marginRight: 5 }}
+                    >
+                      alias to:
+                    </span>
+                  )}
+                  {foodWord.aliasTo && <i>{foodWord.aliasTo}</i>}
+                  {foodWord.word !== stringNormalized && (
+                    <span
+                      class="badge bg-secondary"
+                      style={{ marginLeft: 5, marginRight: 5 }}
+                    >
+                      implied alias of:
+                    </span>
+                  )}
+                  {foodWord.word !== stringNormalized && (
+                    <i>{stringNormalized}</i>
+                  )}
+                </td>
                 <td>{foodWord.hitCount}</td>
               </tr>
             );
@@ -521,6 +546,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
       {db && foodWords && isAdmin && (
         <MassAdd db={db} foodWords={foodWords} locale={locale} />
       )}
+      {db && foodWords && isAdmin && USE_EMULATOR && <SampleLoad />}
     </div>
   );
 }
@@ -547,6 +573,74 @@ export default function Outer({
   );
 }
 
+function SampleLoad() {
+  const [loading, setLoading] = useState(false);
+  const [totalWords, setTotalWords] = useState<null | number>(null);
+  const [totalCounter, setTotalCounter] = useState<null | number>(null);
+  const [samples, setSamples] = useState<null | number>(null);
+  const [loadingError, setLoadingError] = useState<Error | null>(null);
+  const [postingError, setPostingError] = useState<Error | null>(null);
+
+  const functionURL = `${FUNCTION_BASE_URL}/loadSampleFoodWords/`;
+
+  useEffect(() => {
+    fetch(functionURL).then(async (response) => {
+      if (response.ok) {
+        const data = await response.json();
+        setTotalWords(data.totalWords);
+        setSamples(data.samples);
+      } else {
+        setLoadingError(new Error(`${response.status} on ${functionURL}`));
+      }
+    });
+  }, []);
+
+  return (
+    <div style={{ marginTop: 20, marginBottom: 40 }}>
+      {loadingError && (
+        <Alert heading="Loading sample words error" message={loadingError} />
+      )}
+      {postingError && (
+        <Alert heading="Loading sample words error" message={postingError} />
+      )}
+      {totalWords && totalWords > 0 ? (
+        <p>{totalWords.toLocaleString()} sample words loaded</p>
+      ) : (
+        <button
+          class="btn btn-outline-primary"
+          disabled={Boolean(loading || totalCounter)}
+          onClick={async (event) => {
+            event.preventDefault();
+            setLoading(true);
+            try {
+              const r = await fetch(functionURL, { method: "POST" });
+              if (r.ok) {
+                const data = await r.json();
+                setTotalCounter(data.totalCounter);
+              } else {
+                setPostingError(new Error(`${r.status} on ${functionURL}`));
+              }
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          {totalCounter !== null && totalCounter > 0 ? (
+            <span>Loaded {totalCounter?.toLocaleString()}</span>
+          ) : loading ? (
+            <i>Loading...</i>
+          ) : (
+            <span>
+              Load from samples{" "}
+              {samples !== null && `(${samples.toLocaleString()})`}
+            </span>
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function MassAdd({
   db,
   locale,
@@ -567,7 +661,10 @@ function MassAdd({
         const existingWordsLC = new Set(
           foodWords.map((foodWord) => foodWord.word.toLowerCase())
         );
-        const newWords: string[] = [];
+        const newWords: {
+          word: string;
+          aliasTo: string;
+        }[] = [];
         for (let word of newText.split(/\n/g)) {
           word = word.trim();
           if (word.startsWith('"') && word.endsWith('",')) {
@@ -575,22 +672,27 @@ function MassAdd({
           } else if (word.startsWith('"') && word.endsWith('"')) {
             word = word.slice(1, -1);
           }
+          let aliasTo = "";
+          if (word.includes("=>")) {
+            aliasTo = word.split("=>")[1].trim();
+            word = word.split("=>")[0].trim();
+          }
           const wordLC = word.toLowerCase();
           if (!word || seen.has(wordLC) || existingWordsLC.has(wordLC)) {
             continue;
           }
           seen.add(wordLC);
-          newWords.push(word);
+          newWords.push({ word, aliasTo });
         }
         if (newWords.length) {
           setSaving(newWords.length);
           await Promise.all(
-            newWords.map((word) => {
+            newWords.map(({ word, aliasTo }) => {
               return addDoc(collection(db, "foodwords"), {
                 locale,
                 word,
                 hitCount: 0,
-                notes: "",
+                aliasTo,
               });
             })
           );
