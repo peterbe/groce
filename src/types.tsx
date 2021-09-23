@@ -158,8 +158,8 @@ export interface StorageSpec {
 export interface FirestoreFoodWord {
   locale: string;
   word: string;
+  aliasTo?: string;
   hitCount: number;
-  // notes: string;
 }
 export interface FoodWord extends FirestoreFoodWord {
   id: string;

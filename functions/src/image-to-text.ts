@@ -6,16 +6,21 @@ import * as functions from "firebase-functions";
 import { logger } from "firebase-functions";
 
 import { wrappedLogError } from "./rollbar-logger";
-import { getFoodWords, Options } from "./extract-food-words";
+import { getFoodWords } from "./extract-food-words";
 import { MOCK_TEXTS } from "./mock-texts";
 import { FOOD_WORDS } from "./sample-food-words";
 
 type FoodWord = {
   id: string;
   word: string;
+  aliasTo?: string;
   locale: string;
 };
-type FoodWordMap = Map<string, string>;
+type FoodWordInfo = {
+  id: string;
+  aliasTo: string;
+};
+type FoodWordMap = Map<string, FoodWordInfo>;
 type FoodWordOption = {
   word: string;
   ignore: boolean;
@@ -90,11 +95,41 @@ export const onFileUploadToText = functions
         ]);
       console.timeEnd(label);
 
-      const foodWords = await extractFoodWords(
-        text,
-        [...allFoodWords.keys(), ...listItemTexts],
-        listWordOptions
-      );
+      const aliases: Map<string, string> = new Map();
+      const searchWords: string[] = [];
+      for (const [word, info] of allFoodWords) {
+        searchWords.push(word);
+        if (info.aliasTo) {
+          aliases.set(word, info.aliasTo);
+        } else {
+          const wordNormalized = word
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+          // E.g. `Crème Fraîche` becomes `Creme Fraiche`
+          if (wordNormalized !== word) {
+            searchWords.push(wordNormalized);
+            aliases.set(wordNormalized, word);
+          }
+        }
+      }
+      // Now add all the list specific words
+      for (const word of listItemTexts) {
+        searchWords.push(word);
+      }
+      const ignoreWords: string[] = [];
+      for (const option of listWordOptions) {
+        if (option.alias) {
+          searchWords.push(option.word);
+          aliases.set(option.word, option.alias);
+        } else if (option.ignore) {
+          ignoreWords.push(option.word);
+        }
+      }
+
+      const extractLabel = "Time to extract foodwords from text";
+      console.time(extractLabel);
+      const foodWords = getFoodWords(text, searchWords, aliases, ignoreWords);
+      console.timeEnd(extractLabel);
 
       await admin
         .firestore()
@@ -122,8 +157,9 @@ async function incrementFoodWordHitCounts(
   const batch = admin.firestore().batch();
   let countUpdates = 0;
   foodWords.forEach((word) => {
-    const id = allFoodWords.get(word.toLowerCase());
-    if (id) {
+    const info = allFoodWords.get(word.toLowerCase());
+    if (info) {
+      const { id } = info;
       const ref = admin.firestore().collection("foodwords").doc(id);
       batch.update(ref, {
         hitCount: admin.firestore.FieldValue.increment(1),
@@ -135,29 +171,30 @@ async function incrementFoodWordHitCounts(
   logger.debug(`Updating hitCount on ${countUpdates} food words`);
 }
 
-async function extractFoodWords(
-  text: string,
-  searchWords: string[],
-  foodWordOptions: FoodWordOption[]
-): Promise<string[]> {
-  const options: Options = {
-    ignore: foodWordOptions.filter((o) => o.ignore).map((o) => o.word),
-    aliases: new Map(
-      foodWordOptions
-        .filter((o) => !o.ignore && o.alias)
-        .map((o) => {
-          return [o.word, o.alias!];
-        })
-    ),
-  };
-  logger.debug("Foodword options:", options);
-  const label = "Time to extract foodwords from text";
-  console.time(label);
-  const foodWords = getFoodWords(text, searchWords, options);
-  console.timeEnd(label);
-  logger.info(`Food words found: ${foodWords.join(", ")}`);
-  return foodWords;
-}
+// async function extractFoodWords(
+//   text: string,
+//   searchWords: string[],
+//   aliases: Map<string, string>,
+//   ignoreWords: string[]
+// ): Promise<string[]> {
+//   // const options: Options = {
+//   //   ignore: foodWordOptions.filter((o) => o.ignore).map((o) => o.word),
+//   //   aliases: new Map(
+//   //     foodWordOptions
+//   //       .filter((o) => !o.ignore && o.alias)
+//   //       .map((o) => {
+//   //         return [o.word, o.alias!];
+//   //       })
+//   //   ),
+//   // };
+//   logger.debug("Foodword options:", options);
+//   const label = "Time to extract foodwords from text";
+//   console.time(label);
+//   const foodWords = getFoodWords(text, searchWords, aliases, options);
+//   console.timeEnd(label);
+//   logger.info(`Food words found: ${foodWords.join(", ")}`);
+//   return foodWords;
+// }
 
 async function getAllListItemTexts(listID: string): Promise<string[]> {
   const label = "Time to extract all list item texts";
@@ -231,7 +268,23 @@ async function extractText(bucketName: string, name: string): Promise<string> {
 function mockExtractText(): Promise<string> {
   return new Promise((resolve) => {
     const prefix = `MOCK TEXT! ${new Date()}\n`;
-    resolve(prefix + MOCK_TEXTS[Math.floor(Math.random() * MOCK_TEXTS.length)]);
+    const randomText =
+      MOCK_TEXTS[Math.floor(Math.random() * MOCK_TEXTS.length)];
+    resolve(
+      prefix +
+        randomText +
+        `\n
+
+    Crème Fraîche	0
+Diced Jalapeño	0
+Jalapeño	0
+Jalapeño pepper	0
+Saké
+
+4 gloves garlic
+
+    `
+    );
   });
 }
 
@@ -276,7 +329,10 @@ async function getAllFoodWords(
     // en-GB ~= en-US or perhaps if the locale ==='fr', we might want to
     // also include the English words that are nouns such as "Oreos".
     if (data.locale.toLowerCase() === localeLC) {
-      allFoodWords.set(data.word.toLowerCase(), snapshot.id);
+      allFoodWords.set(data.word.toLowerCase(), {
+        id: snapshot.id,
+        aliasTo: data.aliasTo || "",
+      });
     }
   });
   console.timeEnd(label);
@@ -288,8 +344,11 @@ async function getAllFoodWords(
 function mockAllFoodwords(): Promise<FoodWordMap> {
   return new Promise((resolve) => {
     const allFoodWords: FoodWordMap = new Map();
-    FOOD_WORDS.forEach((word, i) => {
-      allFoodWords.set(word.toLowerCase(), `fakeFoodWord-${i + 1}`);
+    FOOD_WORDS.forEach(({ word, aliasTo }, i) => {
+      allFoodWords.set(word.toLowerCase(), {
+        id: `fakeFoodWord-${i + 1}`,
+        aliasTo: aliasTo || "",
+      });
     });
     resolve(allFoodWords);
   });

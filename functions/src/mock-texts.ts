@@ -13,7 +13,16 @@ egg noodles
 cubed bread crumbs
 ST
 wheat inaved Hunia
-oto`,
+oto
+
+Crème Fraîche	0
+Diced Jalapeño	0
+Jalapeño	0
+Jalapeño pepper	0
+Saké
+
+4 gloves garlic
+`,
 
   `2 lb thick rib eye steak,
 boneless, cut into 1-inch (2
@@ -184,4 +193,57 @@ E
 2
 3
 cooke`,
+
+  `artichoke hearts,
+medium
+nips are
+discard
+and vin
+extra vi
+TAG
+ART
+PARI
+Serves 4
+WHY T
+3 tablespoons extra-virgin olive oil
+3 cups jarred whole baby artichoke
+hearts packed in water, quartered,
+rinsed, and patted dry
+12 ounces white mushrooms, trimmed
+and sliced thin
+1 leek, white and light green parts only,
+halved lengthwise, sliced 14 inch thick,
+and washed thoroughly
+4 garlic cloves, minced
+2 anchovy fillets, rinsed, patted dry,
+and minced
+1 teaspoon minced fresh thyme or
+14 teaspoon dried
+3 tablespoons all-purpose flour
+1/4 cup dry white wine
+3 cups chicken broth
+3 cups vegetable broth
+6 ounces parsnips, peeled and cut
+into 1/2-inch pieces
+2 bay leaves
+1/4 cup heavy cream
+2 tablespoons minced fresh tarragon
+1 teaspoon white wine vinegar, plus
+extra for seasoning
+Salt and
+pepper
+pasta co
+flavorfu
+the lear
+them a
+promot
+oregano
+and Par
+and len
+oversha
+simple
+gave th
+TOPPI
+2 sl
+2 ta`,
 ];

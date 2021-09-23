@@ -82,7 +82,12 @@
     ],
     "rules": {
       "# eslint-config-preact drags in 'plugin:jest/recommended' so disabling": 0,
-      "jest/no-test-callback": 0
+      "jest/no-test-callback": 0,
+
+      "# See https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-duplicate-imports.md": 0,
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/no-duplicate-imports": ["error"]
+
     },
     "ignorePatterns": [
       "build/"
