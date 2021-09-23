@@ -49,7 +49,6 @@ export const onFileUploadToText = functions
         );
         return;
       }
-      // console.log(`KEYS: ${JSON.stringify([...Object.keys(object)])}`);
       const fileName = path.basename(name);
       const listID = fileName.split("-")[0];
       if (!listID) {
@@ -171,31 +170,6 @@ async function incrementFoodWordHitCounts(
   logger.debug(`Updating hitCount on ${countUpdates} food words`);
 }
 
-// async function extractFoodWords(
-//   text: string,
-//   searchWords: string[],
-//   aliases: Map<string, string>,
-//   ignoreWords: string[]
-// ): Promise<string[]> {
-//   // const options: Options = {
-//   //   ignore: foodWordOptions.filter((o) => o.ignore).map((o) => o.word),
-//   //   aliases: new Map(
-//   //     foodWordOptions
-//   //       .filter((o) => !o.ignore && o.alias)
-//   //       .map((o) => {
-//   //         return [o.word, o.alias!];
-//   //       })
-//   //   ),
-//   // };
-//   logger.debug("Foodword options:", options);
-//   const label = "Time to extract foodwords from text";
-//   console.time(label);
-//   const foodWords = getFoodWords(text, searchWords, aliases, options);
-//   console.timeEnd(label);
-//   logger.info(`Food words found: ${foodWords.join(", ")}`);
-//   return foodWords;
-// }
-
 async function getAllListItemTexts(listID: string): Promise<string[]> {
   const label = "Time to extract all list item texts";
   console.time(label);
@@ -270,21 +244,7 @@ function mockExtractText(): Promise<string> {
     const prefix = `MOCK TEXT! ${new Date()}\n`;
     const randomText =
       MOCK_TEXTS[Math.floor(Math.random() * MOCK_TEXTS.length)];
-    resolve(
-      prefix +
-        randomText +
-        `\n
-
-    Crème Fraîche	0
-Diced Jalapeño	0
-Jalapeño	0
-Jalapeño pepper	0
-Saké
-
-4 gloves garlic
-
-    `
-    );
+    resolve(prefix + randomText);
   });
 }
 
