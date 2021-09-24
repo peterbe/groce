@@ -29,6 +29,7 @@ export const loadSampleFoodWords = functions.https.onRequest(
       let counter = 0;
       let totalCounter = 0;
       const locale = "en-US";
+      const promises = [];
       for (const info of FOOD_WORDS) {
         const { word } = info;
         if (existingWords.has(locale) && existingWords.get(locale)?.has(word)) {
@@ -45,7 +46,7 @@ export const loadSampleFoodWords = functions.https.onRequest(
         counter++;
         if (counter >= 500) {
           console.log(`Committing batch of ${counter}`);
-          await batch.commit();
+          promises.push(batch.commit());
           totalCounter += counter;
           counter = 0;
           batch = firestore.batch();
@@ -54,9 +55,10 @@ export const loadSampleFoodWords = functions.https.onRequest(
 
       if (counter) {
         console.log(`Committing batch of ${counter}`);
-        await batch.commit();
+        promises.push(batch.commit());
         totalCounter += counter;
       }
+      await Promise.all(promises);
       console.log(`Committed total of ${totalCounter}`);
       res.status(201).json({ totalCounter });
     } else {

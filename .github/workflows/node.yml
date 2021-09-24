@@ -23,7 +23,7 @@ jobs:
         with:
           path: |
             node_modules
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('functions/yarn.lock') }}-${{ hashFiles('.github/workflows/node.yml') }}
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.github/workflows/node.yml') }}
 
       - name: Install
         if: steps.cached-node_modules.outputs.cache-hit != 'true'
@@ -37,6 +37,27 @@ jobs:
         run: yarn lint
 
       - name: Prettier
+        run: yarn pretty
+
+      - name: Cache node_modules (functions)
+        uses: actions/cache@v2.1.6
+        id: cached-node_modules-functions
+        with:
+          path: |
+            functions/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('functions/yarn.lock') }}-${{ hashFiles('.github/workflows/e2e.yml') }}
+
+      - name: Install (functions)
+        if: steps.cached-node_modules-functions.outputs.cache-hit != 'true'
+        working-directory: functions
+        run: yarn --frozen-lockfile
+
+      - name: Lint (functions)
+        working-directory: functions
+        run: yarn lint
+
+      - name: Prettier (functions)
+        working-directory: functions
         run: yarn pretty
 
       - name: Run dev server

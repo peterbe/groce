@@ -126,7 +126,7 @@ export const downloadAndResizeAndStore = functions
         console.timeEnd(label);
       }
 
-      let modifiedImageBuffer = await resize(tempFile, width);
+      const modifiedImageBuffer = await resize(tempFile, width);
       console.log(`Resized ${tempFile} as ${width}`);
 
       label = `Resize?${destinationPath}`;
@@ -173,7 +173,7 @@ export const downloadAndResizeAndStore = functions
     }
   });
 
-function errorToString(error: any, fallback: string = "") {
+function errorToString(error: any, fallback = "") {
   if (error instanceof Error) {
     return error.toString();
   }
