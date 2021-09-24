@@ -93,6 +93,6 @@ async function deleteListPicture(
     .firestore()
     .collection(`shoppinglists/${listID}/pictures`);
   const itemRef = collectionRef.doc(pictureID);
-  itemRef.delete();
+  await itemRef.delete();
   logger.info(`Deleted listpicture ${pictureID} in list ${listID}`);
 }
