@@ -2,7 +2,7 @@ const escapeNeedle = (needle: string) =>
   needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export function getFoodWords(
-  text: string,
+  rawText: string,
   listItems: string[],
   aliases: Map<string, string>,
   ignoreWords: string[]
@@ -13,7 +13,7 @@ export function getFoodWords(
 
   type Find = { word: string; index: number };
   const finds: Find[] = [];
-  text = text.replace(/\n/g, " ").replace(/\s\s+/, " ");
+  let text = rawText.replace(/\n/g, " ").replace(/\s\s+/, " ");
 
   /**
    * XXX Might be worth treating the text that might have line
