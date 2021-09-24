@@ -61,7 +61,7 @@ export const onListItemWithImageWrite = functions.firestore
 // while waiting for the real deal to download.
 // As (moz)JPEF...
 // At width=64, the base64 encoding of images becomes roughly 2,000 - 3,000 bytes.
-async function imagePathToBase64Data(imagePath: string, width: number = 64) {
+async function imagePathToBase64Data(imagePath: string, width = 64) {
   const bucket = admin.storage().bucket();
   const file = bucket.file(imagePath);
   const imageBuffer = await getRawBody(file.createReadStream());

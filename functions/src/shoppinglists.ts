@@ -66,9 +66,8 @@ export const onShoppinglistItemWrite = functions.firestore
           return b.added.getTime() - a.added.getTime();
         } else if (a.done) {
           return 1;
-        } else {
-          return -1;
         }
+        return -1;
       });
 
       const recentItems = items.slice(0, CUTOFF_RECENT_ITEMS).map((item) => {
@@ -174,27 +173,23 @@ export const onShoppinglistDelete = functions.firestore
   .document("shoppinglists/{listID}")
   .onDelete(async (snapshot, context) => {
     const { listID } = context.params;
-    const batch = admin.firestore().batch();
-    const subCollectionNames = ["items", "invitations", "pictures", "texts"];
+
+    const subCollectionNames = [
+      "items",
+      "invitations",
+      "pictures",
+      "texts",
+      "wordoptions",
+    ];
     const counts: Map<string, number> = new Map();
-    for (const subCollectionName of subCollectionNames) {
-      const itemsSnapshot = await admin
-        .firestore()
-        .collection("shoppinglists")
-        .doc(listID)
-        .collection(subCollectionName)
-        .get();
-      itemsSnapshot.forEach((itemSnapshot) => {
-        batch.delete(
-          admin
-            .firestore()
-            .collection(`shoppinglists/${listID}/${subCollectionName}`)
-            .doc(itemSnapshot.id)
-        );
-        counts.set(subCollectionName, (counts.get(subCollectionName) || 0) + 1);
-      });
-    }
-    await batch.commit();
+    const countResults = await Promise.all(
+      subCollectionNames.map((name) => {
+        return deleteAllByShoppinglistSubcollection(listID, name);
+      })
+    );
+    countResults.forEach((count, i) => {
+      counts.set(subCollectionNames[i], count);
+    });
     if (counts.size > 0) {
       let msg = "After deleting shopping list also deleted: ";
       msg += [...counts.entries()]
@@ -209,3 +204,28 @@ export const onShoppinglistDelete = functions.firestore
       );
     }
   });
+
+async function deleteAllByShoppinglistSubcollection(
+  listID: string,
+  subCollectionName: string
+): Promise<number> {
+  const batch = admin.firestore().batch();
+  const itemsSnapshot = await admin
+    .firestore()
+    .collection("shoppinglists")
+    .doc(listID)
+    .collection(subCollectionName)
+    .get();
+  let count = 0;
+  itemsSnapshot.forEach((itemSnapshot) => {
+    batch.delete(
+      admin
+        .firestore()
+        .collection(`shoppinglists/${listID}/${subCollectionName}`)
+        .doc(itemSnapshot.id)
+    );
+    count++;
+  });
+  await batch.commit();
+  return count;
+}
