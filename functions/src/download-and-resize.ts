@@ -67,7 +67,7 @@ export const downloadAndResizeAndStore = functions
     const fileName = path.basename(imagePath);
     const fileNameWithoutExtension = path.basename(fileName, fileExtension);
     const modifiedFileName = `${fileNameWithoutExtension}_${width}${fileExtension}`;
-    const pathname = (imagePath as string).split("/").slice(1, -1).join("/");
+    const pathname = imagePath.split("/").slice(1, -1).join("/");
     const destinationPath = `thumbnails/${pathname}/${modifiedFileName}`;
     console.log(`From ${imagePath} to ${destinationPath}`);
 
@@ -113,9 +113,7 @@ export const downloadAndResizeAndStore = functions
       label = `Download?${destinationPath}`;
       console.time(label);
       try {
-        await bucket
-          .file(imagePath as string)
-          .download({ destination: tempFile });
+        await bucket.file(imagePath).download({ destination: tempFile });
         console.log(`Downloaded ${imagePath} to ${tempFile}`);
       } catch (error) {
         console.warn(`Error downloading ${imagePath}`);
@@ -126,7 +124,7 @@ export const downloadAndResizeAndStore = functions
         console.timeEnd(label);
       }
 
-      let modifiedImageBuffer = await resize(tempFile, width);
+      const modifiedImageBuffer = await resize(tempFile, width);
       console.log(`Resized ${tempFile} as ${width}`);
 
       label = `Resize?${destinationPath}`;

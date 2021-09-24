@@ -1,8 +1,9 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { logger } from "firebase-functions";
 
 import { wrappedLogError } from "./rollbar-logger";
+
+const { logger } = functions;
 
 type ListPicture = {
   filePath: string;

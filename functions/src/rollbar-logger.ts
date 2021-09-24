@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as Rollbar from "rollbar";
-import { logger } from "firebase-functions";
 
+const { logger } = functions;
 const rollbarConfig = functions.config().rollbar;
 
 const rollbar = rollbarConfig
