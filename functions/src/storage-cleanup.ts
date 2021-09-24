@@ -31,8 +31,8 @@ export const onListItemImageDelete = functions.firestore
   );
 
 function listDifference(A: string[], B: string[]) {
-  let _difference = new Set(A);
-  for (let elem of new Set(B)) {
+  const _difference = new Set(A);
+  for (const elem of new Set(B)) {
     _difference.delete(elem);
   }
   return [..._difference];
