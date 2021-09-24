@@ -17,7 +17,7 @@ const rollbar = rollbarConfig
 //   rollbar.log("Rollbar initialized!");
 // }
 
-export function logError(error: unknown, req?: functions.https.Request) {
+export function logError(error: unknown, req?: functions.https.Request): void {
   if (process.env.FUNCTIONS_EMULATOR) {
     logger.debug("Rollbar disabled in emulator mode");
   } else if (rollbar) {

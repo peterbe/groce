@@ -48,7 +48,7 @@ export const downloadAndResizeAndStore = functions
     }
     let width = 0;
     try {
-      width = parseInt(widthString);
+      width = parseInt(widthString, 10);
       if (width < 0) {
         throw new Error("too small");
       }
@@ -133,7 +133,7 @@ export const downloadAndResizeAndStore = functions
       console.timeEnd(label);
       console.log(`Wrote image buffer to ${modifiedFile}`);
 
-      const metadata: { [key: string]: any } = {
+      const metadata: { [key: string]: unknown } = {
         contentType,
         metadata: {
           imagePath,
@@ -171,7 +171,7 @@ export const downloadAndResizeAndStore = functions
     }
   });
 
-function errorToString(error: any, fallback = "") {
+function errorToString(error: unknown, fallback = ""): string {
   if (error instanceof Error) {
     return error.toString();
   }

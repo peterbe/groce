@@ -16,22 +16,20 @@ export const onShoppinglistItemUpdateCounter = functions.firestore
       const docSnapshot = await docRef.get();
       if (!docSnapshot.exists) {
         // Very first time!
-        return docRef.set({
+        await docRef.set({
           ever: 1,
           [year]: 1,
           [`${year}-${month}`]: 1,
           [`${year}-${month}-${day}`]: 1,
         });
       } else {
-        return docRef.update({
+        await docRef.update({
           ever: admin.firestore.FieldValue.increment(1),
           [year]: admin.firestore.FieldValue.increment(1),
           [`${year}-${month}`]: admin.firestore.FieldValue.increment(1),
           [`${year}-${month}-${day}`]: admin.firestore.FieldValue.increment(1),
         });
       }
-    } else {
-      return Promise.resolve();
     }
   });
 
@@ -52,12 +50,11 @@ export const onShoppinglistsCreateCounter = functions.firestore
         [`${year}-${month}`]: 1,
         [`${year}-${month}-${day}`]: 1,
       });
-    } else {
-      return docRef.update({
-        ever: admin.firestore.FieldValue.increment(1),
-        [year]: admin.firestore.FieldValue.increment(1),
-        [`${year}-${month}`]: admin.firestore.FieldValue.increment(1),
-        [`${year}-${month}-${day}`]: admin.firestore.FieldValue.increment(1),
-      });
     }
+    return docRef.update({
+      ever: admin.firestore.FieldValue.increment(1),
+      [year]: admin.firestore.FieldValue.increment(1),
+      [`${year}-${month}`]: admin.firestore.FieldValue.increment(1),
+      [`${year}-${month}-${day}`]: admin.firestore.FieldValue.increment(1),
+    });
   });
