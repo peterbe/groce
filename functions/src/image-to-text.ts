@@ -3,12 +3,13 @@ import * as path from "path";
 import * as vision from "@google-cloud/vision";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { logger } from "firebase-functions";
 
 import { wrappedLogError } from "./rollbar-logger";
 import { getFoodWords } from "./extract-food-words";
 import { MOCK_TEXTS } from "./mock-texts";
 import { FOOD_WORDS } from "./sample-food-words";
+
+const { logger } = functions;
 
 type FoodWord = {
   id: string;
@@ -177,7 +178,7 @@ async function getAllListItemTexts(listID: string): Promise<string[]> {
     .firestore()
     .collection(`shoppinglists/${listID}/items`)
     .get();
-  const texts = snapshot.docs.map((snapshot) => snapshot.data().text);
+  const texts = snapshot.docs.map((s) => s.data().text);
   console.timeEnd(label);
   logger.info(`Found ${texts.length} existing list item texts.`);
   return texts;

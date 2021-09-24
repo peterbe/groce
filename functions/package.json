@@ -3,9 +3,10 @@
   "scripts": {
     "lint": "tslint --project tsconfig.json && prettier -c src/*.ts",
     "build": "tsc",
-    "serve": "yarn run build && firebase emulators:start --only 'auth,firestore,functions,storage,pubsub'",
+    "build:watch": "tsc --watch --preserveWatchOutput",
+    "start": "firebase emulators:start --only 'auth,firestore,functions,storage,pubsub'",
+    "serve": "yarn run build && yarn run start",
     "shell": "yarn run build && firebase functions:shell",
-    "start": "yarn run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "pretty": "prettier --check ."

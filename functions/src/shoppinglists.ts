@@ -50,16 +50,15 @@ export const onShoppinglistItemWrite = functions.firestore
         .get();
 
       const items: BriefItem[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach((itemDoc) => {
         // doc.data() is never undefined for query doc snapshots
-        // console.log("ITEM...", doc.id, " => ", doc.data());
-        const data = doc.data();
+        const itemData = itemDoc.data();
         items.push({
-          text: data.text,
-          description: data.description,
-          added: data.added[0].toDate(),
-          quantity: data.quantity || 0,
-          done: data.done,
+          text: itemData.text,
+          description: itemData.description,
+          added: itemData.added[0].toDate(),
+          quantity: itemData.quantity || 0,
+          done: itemData.done,
         });
       });
       items.sort((a, b) => {
@@ -129,13 +128,13 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
         .get();
 
       if (!doc.exists) {
-        return console.error(`No shopping list with ID ${listID}`);
+        console.error(`No shopping list with ID ${listID}`);
+        return;
       }
       const data = doc.data();
       if (!data) {
-        return console.error(
-          `Shopping list with ID ${listID} contains no data`
-        );
+        console.error(`Shopping list with ID ${listID} contains no data`);
+        return;
       }
       const owners: string[] = data.owners;
       const ownersMetadataBefore: Record<string, OwnerMetadata> =
@@ -185,12 +184,12 @@ export const onShoppinglistDelete = functions.firestore
         .doc(listID)
         .collection(subCollectionName)
         .get();
-      itemsSnapshot.forEach((snapshot) => {
+      itemsSnapshot.forEach((itemSnapshot) => {
         batch.delete(
           admin
             .firestore()
             .collection(`shoppinglists/${listID}/${subCollectionName}`)
-            .doc(snapshot.id)
+            .doc(itemSnapshot.id)
         );
         counts.set(subCollectionName, (counts.get(subCollectionName) || 0) + 1);
       });

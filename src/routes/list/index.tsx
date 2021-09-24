@@ -438,10 +438,7 @@ function ShoppingList({
       });
       if (relatedItems.length) {
         const batch = writeBatch(db);
-
-        // const batch = db.batch();
         relatedItems.forEach((relatedItem) => {
-          // const itemDoc = collectionRef.doc(relatedItem.id);
           const itemRef = doc(db, `shoppinglists/${id}/items`, relatedItem.id);
           batch.update(itemRef, {
             group: {
@@ -457,42 +454,8 @@ function ShoppingList({
           // XXX Deal with this!
           return;
         }
-
-        // batch
-        //   .commit()
-        //   .then(() => {
-        //     console.log(
-        //       `Correct group on ${relatedItems.length} other items`
-        //     );
-        //   })
-        //   .catch((error) => {
-        //     console.error("Error doing batch operation", error);
-        //   });
       }
     }
-
-    // const collectionRef = db.collection(`shoppinglists/${id}/items`);
-    // const itemRef = collectionRef.doc(item.id);
-
-    // const groupText = group.trim();
-    // const groupItem = {
-    //   order: groupOrder,
-    //   text: groupText,
-    // };
-    // itemRef
-    //   .update({
-    //     text: text.trim(),
-    //     description: description.trim(),
-    //     group: groupItem,
-    //     quantity,
-    //   })
-    //   .then(() => {
-
-    //   })
-    //   .catch((error) => {
-    //     // XXX Deal with this better.
-    //     console.error(`Error trying to update item ${item.id}:`, error);
-    //   });
   }
 
   async function updateItemImage(item: Item, spec: StorageSpec) {
@@ -512,35 +475,9 @@ function ShoppingList({
     await updateDoc(doc(db, `shoppinglists/${id}/items`, item.id), {
       images: operation,
     });
-    if (spec.remove && storage) {
-      const objectRef = ref(storage, spec.remove);
-      await deleteObject(objectRef);
-    }
-
-    // const itemRef = db.collection(`shoppinglists/${id}/items`).doc(item.id);
-    // itemRef
-    //   .update({
-    //     images: operation,
-    //   })
-    //   .then(() => {
-    //     if (spec.remove && storage) {
-    //       // Create a reference to the file to delete
-    //       const storageRef = storage.ref();
-    //       storageRef
-    //         .child(spec.remove)
-    //         .delete()
-    //         .then(() => {
-    //           // TODO: Delete all the thumbnails too some day.
-    //         })
-    //         .catch((error) => {
-    //           console.log("Unknown error deleting image", error);
-    //         });
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     // XXX Deal with this better.
-    //     console.error(`Error trying to update item ${item.id}:`, error);
-    //   });
+    // Remember, there's a Cloud Function that takes care of deleting
+    // the image from the storage. It notices when the shoppinglist item
+    // has an image removed.
   }
 
   const [modalImageURL, setModalImageURL] = useState("");

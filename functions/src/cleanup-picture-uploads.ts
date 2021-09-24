@@ -1,8 +1,9 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { logger } from "firebase-functions";
 
 import { wrappedLogError } from "./rollbar-logger";
+
+const { logger } = functions;
 
 type ListPicture = {
   filePath: string;
@@ -93,6 +94,6 @@ async function deleteListPicture(
     .firestore()
     .collection(`shoppinglists/${listID}/pictures`);
   const itemRef = collectionRef.doc(pictureID);
-  itemRef.delete();
+  await itemRef.delete();
   logger.info(`Deleted listpicture ${pictureID} in list ${listID}`);
 }
