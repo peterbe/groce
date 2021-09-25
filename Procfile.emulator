@@ -1,6 +1,6 @@
 # Note, foreman will automatically created $PORT=5000 so applications
 # that depend on $PORT will need to be careful.
 
-web: PREACT_APP_USE_EMULATOR=true PORT=8080 yarn dev --no-clear --no-sw
+web: PREACT_APP_USE_EMULATOR=true PORT=8080 yarn dev --no-clear
 emulator_tsc: cd functions && yarn lint:watch
 emulator_start: cd functions && yarn start
