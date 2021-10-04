@@ -122,6 +122,7 @@ export function Pictures({
             filePath: data.filePath,
             created: data.created,
             modified: data.modified,
+            imageThumbnailData: data.imageThumbnailData,
           };
           newListPictures.push(item);
         });
@@ -952,6 +953,11 @@ function ShowListPictures({
                   <DisplayImage
                     filePath={listPicture.filePath}
                     file={uploadedFiles.get(listPicture.filePath)}
+                    placeholderImageData={
+                      listPicture.imageThumbnailData
+                        ? listPicture.imageThumbnailData
+                        : undefined
+                    }
                     maxWidth={450}
                     maxHeight={450}
                     openImageModal={openImageModal}

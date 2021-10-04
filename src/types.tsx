@@ -35,6 +35,7 @@ export interface FirestoreListPicture {
   created: Timestamp;
   modified: Timestamp;
   deleted?: Timestamp;
+  imageThumbnailData?: string;
 }
 
 export interface ListPicture extends FirestoreListPicture {
