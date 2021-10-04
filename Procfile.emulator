@@ -3,4 +3,5 @@
 
 web: PREACT_APP_USE_EMULATOR=true PORT=8080 yarn dev --no-clear
 emulator_tsc: cd functions && yarn lint:watch
+emulator_build_watch: cd functions && yarn build:watch
 emulator_start: cd functions && yarn start

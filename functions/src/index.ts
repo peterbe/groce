@@ -5,6 +5,7 @@ export * from "./counters";
 export * from "./invites";
 export * from "./shoppinglists";
 export * from "./list-items";
+export * from "./list-pictures";
 export * from "./download-and-resize";
 export * from "./image-to-text";
 export * from "./foodwords";
