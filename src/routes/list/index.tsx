@@ -19,7 +19,7 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
-import { FirebaseStorage, ref, deleteObject } from "firebase/storage";
+import { FirebaseStorage } from "firebase/storage";
 
 import { Alert } from "../../components/alerts";
 import { GoBack } from "../../components/go-back";

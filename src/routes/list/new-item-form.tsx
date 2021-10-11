@@ -46,11 +46,11 @@ export const NewItemForm: FunctionalComponent<Props> = ({
 
       if (items) {
         items.forEach((item) => {
-          if (item.removed) {
+          if (item.removed || item.done) {
             const normalized = stripEmojis(item.text.toLowerCase());
             if (
               rex.test(item.text) &&
-              item.text.toLowerCase() !== newText.toLowerCase() &&
+              // item.text.toLowerCase() !== newText.toLowerCase() &&
               !newSuggestionsSet.has(normalized)
             ) {
               newSuggestions.push({
@@ -81,7 +81,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
           const normalized = stripEmojis(text.toLowerCase());
           if (
             rex.test(text) &&
-            text.toLowerCase() !== newText.toLowerCase() &&
+            // text.toLowerCase() !== newText.toLowerCase() &&
             !newSuggestionsSet.has(normalized)
           ) {
             newSuggestions.push({
@@ -118,10 +118,8 @@ export const NewItemForm: FunctionalComponent<Props> = ({
           type="search"
           class="form-control"
           value={newText}
-          onInput={({
-            currentTarget,
-          }: h.JSX.TargetedEvent<HTMLInputElement, Event>) => {
-            setNewText(currentTarget.value);
+          onInput={(event) => {
+            setNewText(event.currentTarget.value);
           }}
           aria-label="New shopping list item"
           placeholder="Add new item..."
