@@ -387,7 +387,7 @@ export function ListItem({
                 // count: party.variation.range(5, 15)
                 // Size of individual stars
                 // size: party.variation.range(0.5, 1.5),
-
+                lifetime: party.variation.range(2, 4),
                 // I wish I could control the range/radius too
                 // https://github.com/yiliansource/party-js/issues/72
               });
