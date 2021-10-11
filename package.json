@@ -64,7 +64,7 @@
     "firebase-tools": "9.20.0",
     "foreman": "3.0.1",
     "got": "11.8.2",
-    "http-server": "0.12.3",
+    "http-server": "13.0.2",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "minimalcss": "0.11.2",
