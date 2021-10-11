@@ -165,3 +165,8 @@ export interface FirestoreFoodWord {
 export interface FoodWord extends FirestoreFoodWord {
   id: string;
 }
+
+export type openImageModalSignature = (
+  url: string,
+  file: File | undefined
+) => void;

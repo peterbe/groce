@@ -1,4 +1,4 @@
-import { h, Fragment } from "preact";
+import { h } from "preact";
 import { Link } from "preact-router";
 import { useState, useEffect, useRef } from "preact/hooks";
 import style from "./style.css";
@@ -34,6 +34,7 @@ import { PopularityContest } from "./popularity-contest";
 import { GROUP_SUGGESTIONS, ITEM_SUGGESTIONS } from "./default-suggestions";
 import { FirestoreItem, Item, List, StorageSpec } from "../../types";
 import { stripEmojis } from "../../utils";
+import { ImageModal } from "../../components/image-modal";
 
 function ShoppingList({
   user,
@@ -481,11 +482,15 @@ function ShoppingList({
   }
 
   const [modalImageURL, setModalImageURL] = useState("");
-  function openImageModal(url: string) {
+  const [modalImageFile, setModalImageFile] = useState<File | undefined>();
+
+  function openImageModal(url: string, file: File | undefined) {
     setModalImageURL(url);
+    setModalImageFile(file);
   }
   function closeImageModal() {
     setModalImageURL("");
+    setModalImageFile(undefined);
   }
 
   if (user === false) {
@@ -857,70 +862,13 @@ function ShoppingList({
         <GoBack url="/shopping" name="lists" />
       )}
 
-      <ImageModal url={modalImageURL} close={closeImageModal} />
+      <ImageModal
+        url={modalImageURL}
+        close={closeImageModal}
+        file={modalImageFile}
+      />
     </div>
   );
 }
 
 export default ShoppingList;
-
-function ImageModal({ url, close }: { url: string; close: () => void }) {
-  function keydownHandler(event: KeyboardEvent) {
-    if (event.code === "Escape") {
-      close();
-    }
-  }
-  useEffect(() => {
-    if (url) {
-      document.body.classList.add("modal-open");
-      document.addEventListener("keydown", keydownHandler);
-    } else {
-      document.body.classList.remove("modal-open");
-      document.removeEventListener("keydown", keydownHandler);
-    }
-    return () => {
-      document.removeEventListener("keydown", keydownHandler);
-    };
-  }, [url]);
-  if (!url) {
-    return null;
-  }
-  return (
-    <Fragment>
-      <div
-        class="modal fade show"
-        tabIndex={-1}
-        style={{ display: "block" }}
-        role="dialog"
-      >
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button
-                type="button"
-                class="btn-close"
-                data-dismiss="modal"
-                aria-label="Close"
-                onClick={() => close()}
-              />
-            </div>
-            <div class="modal-body">
-              <img src={url} style={{ maxWidth: "100%" }} />
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                data-dismiss="modal"
-                onClick={() => close()}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-backdrop fade show" />
-    </Fragment>
-  );
-}

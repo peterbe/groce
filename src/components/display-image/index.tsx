@@ -1,12 +1,17 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 
-import { useDownloadImageURL } from "../../hooks";
+import { getThumbnailURL, PLACEHOLDER_IMAGE } from "../../utils";
+
+import type { openImageModalSignature } from "../../types";
 
 const preloadedImageURLsCache = new Set();
 
-const PLACEHOLDER_IMAGE =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABGElEQVRoge2ZywrDIBBFb5YhbSHd9f9/tJsOSDDqvLQDcyBLnXuSkKgD+PC5ucKQAqtJAUsOAG8AG2OMVmD71XwwxlQ5iuIcCY0AhacxYokyPFdCKnANL5aohedISATuwoskWhONSHAFeuGp5jAbgFMhwRHQ1nKRGBVwCz+jgHv4slDv/dwF8+6dOU3CE6279VLM+7yZ0zQ8UZPQhCeuEi7hiVLCIjxBEq7hiQ2yd77Hjgnhk6RC61vMXZAtyZMCKZACwQWSZDKhF3Ohl9OhNzSht5ShN/WjJ2Z/eayiCT/613Q9ldPcec5v30Ui/OHuquP11pMw6RHMaHDUJEy6NDNbTKWESZ9sRZPvhEF4KVqB5aTAalJglC/2HDhQqwo8YAAAAABJRU5ErkJggg==";
+type ImageStyle = {
+  width: number;
+  height?: number;
+  "object-fit"?: string;
+};
 
 export function DisplayImage({
   filePath,
@@ -14,7 +19,6 @@ export function DisplayImage({
   maxWidth,
   maxHeight,
   openImageModal,
-  // className = "img-thumbnail",
   className = "rounded",
   thumbnailWidth = null,
   useObjectFit = false,
@@ -24,37 +28,83 @@ export function DisplayImage({
   file: File | undefined;
   maxWidth: number;
   maxHeight: number;
-  openImageModal: (url: string) => void;
+  openImageModal: openImageModalSignature;
   className?: string;
   thumbnailWidth?: number | null;
   useObjectFit?: boolean;
   placeholderImageData?: string | undefined;
 }): h.JSX.Element {
-  const { url: downloadURL } = useDownloadImageURL(filePath, 1000, false);
-  const { url: thumbnailURL, error: thumbnailError } = useDownloadImageURL(
-    filePath,
-    thumbnailWidth || maxWidth,
-    false
+  const downloadURL = getThumbnailURL(filePath, 1000);
+  const thumbnailURL = getThumbnailURL(filePath, thumbnailWidth || maxWidth);
+
+  useEffect(() => {
+    if (downloadURL && !preloadedImageURLsCache.has(downloadURL)) {
+      preloadedImageURLsCache.add(downloadURL);
+      new Image().src = downloadURL;
+    }
+  }, [downloadURL]);
+
+  const style: ImageStyle = {
+    width: maxWidth,
+  };
+  if (useObjectFit) {
+    style.height = maxHeight;
+    style["object-fit"] = "cover";
+  }
+
+  return (
+    <a
+      href={downloadURL}
+      onClick={(event) => {
+        event.preventDefault();
+        openImageModal(downloadURL || thumbnailURL, file);
+      }}
+    >
+      <DisplayImageTag
+        className={className}
+        style={style}
+        url={thumbnailURL}
+        file={file}
+        placeholderImageData={placeholderImageData}
+      />
+    </a>
   );
-  const [loaded, setLoaded] = useState(
-    preloadedImageURLsCache.has(thumbnailURL)
+}
+
+export function DisplayImageTag({
+  className,
+  style,
+  url,
+  file,
+  placeholderImageData = undefined,
+}: {
+  className?: string;
+  style: h.JSX.CSSProperties;
+  url: string;
+  file: File | undefined;
+  placeholderImageData?: string | undefined;
+}): h.JSX.Element {
+  const [loaded, setLoaded] = useState(preloadedImageURLsCache.has(url));
+  console.log(
+    { url, preloadedImageURLsCache, has: preloadedImageURLsCache.has(url) },
+    loaded
   );
 
   useEffect(() => {
     let mounted = true;
 
-    if (preloadedImageURLsCache.has(thumbnailURL)) {
+    if (preloadedImageURLsCache.has(url)) {
       return;
     }
 
-    if (thumbnailURL && !thumbnailError) {
+    if (url) {
       const preloadImg = new Image();
-      preloadImg.src = thumbnailURL;
+      preloadImg.src = url;
 
       const callback = () => {
         if (mounted) {
           setLoaded(true);
-          preloadedImageURLsCache.add(thumbnailURL);
+          preloadedImageURLsCache.add(url);
         }
       };
       if (preloadImg.decode) {
@@ -66,56 +116,21 @@ export function DisplayImage({
     return () => {
       mounted = false;
     };
-  }, [thumbnailURL, thumbnailError]);
-
-  useEffect(() => {
-    if (downloadURL && !preloadedImageURLsCache.has(downloadURL)) {
-      preloadedImageURLsCache.add(downloadURL);
-      new Image().src = downloadURL;
-    }
-  }, [downloadURL]);
-
-  const style: {
-    width: number;
-    height?: number;
-    "object-fit"?: string;
-  } = {
-    width: maxWidth,
-    // height: maxHeight,
-    // "object-fit": "cover",
-  };
-  if (useObjectFit) {
-    style.height = maxHeight;
-    style["object-fit"] = "cover";
-  }
-  // if (placeholderImageData) {
-  //   console.log(`placeholderImageData=${placeholderImageData.length}`);
-  // }
+  }, [url]);
 
   return (
-    <a
-      href={downloadURL}
-      onClick={(event) => {
-        event.preventDefault();
-        openImageModal(downloadURL || thumbnailURL);
-      }}
-    >
-      <img
-        class={className}
-        style={style}
-        src={
-          loaded
-            ? thumbnailURL
-            : file
-            ? URL.createObjectURL(file)
-            : placeholderImageData
-            ? placeholderImageData
-            : PLACEHOLDER_IMAGE
-        }
-      />
-      {/* {placeholderImageData && (
-        <img class={className} style={style} src={placeholderImageData} />
-      )} */}
-    </a>
+    <img
+      class={className}
+      style={style}
+      src={
+        loaded
+          ? url
+          : file
+          ? URL.createObjectURL(file)
+          : placeholderImageData
+          ? placeholderImageData
+          : PLACEHOLDER_IMAGE
+      }
+    />
   );
 }

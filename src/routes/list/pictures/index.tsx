@@ -35,6 +35,7 @@ import {
   SuggestedFoodword,
   FirestoreListWordOption,
   ListWordOption,
+  openImageModalSignature,
 } from "../../../types";
 import { DisplayImage } from "../../../components/display-image";
 // import { useToasts } from "../../../toasts-context";
@@ -64,7 +65,7 @@ export function Pictures({
   list: List;
   items: Item[] | null;
   saveHandler: (text: string) => Promise<void>;
-  openImageModal: (url: string) => void;
+  openImageModal: openImageModalSignature;
 }): h.JSX.Element {
   // const { addToast } = useToasts();
 
@@ -931,7 +932,7 @@ function ShowListPictures({
   listPictureTexts: Map<string, ListPictureText>;
   saveListPictureNotes: (id: string, notes: string) => Promise<void>;
   deleteListPicture: (id: string) => void;
-  openImageModal: (url: string) => void;
+  openImageModal: openImageModalSignature;
   uploadedFiles: Map<string, File>;
   items: Item[] | null;
   saveNewTexts: (words: string[]) => Promise<void>;
