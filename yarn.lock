@@ -10480,10 +10480,10 @@ parseurl@~1.3.2, parseurl@~1.3.3:
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.3.tgz#9da19e7bee8d12dff0513ed5b76957793bc2e8d4"
   integrity sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
 
-party-js@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/party-js/-/party-js-2.1.0.tgz#5aa4e44d82b333989022c125c1678b625686ef81"
-  integrity sha512-5WMMDbzgFabiPOfC1YXy1kj0tkmfoCHwkyqKdONe4Zb1doF0WN9Z5qvLF+WuKoQcuJNpWGS/5qbJ0vP6b/Tu6Q==
+party-js@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/party-js/-/party-js-2.1.2.tgz#0782c66dca3894cb4a598b7a9aa53114370edb2a"
+  integrity sha512-nCErDELYdR6W8KGJR0gu7NF8AxPWjYoVtDe37ZZdMxFyUGw12dx2zTRHDlhKKLux7k5R+KHiuFxUt80UhXQ+Wg==
   optionalDependencies:
     webpack-dev-server "^4.3.0"
 
