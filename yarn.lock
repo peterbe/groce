@@ -5925,10 +5925,10 @@ eslint-plugin-jest@^23.7.0:
   dependencies:
     "@typescript-eslint/experimental-utils" "^2.5.0"
 
-eslint-plugin-playwright@0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-0.5.1.tgz#dccb7080f6d7749176f7d77b9d062490c8e59e81"
-  integrity sha512-ZdbVo7ajPR/wVsAsqzlb6zqR7qs2wywPqIltReEKSf054pn3vagigUzrJywMercwN/LnvPcZfGJvxcFjm/6Tyw==
+eslint-plugin-playwright@0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-0.5.2.tgz#2d736595e363dfd0edf26d8d25402e640f6b1c99"
+  integrity sha512-UnNJf/okE/NnuiTSSbn3YZNSn2EOjPXvjMoGjg7WQcSSBmZNSIdxENjEqsebK2cEm5uyVvZ3h2FoguPA8CNTwQ==
 
 eslint-plugin-react-hooks@^4.2.0:
   version "4.2.0"
