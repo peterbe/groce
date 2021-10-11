@@ -9,8 +9,13 @@ import { FirebaseStorage } from "firebase/storage";
 
 import { FileUpload } from "../../components/file-upload";
 import style from "./style.css";
-import { Item, List, StorageSpec } from "../../types";
-// import { useDownloadImageURL } from "../../hooks";
+import type {
+  Item,
+  List,
+  StorageSpec,
+  openImageModalSignature,
+} from "../../types";
+
 import { DisplayImage } from "../../components/display-image";
 
 dayjs.extend(relativeTime);
@@ -49,7 +54,7 @@ export function ListItem({
   disableGroups: boolean;
   disableQuantity: boolean;
   disableFireworks: boolean;
-  openImageModal: (url: string) => void;
+  openImageModal: openImageModalSignature;
   deleteItem: (item: Item) => void;
 }): h.JSX.Element {
   const [text, setText] = useState(item.text);
@@ -458,7 +463,7 @@ function DisplayFilesViewMode({
   imagesThumbnailData,
 }: {
   images: string[];
-  openImageModal: (url: string) => void;
+  openImageModal: openImageModalSignature;
   uploadedFiles: Map<string, File>;
   imagesThumbnailData: { [image: string]: string } | undefined;
 }) {
@@ -502,7 +507,7 @@ function DisplayFilesEditMode({
   images: string[];
   item: Item;
   updateItemImage: (item: Item, spec: StorageSpec) => void;
-  openImageModal: (url: string) => void;
+  openImageModal: openImageModalSignature;
   uploadedFiles: Map<string, File>;
   imagesThumbnailData: { [image: string]: string } | undefined;
 }) {
