@@ -383,11 +383,11 @@ export function ListItem({
                 // https://party.js.org/docs/ref/templates
                 // size: party.variation.range(0.5, 1.5),
                 // Default is 100,200
-                speed: party.variation.range(150, 250),
+                speed: party.variation.range(200, 250),
                 // count: party.variation.range(5, 15)
                 // Size of individual stars
                 // size: party.variation.range(0.5, 1.5),
-                lifetime: party.variation.range(2, 4),
+                lifetime: party.variation.range(0.5, 1.0),
                 // I wish I could control the range/radius too
                 // https://github.com/yiliansource/party-js/issues/72
               });
