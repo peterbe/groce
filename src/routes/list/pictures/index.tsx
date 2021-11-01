@@ -1150,7 +1150,6 @@ function ListWords({
               onClick={async () => {
                 setAdding(true);
                 await saveNewTexts(picked);
-                setAdding(false);
               }}
             >
               {adding && (
