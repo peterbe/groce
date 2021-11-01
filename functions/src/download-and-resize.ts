@@ -107,8 +107,6 @@ export const downloadAndResizeAndStore = functions
     const tempFile = path.join(os.tmpdir(), fileName);
     const modifiedFile = path.join(os.tmpdir(), modifiedFileName);
 
-    label = `Download?${destinationPath}`;
-    console.time(label);
     try {
       label = `Download?${destinationPath}`;
       console.time(label);
