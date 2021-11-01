@@ -85,10 +85,6 @@ export function DisplayImageTag({
   placeholderImageData?: string | undefined;
 }): h.JSX.Element {
   const [loaded, setLoaded] = useState(preloadedImageURLsCache.has(url));
-  console.log(
-    { url, preloadedImageURLsCache, has: preloadedImageURLsCache.has(url) },
-    loaded
-  );
 
   useEffect(() => {
     let mounted = true;

@@ -5,7 +5,7 @@
     "lint:watch": "esw --watch --color 'src/**/*.{ts,tsx}'",
     "build": "tsc",
     "build:watch": "tsc --watch --preserveWatchOutput",
-    "start": "firebase emulators:start --only 'auth,firestore,functions,storage,pubsub'",
+    "start": "firebase emulators:start --only 'auth,firestore,functions,storage'",
     "serve": "yarn run build && yarn run start",
     "shell": "yarn run build && firebase functions:shell",
     "deploy": "firebase deploy --only functions",
