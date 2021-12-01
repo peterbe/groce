@@ -61,7 +61,7 @@
     "eslint-config-preact": "^1.1.1",
     "eslint-plugin-playwright": "0.5.2",
     "eslint-watch": "7.0.0",
-    "firebase-tools": "9.21.0",
+    "firebase-tools": "9.23.0",
     "foreman": "3.0.1",
     "got": "11.8.2",
     "http-server": "0.12.3",
