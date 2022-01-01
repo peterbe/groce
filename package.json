@@ -59,7 +59,7 @@
     "css-loader": "^5.2.6",
     "eslint": "^7.32.0",
     "eslint-config-preact": "^1.1.1",
-    "eslint-plugin-playwright": "0.5.2",
+    "eslint-plugin-playwright": "0.7.1",
     "eslint-watch": "7.0.0",
     "firebase-tools": "9.21.0",
     "foreman": "3.0.1",
