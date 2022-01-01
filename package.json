@@ -72,7 +72,7 @@
     "prettier": "^2.4.1",
     "serve": "12.0.1",
     "sirv-cli": "^1.0.14",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.4"
   },
   "resolutions": {
     "node-fetch": ">=2.6.1"
