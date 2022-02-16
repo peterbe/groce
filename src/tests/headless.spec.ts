@@ -1,3 +1,5 @@
+/* eslint jest/no-done-callback: 0 */ // --> OFF
+
 import { test, expect } from "@playwright/test";
 
 const testURL = (pathname: string) => `http://localhost:8080${pathname}`;

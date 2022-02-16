@@ -58,7 +58,7 @@
     "cheerio": "1.0.0-rc.10",
     "css-loader": "^5.2.6",
     "eslint": "^7.32.0",
-    "eslint-config-preact": "^1.1.1",
+    "eslint-config-preact": "^1.3.0",
     "eslint-plugin-playwright": "0.5.2",
     "eslint-watch": "7.0.0",
     "firebase-tools": "9.21.0",
@@ -87,6 +87,8 @@
     "rules": {
       "# eslint-config-preact drags in 'plugin:jest/recommended' so disabling": 0,
       "jest/no-test-callback": 0,
+      "jest/no-deprecated-functions": 0,
+
       "# See https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-duplicate-imports.md": 0,
       "no-duplicate-imports": "off",
       "@typescript-eslint/no-duplicate-imports": [
