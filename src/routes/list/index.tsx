@@ -173,7 +173,7 @@ function ShoppingList({
 
   const [clearedItems, setClearedItems] = useState<Item[]>([]);
 
-  const clearTimerRef = useRef();
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (clearedItems.length) {

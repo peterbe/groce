@@ -75,5 +75,9 @@ export function getFoodWords(
   // Sort by the location they were found in the text.
   finds.sort((a, b) => a.index - b.index);
 
-  return finds.map((find) => find.word);
+  return finds.map((find) => capitalize(find.word));
+}
+
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
