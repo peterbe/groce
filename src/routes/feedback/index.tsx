@@ -294,7 +294,7 @@ function Submissions({ db, user }: { db: Firestore; user: User }) {
     let unsubscribe: null | Unsubscribe = null;
     if (user) {
       const collectionRef = collection(db, "feedback");
-      const q = query(collectionRef, where("email", "==", user.uid));
+      const q = query(collectionRef, where("creator_uid", "==", user.uid));
       const newSubmissions: Submission[] = [];
       unsubscribe = onSnapshot(
         q,
