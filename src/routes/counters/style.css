@@ -7,7 +7,8 @@
   text-align: center;
 }
 
-.counters td, .counters th {
+.counters td,
+.counters th {
   padding: 2px;
 }
 
@@ -17,13 +18,12 @@ span.number {
 
 /* Non-responsive... */
 @media (min-width: 415px) {
-
   span.number {
     font-size: 250%;
   }
 
-  .counters td, .counters th {
+  .counters td,
+  .counters th {
     padding: 8px;
   }
-
 }
