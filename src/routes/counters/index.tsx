@@ -1,5 +1,4 @@
 import { h } from "preact";
-import style from "./style.css";
 import { useEffect, useRef, useState } from "preact/hooks";
 import rv from "rough-viz/dist/roughviz.min";
 import dayjs from "dayjs";
@@ -7,6 +6,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { doc, Firestore, onSnapshot } from "firebase/firestore";
 
+import style from "./style.css";
 import { GoBack } from "../../components/go-back";
 import { Loading } from "../../components/loading";
 
