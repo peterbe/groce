@@ -6,9 +6,24 @@
 .counters table th {
   text-align: center;
 }
-.counters table tbody td {
+
+.counters td,
+.counters th {
+  padding: 2px;
 }
 
 span.number {
-  font-size: 250%;
+  font-size: 100%;
+}
+
+/* Non-responsive... */
+@media (min-width: 415px) {
+  span.number {
+    font-size: 250%;
+  }
+
+  .counters td,
+  .counters th {
+    padding: 8px;
+  }
 }
