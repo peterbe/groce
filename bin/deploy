@@ -16,7 +16,7 @@ do
     rsync --ignore-existing -avh $dir build
 done
 
-./bin/download-old-build-assets.js
+./bin/download-old-build-assets.mjs
 
 cd functions && yarn build && cd ..
 firebase --version
