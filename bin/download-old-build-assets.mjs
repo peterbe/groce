@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-const got = require("got");
+import got from "got";
 
 const BASE_URL = "https://thatsgroce.web.app/push-manifest.json";
 const BUILD = "./build";
