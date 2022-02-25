@@ -5,6 +5,7 @@ import style from "./style.css";
 import { ITEM_SUGGESTIONS } from "./default-suggestions";
 import { Item, SearchSuggestion } from "../../types";
 import { stripEmojis } from "../../utils";
+import type { ItemSummary } from "./popularity-contest";
 import { getItemsSummary } from "./popularity-contest";
 
 interface Props {
@@ -22,21 +23,70 @@ export const NewItemForm: FunctionalComponent<Props> = ({
 }: Props) => {
   const [newText, setNewText] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  // const [preemptiveSuggestions, setPreemptiveSuggestions] = useState(false);
 
   const MAX_SUGGESTIONS = 4;
 
-  const mostPopularTexts: string[] = useMemo(
-    () =>
-      items
-        ? getItemsSummary(items, { sortReverse: true }).map((x) => x.text)
-        : [],
+  const mostPopular: ItemSummary[] = useMemo(
+    () => (items ? getItemsSummary(items, { sortReverse: true }) : []),
     [items]
+  );
+  const mostPopularTexts = mostPopular.map((x) => x.text);
+  const mostPopularMap: Map<string, ItemSummary> = new Map(
+    mostPopular.map((summary) => {
+      return [stripEmojis(summary.text.toLowerCase()), summary];
+    })
   );
 
   useEffect(() => {
     if (!newText.trim()) {
-      setSuggestions([]);
+      if (items) {
+        // Suggest items that are popular but haven't been added recently
+        const premptiveSuggestions: SearchSuggestion[] = [];
+
+        const now = new Date();
+        const tested = new Set<string>();
+        items.forEach((item) => {
+          if (item.removed || item.done) {
+            const normalized = stripEmojis(item.text.toLowerCase());
+            // Because an item can appear more than once with the same
+            // text, we only
+            if (tested.has(normalized)) {
+              return;
+            }
+            tested.add(normalized);
+
+            // possibilities
+            const summary = mostPopularMap.get(normalized);
+            if (!summary || summary.added.length < 2) {
+              return;
+            }
+            const lastAdded = summary.added[0].toDate();
+            const distance = (now.getTime() - lastAdded.getTime()) / 1000;
+            if (summary.frequency < distance) {
+              premptiveSuggestions.push({
+                text: item.text,
+                popularity: Math.max(
+                  mostPopularTexts.findIndex((t) => t === item.text),
+                  1
+                ),
+              });
+            }
+          }
+        });
+
+        // Sort by highest popularity number first
+        premptiveSuggestions.sort((a, b) => b.popularity - a.popularity);
+        setSuggestions(
+          premptiveSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
+        );
+        // setPreemptiveSuggestions(true);
+      } else {
+        setSuggestions([]);
+        // setPreemptiveSuggestions(false);
+      }
     } else {
+      // setPreemptiveSuggestions(false);
       const newSuggestions: SearchSuggestion[] = [];
       const escaped = newText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const rex = new RegExp(`\\b${escaped}`, "i");
