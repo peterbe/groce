@@ -8,7 +8,7 @@ import { Item } from "../../types";
 
 dayjs.extend(relativeTime);
 
-interface ItemSummary {
+export interface ItemSummary {
   id: string;
   text: string;
   times_added: number;

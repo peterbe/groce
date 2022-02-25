@@ -190,30 +190,6 @@ function ShoppingList({
 
   async function clearDoneItems() {
     if (db && items) {
-      // try {
-      //   await runTransaction(db, async (transaction) => {
-      //     const sfDoc = await transaction.get(sfDocRef);
-      //     if (!sfDoc.exists()) {
-      //       throw "Document does not exist!";
-      //     }
-
-      //     const newPopulation = sfDoc.data().population + 1;
-      //     transaction.update(sfDocRef, { population: newPopulation });
-      //   });
-      //   console.log("Transaction successfully committed!");
-      // } catch (e) {
-      //   console.log("Transaction failed: ", e);
-      // }
-
-      // try {
-      // const collectionRef = collection(db, `shoppinglists/${id}/items`);
-      //   const itemsDoc
-
-      // } catch (error) {
-      //   console.log("Transaction failed: ", error);
-      //   // XXX DEAL WITH THIS BETTER
-
-      // }
       const cleared: Item[] = [];
       const batch = writeBatch(db);
       items
@@ -233,48 +209,17 @@ function ShoppingList({
         return;
       }
       setClearedItems(cleared);
-
-      // const collectionRef = db.collection(`shoppinglists/${id}/items`);
-      // const batch = db.batch();
-      // items
-      //   .filter((item) => item.done && !item.removed)
-      //   .forEach((item) => {
-      //     const itemDoc = collectionRef.doc(item.id);
-      //     batch.update(itemDoc, {
-      //       removed: Timestamp.fromDate(new Date()),
-      //     });
-      //     cleared.push(item);
-      //   });
-
-      // batch
-      //   .commit()
-      //   .then(() => {
-      //     console.log("All items cleared");
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error doing batch operation", error);
-      //     // XXX Deal with this!
-      //   });
-      // setClearedItems(cleared);
     }
   }
 
   async function undoClearDoneItems() {
     if (db && items) {
-      // const collectionRef = db.collection(`shoppinglists/${id}/items`);
-      // const batch = db.batch();
       const batch = writeBatch(db);
       clearedItems.forEach((item) => {
-        // const itemRef = doc(db, "cities", "SF");
         const itemRef = doc(db, `shoppinglists/${id}/items`, item.id);
         batch.update(itemRef, {
           removed: false,
         });
-        // const itemDoc = collectionRef.doc(item.id);
-        // // console.log(item);
-        // batch.update(itemDoc, {
-        //   removed: false,
-        // });
       });
 
       try {
@@ -285,16 +230,6 @@ function ShoppingList({
         return;
       }
       setClearedItems([]);
-      // batch
-      //   .commit()
-      //   .then(() => {
-      //     console.log("Undo all items cleared");
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error doing batch operation", error);
-      //     // XXX Deal with this!
-      //   });
-      // setClearedItems([]);
     }
   }
 
