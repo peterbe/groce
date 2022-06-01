@@ -36,7 +36,7 @@
     "dayjs": "1.10.7",
     "firebase": "9.6.7",
     "party-js": "2.1.2",
-    "preact": "^10.6.6",
+    "preact": "^10.7.2",
     "preact-cli-plugin-env-vars": "1.2.1",
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.1.1",
