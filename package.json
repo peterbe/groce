@@ -43,7 +43,7 @@
     "preact-render-to-string": "^5.1.20",
     "preact-router": "^4.0.1",
     "rough-viz": "1.0.6",
-    "sass": "1.49.9",
+    "sass": "1.53.0",
     "sass-loader": "10.1.1",
     "smoothscroll-polyfill": "0.4.4",
     "sortablejs": "1.14.0"
