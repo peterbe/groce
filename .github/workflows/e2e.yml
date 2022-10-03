@@ -18,7 +18,7 @@ jobs:
           cache: "yarn"
 
       - name: Cache node_modules
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3.0.9
         id: cached-node_modules
         with:
           path: |
@@ -34,7 +34,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Cache node_modules (functions)
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3.0.9
         id: cached-node_modules-functions
         with:
           path: |
