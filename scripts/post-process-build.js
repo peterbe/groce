@@ -67,7 +67,7 @@ async function run(buildRoot) {
     const metaDescription = $('meta[name="description"]');
     if (!metaDescription.length) {
       const description =
-        "A mobile web app to help families do grocery and meal planning.";
+        "A mobile web app to help families perfect grocery shopping.";
       const tag = `<meta name="description" content="${description}">`;
       $(tag).appendTo($("head"));
       console.log(
