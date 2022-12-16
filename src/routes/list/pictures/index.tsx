@@ -347,14 +347,15 @@ export function Pictures({
   return (
     <div class={style.pictures}>
       <div class={style.new_upload}>
-        {!uploadedFiles.size && (!listPictures || listPictures.length === 0) && (
-          <div>
-            <p>
-              Click "Choose File" to upload a picture of ingredients you're
-              planning and perhaps you need to buy.
-            </p>
-          </div>
-        )}
+        {!uploadedFiles.size &&
+          (!listPictures || listPictures.length === 0) && (
+            <div>
+              <p>
+                Click "Choose File" to upload a picture of ingredients you're
+                planning and perhaps you need to buy.
+              </p>
+            </div>
+          )}
         <FileUpload
           db={db}
           storage={storage}
