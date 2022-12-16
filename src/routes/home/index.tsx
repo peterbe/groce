@@ -42,9 +42,6 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
     string | null
   >(null);
 
-  // async function watchInvitations(db: Firestore) {
-
-  // }
   useEffect(() => {
     let unsubscribe: null | Unsubscribe = null;
     if (db) {
@@ -52,8 +49,6 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         const identifier = sessionStorage.getItem("invitationID");
         if (identifier) {
           const [listID, invitationID] = identifier.split("/");
-          // const collectionRef = collection(
-          //   db,
           unsubscribe = onSnapshot(
             doc(db, `shoppinglists/${listID}/invitations`, invitationID),
             (doc) => {
@@ -64,28 +59,6 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               }
             }
           );
-          // );
-          // const docRef = doc(
-          //   db,
-          //   `shoppinglists/${listID}/invitations`,
-          //   invitationID
-          // );
-          // const docSnap = await getDoc(docRef);
-
-          // db.collection(`shoppinglists/${listID}/invitations`)
-          //   .doc(invitationID)
-          //   .onSnapshot(
-          //     (doc) => {
-          //       if (doc.exists) {
-          //         setInvitationIdentifier(identifier);
-          //       } else {
-          //         console.warn("Invitation, by identifier, does not exist");
-          //       }
-          //     },
-          //     (error) => {
-          //       console.error("Error getting invitation by identifier", error);
-          //     }
-          //   );
         }
       } catch (error) {
         console.error("Error trying to get sessionStorage item", error);
@@ -156,6 +129,37 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
 
   const [signinError, setSigninError] = useState<Error | null>(null);
 
+  const [triedWithRedirect, setTriedWithRedirect] = useState(false);
+  const TRIED_SESSION_KEY = "triedWithRedirect";
+
+  function setTriedWithRedirectSessionStorage() {
+    try {
+      sessionStorage.setItem(TRIED_SESSION_KEY, new Date().toISOString());
+    } catch (error) {
+      console.warn("Unable to set in sessionStorage", error);
+    }
+  }
+  function getTriedWithRedirectSessionStorage() {
+    try {
+      const value = sessionStorage.getItem(TRIED_SESSION_KEY);
+      if (value) {
+        const parsed = new Date(value);
+        const ago = (new Date().getTime() - parsed.getTime()) / 1000;
+        if (ago < 60) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn("Unable to retrieve from sessionStorage", error);
+    }
+    return false;
+  }
+  useEffect(() => {
+    if (!triedWithRedirect && getTriedWithRedirectSessionStorage()) {
+      setTriedWithRedirect(true);
+    }
+  }, [triedWithRedirect]);
+
   const hasInvitationByID =
     invitations &&
     invitationIdentifier &&
@@ -165,7 +169,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
     <div id="home">
       <div class="text-center">
         <h1 class="display-1">That&apos;s Groce!</h1>
-        <p class="lead">Planning shopping and meals for the family.</p>
+        <p class="lead">Know exactly what groceries to buy.</p>
 
         {user && (
           <div class="login">
@@ -245,7 +249,13 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 onClick={async () => {
                   const provider = new GoogleAuthProvider();
                   try {
-                    await signInWithRedirect(auth, provider);
+                    // setTriedWithRedirect(true);
+                    setTriedWithRedirectSessionStorage();
+                    // Slight delay to give the sessionStorage.setItem a chance
+                    // setTimeout(() => {
+                    signInWithRedirect(auth, provider);
+                    // }, 200);
+                    // await
                   } catch (error) {
                     console.error("Error signing in with redirect", error);
                     setSigninError(
@@ -257,6 +267,15 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 Sign in with Google
               </button>
             </p>
+            {!user && triedWithRedirect && (
+              <Alert
+                type="info"
+                heading="Tried to sign in and it didn't work?"
+                message={<Link href="/signin">Try other sign in options</Link>}
+                linkToHomepage={false}
+                offerReload={false}
+              />
+            )}
             <p>
               <button
                 type="button"

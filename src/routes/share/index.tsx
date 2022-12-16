@@ -91,7 +91,7 @@ function WebShare() {
     const url = new URL("/", window.location.href);
     const data = {
       title: "That's Groce!",
-      text: "Planning shopping and meals for the family.",
+      text: "Know exactly what groceries to buy.",
       url: url.toString(),
     };
     if (shareError) setShareError(null);

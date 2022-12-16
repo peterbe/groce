@@ -7,8 +7,10 @@ import {
   User,
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithPopup,
   // linkWithPopup,
   linkWithRedirect,
+  linkWithPopup,
 } from "firebase/auth";
 
 import { Loading } from "../../components/loading";
@@ -50,8 +52,8 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
         </p>
       )}
       {(!user || user.isAnonymous) && (
-        <Fragment>
-          <p style={{ marginTop: 10 }}>
+        <div class="text-center my-5">
+          <div class="my-5">
             <button
               type="button"
               class="btn btn-primary btn-lg"
@@ -60,7 +62,6 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
                 if (user && user.isAnonymous) {
                   try {
                     await linkWithRedirect(user, provider);
-                    // await user.linkWithPopup(provider);
                     route("/", true);
                   } catch (error) {
                     setSignInError(
@@ -79,15 +80,42 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
                 }
               }}
             >
-              Sign in with Google
+              Sign in with Google (redirect)
+            </button>{" "}
+            <button
+              type="button"
+              class="btn btn-primary btn-lg"
+              onClick={async () => {
+                const provider = new GoogleAuthProvider();
+                if (user && user.isAnonymous) {
+                  try {
+                    await linkWithPopup(user, provider);
+                    route("/", true);
+                  } catch (error) {
+                    setSignInError(
+                      error instanceof Error ? error : new Error(String(error))
+                    );
+                  }
+                } else {
+                  try {
+                    await signInWithPopup(auth, provider);
+                    route("/", true);
+                  } catch (error) {
+                    setSignInError(
+                      error instanceof Error ? error : new Error(String(error))
+                    );
+                  }
+                }
+              }}
+            >
+              Sign in with Google (popup)
             </button>
+          </div>
+          <p>
+            Which one you use might depend on your device. Try the other if one
+            of them doesn't work.
           </p>
-          {/* {user && user.isAnonymous && (
-            <p>
-              <small>Your temporary data will be saved.</small>
-            </p>
-          )} */}
-        </Fragment>
+        </div>
       )}
       {user && user.isAnonymous && (
         <p style={{ marginTop: 50 }}>
