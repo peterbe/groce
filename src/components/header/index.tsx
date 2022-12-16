@@ -1,12 +1,7 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { Link, route } from "preact-router";
-import {
-  Auth,
-  User,
-  GoogleAuthProvider,
-  signInWithRedirect,
-} from "firebase/auth";
+import { Link } from "preact-router";
+import { Auth, User } from "firebase/auth";
 
 export default function Header({
   user,
@@ -15,8 +10,6 @@ export default function Header({
   user: User | false | null;
   auth: Auth | null;
 }): h.JSX.Element {
-  // const [showUserMenu, setShowUserMenu] = useState(false);
-  // const [showSigninMenu, setShowSigninMenu] = useState(false);
   const [showNavbar, setShowNavbar] = useState(false);
   const [showPrintThisPage, setShowPrintThisPage] = useState(false);
 
@@ -95,18 +88,6 @@ export default function Header({
                 </Link>
               </li>
             )}
-            {/* <li class="nav-item">
-              <Link
-                class="nav-link"
-                activeClassName={"active"}
-                href="/settings"
-                onClick={() => {
-                  setShowNavbar(false);
-                }}
-              >
-                Settings
-              </Link>
-            </li> */}
             {user && (
               <li class="nav-item">
                 <Link
@@ -145,18 +126,6 @@ export default function Header({
                 Share the ❤️
               </Link>
             </li>
-            {/* <li class="nav-item">
-              <Link
-                class="nav-link"
-                activeClassName={"active"}
-                href="/version"
-                onClick={() => {
-                  setShowNavbar(false);
-                }}
-              >
-                Version
-              </Link>
-            </li> */}
             <li class="nav-item">
               <Link
                 class="nav-link"
@@ -220,21 +189,8 @@ export default function Header({
             ) : (
               <li class="nav-item">
                 {auth && (
-                  <Link
-                    href="/"
-                    class="nav-link"
-                    onClick={async (event) => {
-                      event.preventDefault();
-                      const provider = new GoogleAuthProvider();
-                      try {
-                        await signInWithRedirect(auth, provider);
-                      } catch (error) {
-                        console.log("ERROR:", error);
-                        route("/signin", true);
-                      }
-                    }}
-                  >
-                    Sign in with Google
+                  <Link href="/signin" class="nav-link">
+                    Sign in
                   </Link>
                 )}
               </li>
