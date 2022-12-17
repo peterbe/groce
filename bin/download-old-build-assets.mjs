@@ -9,6 +9,13 @@ const BUILD = "./build";
 
 console.assert(fs.existsSync(BUILD));
 
+const retryConfiguration = {
+  limit: 3,
+};
+const timeoutConfiguration = {
+  request: 3000,
+};
+
 async function download(uri) {
   const url = new URL(uri, BASE_URL);
   const fp = path.join(BUILD, uri.slice(1));
@@ -22,8 +29,8 @@ async function download(uri) {
         const buffer = await got(url, {
           responseType: "buffer",
           resolveBodyOnly: true,
-          timeout: 10000,
-          retry: 3,
+          retry: retryConfiguration,
+          timeout: timeoutConfiguration,
         });
         fs.writeFileSync(fp, buffer);
         console.log(fp.padEnd(80), "🎉");
