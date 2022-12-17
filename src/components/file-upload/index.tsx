@@ -157,29 +157,6 @@ export function FileUpload({
             if (onSaved) {
               onSaved();
             }
-            // db.collection(`shoppinglists/${list.id}/pictures`)
-            //   .add({
-            //     filePath,
-            //     notes: "",
-            //     created: Timestamp.fromDate(new Date()),
-            //     modified: Timestamp.fromDate(new Date()),
-            //   })
-            //   .then(() => {
-            //     setFile(null);
-            //     setFileValidationError(null);
-            //     setUploadError(null);
-            //     setUploadingPercentage(null);
-            //     if (fileInputRef.current) {
-            //       fileInputRef.current.value = "";
-            //     }
-            //     if (onSaved) {
-            //       onSaved();
-            //     }
-            //   })
-            //   .catch((error) => {
-            //     console.error("Error trying to save picture", error);
-            //     throw error;
-            //   });
           }
         }
       );
