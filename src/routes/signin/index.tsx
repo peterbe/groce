@@ -53,7 +53,7 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
       )}
       {(!user || user.isAnonymous) && (
         <div class="text-center my-5">
-          <div class="my-5">
+          <div class="my-5 d-grid gap-2">
             <button
               type="button"
               class="btn btn-primary btn-lg"

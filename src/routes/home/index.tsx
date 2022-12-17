@@ -223,7 +223,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                 </Link>
               )}
 
-              <Link
+              {/* <Link
                 href="#"
                 class="btn btn-secondary btn-lg"
                 disabled
@@ -233,7 +233,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               </Link>
               <i>
                 <small>Under construction</small>
-              </i>
+              </i> */}
             </div>
           </div>
         )}

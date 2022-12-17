@@ -131,15 +131,12 @@ export const onFileUploadToText = functions
       const foodWords = getFoodWords(text, searchWords, aliases, ignoreWords);
       console.timeEnd(extractLabel);
 
-      await admin
-        .firestore()
-        .collection(`shoppinglists/${listID}/texts`)
-        .add({
-          filePath: name,
-          text,
-          foodWords,
-          created: admin.firestore.Timestamp.fromDate(new Date()),
-        });
+      await admin.firestore().collection(`shoppinglists/${listID}/texts`).add({
+        filePath: name,
+        text,
+        foodWords,
+        created: new Date(),
+      });
 
       if (!process.env.FUNCTIONS_EMULATOR) {
         await incrementFoodWordHitCounts(foodWords, allFoodWords);

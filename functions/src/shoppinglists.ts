@@ -96,7 +96,7 @@ export const onShoppinglistItemWrite = functions.firestore
         .update({
           recent_items: recentItems,
           active_items_count: items.length,
-          modified: admin.firestore.Timestamp.fromDate(new Date()),
+          modified: new Date(),
         });
     })
   );
