@@ -24,7 +24,7 @@
     "sharp": "0.31.3"
   },
   "devDependencies": {
-    "@types/sharp": "0.31.0",
+    "@types/sharp": "0.31.1",
     "@typescript-eslint/eslint-plugin": "5.47.0",
     "@typescript-eslint/parser": "5.47.0",
     "eslint": "8.30.0",
