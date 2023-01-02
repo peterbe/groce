@@ -23,7 +23,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
 }: Props) => {
   const [newText, setNewText] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  // const [preemptiveSuggestions, setPreemptiveSuggestions] = useState(false);
+  const [hideSuggestions, setHideSuggestions] = useState(false);
 
   const MAX_SUGGESTIONS = 4;
 
@@ -77,13 +77,12 @@ export const NewItemForm: FunctionalComponent<Props> = ({
 
         // Sort by highest popularity number first
         premptiveSuggestions.sort((a, b) => b.popularity - a.popularity);
+
         setSuggestions(
           premptiveSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
         );
-        // setPreemptiveSuggestions(true);
       } else {
         setSuggestions([]);
-        // setPreemptiveSuggestions(false);
       }
     } else {
       // setPreemptiveSuggestions(false);
@@ -125,14 +124,24 @@ export const NewItemForm: FunctionalComponent<Props> = ({
         !disableDefaultSuggestions &&
         newSuggestions.length < MAX_SUGGESTIONS
       ) {
-        // Add some brand new ones that have never been used but
+        const alreadyOnListNormalized = new Set(
+          (items || [])
+            .filter((item) => {
+              return !item.removed;
+            })
+            .map((item) => {
+              return stripEmojis(item.text.toLowerCase());
+            })
+        );
+
         // assuming it's English we can suggest some
         ITEM_SUGGESTIONS.forEach((text) => {
           const normalized = stripEmojis(text.toLowerCase());
           if (
             rex.test(text) &&
             // text.toLowerCase() !== newText.toLowerCase() &&
-            !newSuggestionsSet.has(normalized)
+            !newSuggestionsSet.has(normalized) &&
+            !alreadyOnListNormalized.has(normalized)
           ) {
             newSuggestions.push({
               text,
@@ -153,6 +162,27 @@ export const NewItemForm: FunctionalComponent<Props> = ({
       );
     }
   }, [newText, items]);
+
+  // Every time `hideSuggestions` becomes true, we set it back to false
+  // after a little delay.
+  // The reason is that once you've clicked a suggestion, that button
+  // will disappear and if it's not the right-most one in the list
+  // a new one will take its place and the user won't notice.
+  // So by hiding all suggestions briefly after one has been chosen, it
+  // hopefully feels like a new computed set of suggestions appears.
+  useEffect(() => {
+    let mounted = true;
+    if (hideSuggestions) {
+      setTimeout(() => {
+        if (mounted) {
+          setHideSuggestions(false);
+        }
+      }, 300);
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [hideSuggestions]);
 
   return (
     <form
@@ -185,7 +215,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
       </div>
 
       <div class={style.search_suggestions}>
-        {suggestions.length > 0 ? (
+        {suggestions.length > 0 && !hideSuggestions ? (
           <p>
             {suggestions.map((suggestion) => {
               return (
@@ -196,6 +226,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
                   onClick={() => {
                     saveHandler(suggestion);
                     setNewText("");
+                    setHideSuggestions(true);
                   }}
                 >
                   {suggestion}
