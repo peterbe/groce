@@ -49,12 +49,12 @@
     "sortablejs": "1.15.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.29.1",
+    "@playwright/test": "1.29.2",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@types/cheerio": "0.22.31",
     "@types/webpack-env": "^1.18.0",
-    "@typescript-eslint/eslint-plugin": "^5.47.1",
-    "@typescript-eslint/parser": "^5.47.1",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
     "cheerio": "1.0.0-rc.12",
     "css-loader": "^6.7.3",
     "eslint": "^8.31.0",
