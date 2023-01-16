@@ -68,7 +68,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^13.1.0",
     "minimalcss": "0.11.3",
-    "preact-cli": "^3.4.3",
+    "preact-cli": "^3.4.4",
     "prettier": "^2.8.3",
     "serve": "14.1.2",
     "sirv-cli": "^2.0.2",
