@@ -1875,12 +1875,12 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@preact/async-loader@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@preact/async-loader/-/async-loader-3.0.1.tgz#aeca7b029ad1e3e70eda684191a3cf050b9055a4"
-  integrity sha512-BoUN24hxEfAQYnWjliAmkZLuliv+ONQi7AWn+/+VOJHTIHmbFiXrvmSxITf7PDkKiK0a5xy4OErZtVVLlk96Tg==
+"@preact/async-loader@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@preact/async-loader/-/async-loader-3.0.2.tgz#e600d8400cb3154a3a8418068e911ad21cf0ad50"
+  integrity sha512-nYIdlAGbZ0+0/u5VJxQdLDgNFgEJmNLzctuqnCBZxW/EpLPMg8lcsnRsoXVl+O28ZZYhVhos3XiWM3KtuN0C3Q==
   dependencies:
-    kleur "^4.0.2"
+    kleur "^4.1.4"
     loader-utils "^2.0.0"
 
 "@prefresh/babel-plugin@^0.4.1":
@@ -8640,7 +8640,7 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kleur@^4.0.2, kleur@^4.1.4:
+kleur@^4.1.4:
   version "4.1.4"
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-4.1.4.tgz#8c202987d7e577766d039a8cd461934c01cda04d"
   integrity sha512-8QADVssbrFjivHWQU7KkMgptGTl6WAcSdlbBPY4uNF+mWr6DGcKrvY2w4FQJoXch7+fKMjj0dRrL75vk3k23OA==
@@ -11104,10 +11104,10 @@ preact-cli-plugin-env-vars@1.2.1:
     dotenv "^4.0.0"
     resolve-env-vars "^1.0.0"
 
-preact-cli@^3.4.3:
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/preact-cli/-/preact-cli-3.4.3.tgz#7794a398e1a7c3a09eb1ceaf4d1f8abdc4148140"
-  integrity sha512-kHJOoaVy8/g9ijZngUwVCmdolyH2445DVgUylmz9PN3vz/x2WVCtFRK7LvzLk3mF8P9VJmHflw3RNgpR76GU4g==
+preact-cli@^3.4.4:
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/preact-cli/-/preact-cli-3.4.4.tgz#4a9f8676e0dd71a621c563c93ce5d9598c921e51"
+  integrity sha512-qiC/Hg4AEJHPAAG4NB4npTht2cb0puW33CNGmQ0ia+OoxwNCrCzuWkVOlqJ+LtfCTEureNwoQ326CDpwqzqDMg==
   dependencies:
     "@babel/core" "^7.13.16"
     "@babel/plugin-proposal-class-properties" "^7.13.0"
@@ -11118,7 +11118,7 @@ preact-cli@^3.4.3:
     "@babel/plugin-transform-react-jsx" "^7.13.12"
     "@babel/preset-env" "^7.13.15"
     "@babel/preset-typescript" "^7.13.0"
-    "@preact/async-loader" "^3.0.1"
+    "@preact/async-loader" "^3.0.2"
     "@prefresh/babel-plugin" "^0.4.1"
     "@prefresh/webpack" "^3.2.2"
     "@types/webpack" "^4.38.0"
