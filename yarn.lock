@@ -5849,10 +5849,10 @@ eslint-plugin-jest@^25.2.4:
   dependencies:
     "@typescript-eslint/experimental-utils" "^5.0.0"
 
-eslint-plugin-playwright@0.11.2:
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-0.11.2.tgz#876057d4ab19d00b44bf004e27d5ace2c8bffada"
-  integrity sha512-uRLRLk7uTzc8NE6t4wBU8dijQwHvC66R/h7xwdM779jsJjMUtSmeaB8ayRkkpfwi+UU5BEfwvDANwmE+ccMVDw==
+eslint-plugin-playwright@0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-0.12.0.tgz#0c728e07c217b5ea48acef46c52eefba9cf8ebd3"
+  integrity sha512-KXuzQjVzca5irMT/7rvzJKsVDGbQr43oQPc8i+SLEBqmfrTxlwMwRqfv9vtZqh4hpU0jmrnA/EOfwtls+5QC1w==
 
 eslint-plugin-react-hooks@^4.3.0:
   version "4.3.0"
@@ -5941,10 +5941,10 @@ eslint-watch@8.0.0:
     lodash.unionwith "^4.6.0"
     optionator "^0.9.1"
 
-eslint@^8.31.0:
-  version "8.31.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.31.0.tgz#75028e77cbcff102a9feae1d718135931532d524"
-  integrity sha512-0tQQEVdmPZ1UtUKXjX7EMm9BlgJ08G90IhWh0PKDCb3ZLsgAOHI8fYSIzYVZej92zsgq+ft0FGsxhJ3xo2tbuA==
+eslint@^8.32.0:
+  version "8.32.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.32.0.tgz#d9690056bb6f1a302bd991e7090f5b68fbaea861"
+  integrity sha512-nETVXpnthqKPFyuY2FNjz/bEd6nbosRgKbkgS/y1C7LJop96gYHWpiguLecMHQ2XCPxn77DS0P+68WzG6vkZSQ==
   dependencies:
     "@eslint/eslintrc" "^1.4.1"
     "@humanwhocodes/config-array" "^0.11.8"
@@ -11092,10 +11092,10 @@ preact-cli-plugin-env-vars@1.2.1:
     dotenv "^4.0.0"
     resolve-env-vars "^1.0.0"
 
-preact-cli@^3.4.4:
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/preact-cli/-/preact-cli-3.4.4.tgz#4a9f8676e0dd71a621c563c93ce5d9598c921e51"
-  integrity sha512-qiC/Hg4AEJHPAAG4NB4npTht2cb0puW33CNGmQ0ia+OoxwNCrCzuWkVOlqJ+LtfCTEureNwoQ326CDpwqzqDMg==
+preact-cli@^3.4.5:
+  version "3.4.5"
+  resolved "https://registry.yarnpkg.com/preact-cli/-/preact-cli-3.4.5.tgz#501f0ca410a15a7b1dac92083c32df52b6da6cf7"
+  integrity sha512-pLTawiXDy4rEct5ul0mDCP92GB6NK/QFhpoR+iHZJqgkeyE25qEXPf1/tJhAiijphDL5kxGvsT4qA6SrpQ5BsQ==
   dependencies:
     "@babel/core" "^7.13.16"
     "@babel/plugin-proposal-class-properties" "^7.13.0"
