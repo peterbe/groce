@@ -191,7 +191,6 @@ export const NewItemForm: FunctionalComponent<Props> = ({
         saveHandler(newText);
         setNewText("");
       }}
-      role="new-item"
     >
       <div class="input-group">
         <input
