@@ -212,9 +212,9 @@ export function FileUpload({
               uploadingPercentage >= 99 ? "bg-success" : ""
             }`}
             role="progressbar"
-            aria-valuenow={`${uploadingPercentage}`}
-            aria-valuemin="0"
-            aria-valuemax="100"
+            aria-valuenow={uploadingPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
             style={`width: ${uploadingPercentage}%`}
           >
             {/* {uploadingPercentage}% */}

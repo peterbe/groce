@@ -43,7 +43,7 @@ export default function Header({
           data-toggle="collapse"
           data-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent"
-          aria-expanded={JSON.stringify(showNavbar)}
+          aria-expanded={showNavbar}
           aria-label="Toggle navigation"
           onClick={() => {
             setShowNavbar(!showNavbar);

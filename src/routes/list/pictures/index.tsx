@@ -1039,9 +1039,9 @@ function DisplayFakeProgressbar({ time }: { time: number }) {
       <div
         class="progress-bar progress-bar-striped progress-bar-animated"
         role="progressbar"
-        aria-valuenow={`${percent}`}
-        aria-valuemin="0"
-        aria-valuemax="100"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
         style={{ width: `${percent}%` }}
       />
     </div>
@@ -1128,7 +1128,7 @@ function ListWords({
                     }
                   }}
                 >
-                  {(isDone || isDisabled) && <span role="icon">✔️ </span>}
+                  {(isDone || isDisabled) && <span role="img">✔️ </span>}
                   {word}{" "}
                   {isDisabled && (
                     <small>
