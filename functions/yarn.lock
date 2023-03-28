@@ -229,10 +229,10 @@
     teeny-request "^8.0.0"
     uuid "^8.0.0"
 
-"@google-cloud/vision@3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/vision/-/vision-3.1.0.tgz#2c657e95f1c45b58c632376a010d641476deacbb"
-  integrity sha512-4x64JQfC19LTJeTYFv4yLrHb44v4uFwkgbMkvxh1HOKGR5T9zVH9vWkKocodmUosg/q3YILKJ6moZBtITqeUJA==
+"@google-cloud/vision@3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@google-cloud/vision/-/vision-3.1.2.tgz#aa67558fe91cdf9e3a4f30f7f2ce6ed916262d45"
+  integrity sha512-FlORL0Z7G8ekOrgm4gxfRKvppdKSDrW4RFVNylxfsMsD59zS0JPh1FV+snKp7N4E9a78GEY+HKVPcuT35IiLcw==
   dependencies:
     "@google-cloud/promisify" "^3.0.0"
     google-gax "^3.5.2"
