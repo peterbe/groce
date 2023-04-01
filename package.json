@@ -63,7 +63,7 @@
     "eslint-watch": "8.0.0",
     "firebase-tools": "11.25.1",
     "foreman": "3.0.1",
-    "got": "12.5.3",
+    "got": "12.6.0",
     "http-server": "14.1.1",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.0",
