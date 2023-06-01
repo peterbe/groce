@@ -17,7 +17,7 @@
     "@google-cloud/vision": "3.1.2",
     "firebase-admin": "^11.4.0",
     "firebase-functions": "^4.2.1",
-    "postmark": "3.0.15",
+    "postmark": "3.0.18",
     "prettier": "2.8.7",
     "raw-body": "2.5.2",
     "rollbar": "2.26.1",
