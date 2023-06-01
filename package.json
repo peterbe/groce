@@ -41,7 +41,7 @@
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.1.1",
     "preact-render-to-string": "^5.2.6",
-    "preact-router": "^4.1.0",
+    "preact-router": "^4.1.1",
     "rough-viz": "1.0.6",
     "sass": "1.57.1",
     "sass-loader": "10.1.1",
