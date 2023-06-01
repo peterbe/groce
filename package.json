@@ -52,7 +52,7 @@
     "@playwright/test": "1.32.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@types/cheerio": "0.22.31",
-    "@types/webpack-env": "^1.18.0",
+    "@types/webpack-env": "^1.18.1",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
     "cheerio": "1.0.0-rc.12",
