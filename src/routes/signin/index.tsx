@@ -1,4 +1,4 @@
-import { Fragment, h } from "preact";
+import { h } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { route } from "preact-router";
 import style from "./style.css";
@@ -8,7 +8,6 @@ import {
   GoogleAuthProvider,
   signInWithRedirect,
   signInWithPopup,
-  // linkWithPopup,
   linkWithRedirect,
   linkWithPopup,
 } from "firebase/auth";
