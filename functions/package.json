@@ -21,7 +21,7 @@
     "prettier": "3.3.2",
     "raw-body": "2.5.2",
     "rollbar": "2.26.1",
-    "sharp": "0.31.3"
+    "sharp": "0.33.4"
   },
   "devDependencies": {
     "@types/sharp": "0.31.1",
