@@ -5,7 +5,7 @@ export function getFoodWords(
   rawText: string,
   listItems: string[],
   aliases: Map<string, string>,
-  ignoreWords: string[]
+  ignoreWords: string[],
 ): string[] {
   const possibleFoodWords = [...new Set(listItems.map((t) => t.toLowerCase()))];
 

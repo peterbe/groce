@@ -19,7 +19,7 @@ export const onFeedbackAdded = functions.firestore
     wrappedLogError(async (snap, context) => {
       const data = snap.data() as FeedbackSubmission;
       const client = new postmark.Client(
-        functions.config().postmark.server_api_token
+        functions.config().postmark.server_api_token,
       );
 
       const params = {
@@ -43,5 +43,5 @@ Sent: ${new Date().toLocaleString()}`,
         console.log("Emulating sending of email:");
         console.log(params);
       }
-    })
+    }),
   );

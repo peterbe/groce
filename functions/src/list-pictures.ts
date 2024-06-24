@@ -19,7 +19,7 @@ export const onListPictureCreateMakeDataThumbnail = functions.firestore
     const { filePath } = data;
     const imageThumbnailData = await imagePathToBase64Data(filePath);
     functions.logger.info(
-      `From ${filePath} to ${imageThumbnailData.length.toLocaleString()} base64 data string.`
+      `From ${filePath} to ${imageThumbnailData.length.toLocaleString()} base64 data string.`,
     );
 
     await admin

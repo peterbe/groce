@@ -50,7 +50,7 @@ async function run(buildRoot) {
     const buildFile = path.join(
       buildRoot,
       prerenderURL.url.slice(1),
-      "index.html"
+      "index.html",
     );
     const originalContent = fs.readFileSync(buildFile, "utf-8");
     let content = originalContent;
@@ -61,7 +61,7 @@ async function run(buildRoot) {
       const tag = `<meta name="apple-mobile-web-app-title" content="${manifest.short_name}">`;
       $(tag).appendTo($("head"));
       console.log(
-        `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`
+        `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`,
       );
     }
     const metaDescription = $('meta[name="description"]');
@@ -71,7 +71,7 @@ async function run(buildRoot) {
       const tag = `<meta name="description" content="${description}">`;
       $(tag).appendTo($("head"));
       console.log(
-        `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`
+        `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`,
       );
     }
 
@@ -89,7 +89,7 @@ async function run(buildRoot) {
         const tag = `<meta property="og:image" content="${imageURL}">`;
         $(tag).appendTo($("head"));
         console.log(
-          `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`
+          `${chalk.green("Post-process injected:")} ${chalk.grey(tag)}`,
         );
         const [width, height] = largestIcon.sizes
           .split(" ")[0]
@@ -98,12 +98,12 @@ async function run(buildRoot) {
         const tagWidth = `<meta property="og:image:width" content="${width}">`;
         $(tagWidth).appendTo($("head"));
         console.log(
-          `${chalk.green("Post-process injected:")} ${chalk.grey(tagWidth)}`
+          `${chalk.green("Post-process injected:")} ${chalk.grey(tagWidth)}`,
         );
         const tagHeight = `<meta property="og:image:height" content="${height}">`;
         $(tagHeight).appendTo($("head"));
         console.log(
-          `${chalk.green("Post-process injected:")} ${chalk.grey(tagHeight)}`
+          `${chalk.green("Post-process injected:")} ${chalk.grey(tagHeight)}`,
         );
       }
     }
@@ -136,7 +136,7 @@ async function run(buildRoot) {
       await browser.close();
     }
     const stylesheetsFound = Object.keys(result.stylesheetContents).map(
-      (u) => new URL(u).pathname
+      (u) => new URL(u).pathname,
     );
 
     $('link[rel="stylesheet"]').each((_, element) => {
@@ -157,7 +157,7 @@ async function run(buildRoot) {
 
     content = $.html().replace(
       /this.media=&apos;all&apos;/g,
-      "this.media='all'"
+      "this.media='all'",
     );
     if (content !== originalContent) {
       fs.writeFileSync(buildFile, content, "utf-8");

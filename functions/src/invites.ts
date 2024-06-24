@@ -9,22 +9,22 @@ export const onInviteAccept = functions.firestore
     const acceptedBefore = new Set(previousValue.accepted);
     console.log(
       `${context.params.invitationID} acceptedBefore: ${Array.from(
-        acceptedBefore
-      )}`
+        acceptedBefore,
+      )}`,
     );
     const acceptedAfter = new Set(newValue.accepted);
     console.log(
       `${context.params.invitationID} acceptedAfter: ${Array.from(
-        acceptedAfter
-      )}`
+        acceptedAfter,
+      )}`,
     );
     const removedUID = [...acceptedBefore].filter((x) => !acceptedAfter.has(x));
     const addedUID = [...acceptedAfter].filter((x) => !acceptedBefore.has(x));
 
     console.log(
       `addedUID: ${JSON.stringify(addedUID)}  removedUID: ${JSON.stringify(
-        removedUID
-      )}`
+        removedUID,
+      )}`,
     );
     const listID = context.params.listID;
 
@@ -39,7 +39,7 @@ export const onInviteAccept = functions.firestore
             .update({
               owners: admin.firestore.FieldValue.arrayUnion(uid),
             });
-        })
+        }),
       );
     }
 
@@ -55,7 +55,7 @@ export const onInviteAccept = functions.firestore
             .update({
               owners: admin.firestore.FieldValue.arrayRemove(uid),
             });
-        })
+        }),
       );
     }
   });

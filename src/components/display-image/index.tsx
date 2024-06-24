@@ -122,10 +122,10 @@ export function DisplayImageTag({
         loaded
           ? url
           : file
-          ? URL.createObjectURL(file)
-          : placeholderImageData
-          ? placeholderImageData
-          : PLACEHOLDER_IMAGE
+            ? URL.createObjectURL(file)
+            : placeholderImageData
+              ? placeholderImageData
+              : PLACEHOLDER_IMAGE
       }
     />
   );

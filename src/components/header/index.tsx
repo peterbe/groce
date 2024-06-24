@@ -152,7 +152,7 @@ export default function Header({
                     } catch (error) {
                       // Firefox?
                       console.error(
-                        "Unable to use 'document.execCommand(print)'"
+                        "Unable to use 'document.execCommand(print)'",
                       );
                       window.print();
                     }

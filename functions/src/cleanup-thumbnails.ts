@@ -29,7 +29,7 @@ export const scheduledCleanupThumbnails = functions.pubsub
       });
 
       return null;
-    })
+    }),
   );
 
 function zeroPad(num: number, places = 2): string {
@@ -52,7 +52,7 @@ async function deleteByPrefix(prefix: string) {
     const updated = new Date(metadata.updated);
     const created = new Date(metadata.timeCreated);
     logger.info(
-      `File: ${name} Last updated: ${new Date(updated)} Size: ${metadata.size}`
+      `File: ${name} Last updated: ${new Date(updated)} Size: ${metadata.size}`,
     );
     const ageDays =
       (new Date().getTime() - created.getTime()) / 1000 / 60 / 60 / 24;

@@ -46,7 +46,7 @@ test("basics as guest", async ({ page }) => {
 test("submit feedback", async ({ page }) => {
   await page.goto(testURL("/feedback"));
   await expect(
-    page.locator(`text=You have to be signed in to post feedback`).first()
+    page.locator(`text=You have to be signed in to post feedback`).first(),
   ).toBeVisible();
 
   await page.goto(testURL("/"));

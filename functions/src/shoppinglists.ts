@@ -33,7 +33,7 @@ export const onShoppinglistItemWrite = functions.firestore
       const data = doc.data();
       if (!data) {
         functions.logger.warn(
-          `Shopping list ${listID} has no data (deletion?)`
+          `Shopping list ${listID} has no data (deletion?)`,
         );
         return;
       }
@@ -84,7 +84,7 @@ export const onShoppinglistItemWrite = functions.firestore
         JSON.stringify(recentItemsBefore) === JSON.stringify(recentItems)
       ) {
         functions.logger.info(
-          "The recent_items and active_items_count has not changed."
+          "The recent_items and active_items_count has not changed.",
         );
         return;
       }
@@ -98,7 +98,7 @@ export const onShoppinglistItemWrite = functions.firestore
           active_items_count: items.length,
           modified: new Date(),
         });
-    })
+    }),
   );
 
 interface OwnerMetadata {
@@ -115,7 +115,7 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
       // If the change is that the shopping list was deleted, bail.
       if (!change.after.data()) {
         functions.logger.warn(
-          "Shoppinglist deleted. Not going to update owners metadata"
+          "Shoppinglist deleted. Not going to update owners metadata",
         );
         return;
       }
@@ -144,7 +144,7 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
         getters.push(admin.auth().getUser(uid));
       }
       const users = await Promise.all(
-        owners.map((uid) => admin.auth().getUser(uid))
+        owners.map((uid) => admin.auth().getUser(uid)),
       );
       for (const user of users) {
         const owner: OwnerMetadata = {};
@@ -166,7 +166,7 @@ export const onShoppinglistWriteOwnersMetadata = functions.firestore
           ownersMetadata,
         });
       }
-    })
+    }),
   );
 
 export const onShoppinglistDelete = functions.firestore
@@ -185,7 +185,7 @@ export const onShoppinglistDelete = functions.firestore
     const countResults = await Promise.all(
       subCollectionNames.map((name) => {
         return deleteAllByShoppinglistSubcollection(listID, name);
-      })
+      }),
     );
     countResults.forEach((count, i) => {
       counts.set(subCollectionNames[i], count);
@@ -200,14 +200,14 @@ export const onShoppinglistDelete = functions.firestore
       functions.logger.info(msg);
     } else {
       functions.logger.info(
-        `No subcollections to delete when deleting ${listID}`
+        `No subcollections to delete when deleting ${listID}`,
       );
     }
   });
 
 async function deleteAllByShoppinglistSubcollection(
   listID: string,
-  subCollectionName: string
+  subCollectionName: string,
 ): Promise<number> {
   const batch = admin.firestore().batch();
   const itemsSnapshot = await admin
@@ -222,7 +222,7 @@ async function deleteAllByShoppinglistSubcollection(
       admin
         .firestore()
         .collection(`shoppinglists/${listID}/${subCollectionName}`)
-        .doc(itemSnapshot.id)
+        .doc(itemSnapshot.id),
     );
     count++;
   });

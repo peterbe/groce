@@ -65,7 +65,7 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
                     route("/", true);
                   } catch (error) {
                     setSignInError(
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
                     );
                   }
                 } else {
@@ -74,7 +74,7 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
                     route("/", true);
                   } catch (error) {
                     setSignInError(
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
                     );
                   }
                 }
@@ -93,7 +93,7 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
                     route("/", true);
                   } catch (error) {
                     setSignInError(
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
                     );
                   }
                 } else {
@@ -102,7 +102,7 @@ function Signin({ user, auth }: { user: User | false; auth: Auth }) {
                     route("/", true);
                   } catch (error) {
                     setSignInError(
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
                     );
                   }
                 }

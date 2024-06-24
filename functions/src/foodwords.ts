@@ -63,10 +63,10 @@ export const loadSampleFoodWords = functions.https.onRequest(
       res.status(201).json({ totalCounter });
     } else {
       console.log(
-        `There are ${totalWords} foodwords (${FOOD_WORDS.length} samples)`
+        `There are ${totalWords} foodwords (${FOOD_WORDS.length} samples)`,
       );
 
       res.status(200).json({ totalWords, samples: FOOD_WORDS.length });
     }
-  }
+  },
 );

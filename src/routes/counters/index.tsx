@@ -44,7 +44,7 @@ function Counters({ db }: { db: Firestore }) {
       (error) => {
         // XXX deal with this better
         console.error("Error getting itemsDone snapshot", error);
-      }
+      },
     );
     const unsubscribeCreated = onSnapshot(
       doc(db, "counters", "listsCreated"),
@@ -52,14 +52,14 @@ function Counters({ db }: { db: Firestore }) {
         const data = snapshot.data() as Counter;
         const newListsCreated = new Map<string, number>();
         Object.entries(data).forEach(([key, value]) =>
-          newListsCreated.set(key, value)
+          newListsCreated.set(key, value),
         );
 
         setListsCreated(newListsCreated);
       },
       (error) => {
         console.error("Error getting itemsDone snapshot", error);
-      }
+      },
     );
 
     return () => {
@@ -170,8 +170,8 @@ function DayByDayNumberTable({
           diffDates === 0
             ? "today"
             : diffDates === 1
-            ? "yesterday"
-            : today.to(date)
+              ? "yesterday"
+              : today.to(date),
         );
         values.push(value);
         date.setDate(date.getDate() - 1);
@@ -195,7 +195,7 @@ function DayByDayNumberTable({
         roughness: 1,
         width: Math.min(
           1000,
-          document.querySelector("#app.container")?.clientWidth || 1000
+          document.querySelector("#app.container")?.clientWidth || 1000,
         ),
       });
     }

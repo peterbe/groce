@@ -33,7 +33,7 @@ dayjs.extend(relativeTime);
 function sortFoodWords(
   foodWords: FoodWord[],
   sortBy: string,
-  sortReverse: boolean
+  sortReverse: boolean,
 ) {
   return foodWords.sort((a, b) => {
     const reverse = sortReverse ? -1 : 1;
@@ -86,7 +86,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
       (error) => {
         console.error("Error getting snapshot", error);
         setFoodWordsError(error);
-      }
+      },
     );
 
     return () => {
@@ -116,7 +116,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
             });
           });
           newSuggestedFoodwords.sort(
-            (a, b) => b.created.seconds - a.created.seconds
+            (a, b) => b.created.seconds - a.created.seconds,
           );
           setSuggestedFoodwords(newSuggestedFoodwords);
           if (newSuggestedFoodwords.length === 0) {
@@ -126,7 +126,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
         (error) => {
           console.error("Snapshot error:", error);
           setSuggestedFoodWordsError(error);
-        }
+        },
       );
     }
 
@@ -159,7 +159,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
             );
           }
           return true;
-        })
+        }),
       );
     }
   }, [filterWord, foodWords]);
@@ -251,7 +251,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
     text += `export const FOOD_WORDS: FoodWordInfo[] = ${JSON.stringify(
       words,
       null,
-      2
+      2,
     )};\n`;
 
     const a = document.createElement("a");
@@ -384,7 +384,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
                           return;
                         }
                         await deleteDoc(
-                          doc(db, "suggestedfoodwords", suggestedFoodword.id)
+                          doc(db, "suggestedfoodwords", suggestedFoodword.id),
                         );
                       }}
                     >
@@ -402,7 +402,7 @@ function FoodWords({ db, user }: { db: Firestore; user: User | false | null }) {
                         });
 
                         await deleteDoc(
-                          doc(db, "suggestedfoodwords", suggestedFoodword.id)
+                          doc(db, "suggestedfoodwords", suggestedFoodword.id),
                         );
                       }}
                     >
@@ -659,7 +659,7 @@ function MassAdd({
         event.preventDefault();
         const seen = new Set();
         const existingWordsLC = new Set(
-          foodWords.map((foodWord) => foodWord.word.toLowerCase())
+          foodWords.map((foodWord) => foodWord.word.toLowerCase()),
         );
         const newWords: {
           word: string;
@@ -694,7 +694,7 @@ function MassAdd({
                 hitCount: 0,
                 aliasTo,
               });
-            })
+            }),
           );
 
           setSavedNewWords(newWords.length);

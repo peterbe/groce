@@ -26,7 +26,7 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
   async function createNewGroup(
     name: string,
     notes: string,
-    config: ListConfig
+    config: ListConfig,
   ) {
     if (db && user && lists) {
       if (
@@ -119,8 +119,8 @@ const Shopping: FunctionalComponent<Props> = ({ user, db, lists }: Props) => {
             {addNewList
               ? "Close"
               : lists && !lists.length
-              ? "Create list"
-              : "Create new list"}
+                ? "Create list"
+                : "Create new list"}
           </button>
         </div>
       )}

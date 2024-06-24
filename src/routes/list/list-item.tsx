@@ -47,7 +47,7 @@ export function ListItem({
     text: string,
     description: string,
     group: string,
-    quantity: number
+    quantity: number,
   ) => void;
   updateItemImage: (item: Item, spec: StorageSpec) => void;
   modified: null | Date;
@@ -61,7 +61,7 @@ export function ListItem({
   const [description, setDescription] = useState(item.description);
   const [group, setGroup] = useState(item.group.text);
   const [quantity, setQuantity] = useState<string | number>(
-    item.quantity || ""
+    item.quantity || "",
   );
 
   const [editMode, setEditMode] = useState<
@@ -121,14 +121,14 @@ export function ListItem({
     const escaped = group.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const rex = new RegExp(`\\b${escaped}`, "i");
     return groupOptions.filter(
-      (text) => rex.test(text) && text.toLowerCase() !== group.toLowerCase()
+      (text) => rex.test(text) && text.toLowerCase() !== group.toLowerCase(),
     );
   }
 
   const [checked, setChecked] = useState(false);
 
   const [uploadedFiles, setUploadedFiles] = useState<Map<string, File>>(
-    new Map()
+    new Map(),
   );
 
   if (editMode) {
@@ -401,8 +401,8 @@ export function ListItem({
             item.done
               ? style.done_item
               : recentAddition
-              ? style.rainbow_text_animated
-              : undefined
+                ? style.rainbow_text_animated
+                : undefined
           }
         >
           <span

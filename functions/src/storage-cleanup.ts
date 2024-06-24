@@ -24,10 +24,10 @@ export const onListItemImageDelete = functions.firestore
       }
 
       functions.logger.info(
-        `Remove shoppinglist item images: ${removed.join(", ")}`
+        `Remove shoppinglist item images: ${removed.join(", ")}`,
       );
       await Promise.all(removed.map(deleteImageFile));
-    })
+    }),
   );
 
 function listDifference(A: string[], B: string[]) {
@@ -60,8 +60,8 @@ export const onListItemDeleteImages = functions.firestore
         return;
       }
       functions.logger.info(
-        `Remove shoppinglist item images: ${data.images.join(", ")}`
+        `Remove shoppinglist item images: ${data.images.join(", ")}`,
       );
       await Promise.all(data.images.map(deleteImageFile));
-    })
+    }),
   );

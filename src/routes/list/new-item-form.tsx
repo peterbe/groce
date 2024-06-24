@@ -29,13 +29,13 @@ export const NewItemForm: FunctionalComponent<Props> = ({
 
   const mostPopular: ItemSummary[] = useMemo(
     () => (items ? getItemsSummary(items, { sortReverse: true }) : []),
-    [items]
+    [items],
   );
   const mostPopularTexts = mostPopular.map((x) => x.text);
   const mostPopularMap: Map<string, ItemSummary> = new Map(
     mostPopular.map((summary) => {
       return [stripEmojis(summary.text.toLowerCase()), summary];
-    })
+    }),
   );
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
                 text: item.text,
                 popularity: Math.max(
                   mostPopularTexts.findIndex((t) => t === item.text),
-                  1
+                  1,
                 ),
               });
             }
@@ -79,7 +79,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
         premptiveSuggestions.sort((a, b) => b.popularity - a.popularity);
 
         setSuggestions(
-          premptiveSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
+          premptiveSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text),
         );
       } else {
         setSuggestions([]);
@@ -112,7 +112,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
                 // least a popularity of 1 or more.
                 popularity: Math.max(
                   mostPopularTexts.findIndex((t) => t === item.text),
-                  1
+                  1,
                 ),
               });
               newSuggestionsSet.add(normalized);
@@ -131,7 +131,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
             })
             .map((item) => {
               return stripEmojis(item.text.toLowerCase());
-            })
+            }),
         );
 
         // assuming it's English we can suggest some
@@ -158,7 +158,7 @@ export const NewItemForm: FunctionalComponent<Props> = ({
       newSuggestions.sort((a, b) => b.popularity - a.popularity);
 
       setSuggestions(
-        newSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text)
+        newSuggestions.slice(0, MAX_SUGGESTIONS).map((s) => s.text),
       );
     }
   }, [newText, items]);

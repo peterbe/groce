@@ -21,7 +21,7 @@ export const firebaseConfig = fromEntries(
       throw new Error(`Expected ${envKey} to be set to something.\n${hint}`);
     }
     return [key, value];
-  })
+  }),
 );
 
 function fromEntries<T>(iterable: Array<[string, T]>): { [key: string]: T } {

@@ -33,7 +33,7 @@ export function logError(error: unknown, req?: functions.https.Request): void {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function wrappedLogError<T>(
-  fn: (...args: any[]) => Promise<T>
+  fn: (...args: any[]) => Promise<T>,
 ): (...args: any[]) => Promise<T> {
   return async function (...args: any[]) {
     try {

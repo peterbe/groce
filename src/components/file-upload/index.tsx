@@ -59,10 +59,10 @@ export function FileUpload({
 }): h.JSX.Element {
   const [file, setFile] = useState<File | null>(null);
   const [fileValidationError, setFileValidationError] = useState<Error | null>(
-    null
+    null,
   );
   const [uploadingPercentage, setUploadingPercentage] = useState<number | null>(
-    null
+    null,
   );
   const [uploadError, setUploadError] = useState<StorageError | null>(null);
 
@@ -73,8 +73,8 @@ export function FileUpload({
     if (file.size > MAX_FILE_SIZE) {
       throw new Error(
         `Too large (${humanFileSize(file.size)} > ${humanFileSize(
-          MAX_FILE_SIZE
-        )})`
+          MAX_FILE_SIZE,
+        )})`,
       );
     }
   }
@@ -118,7 +118,7 @@ export function FileUpload({
               doc(db, `shoppinglists/${list.id}/items`, item.id),
               {
                 images: arrayUnion(filePath),
-              }
+              },
             );
             // .then(() => {
             //   if (onSaved) {
@@ -141,7 +141,7 @@ export function FileUpload({
                   notes: "",
                   created: Timestamp.fromDate(new Date()),
                   modified: Timestamp.fromDate(new Date()),
-                }
+                },
               );
             } catch (error) {
               console.error("Error trying to save picture", error);
@@ -158,7 +158,7 @@ export function FileUpload({
               onSaved();
             }
           }
-        }
+        },
       );
     }
   }, [prefix, file, list.id, itemID, storage, db]);
@@ -187,7 +187,7 @@ export function FileUpload({
             } catch (error) {
               console.warn("Problem with file validation", error);
               setFileValidationError(
-                error instanceof Error ? error : new Error(String(error))
+                error instanceof Error ? error : new Error(String(error)),
               );
               return;
             }
