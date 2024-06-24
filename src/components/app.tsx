@@ -8,8 +8,6 @@ import {
   getFirestore,
   connectFirestoreEmulator,
   enableIndexedDbPersistence,
-  enableNetwork,
-  disableNetwork,
   Firestore,
   FirestoreError,
   collection,
@@ -275,8 +273,6 @@ const App: FunctionalComponent = () => {
     };
   }, [db, user]);
 
-  // function handleRoute(event: RouterOnChangeArgs) {}
-
   return (
     <div id="app" class="container">
       {snapshotsOffline && <OfflineWarning />}
@@ -391,57 +387,57 @@ function DisplayPersistenceError({ error }: { error: FirestoreError | null }) {
   );
 }
 
-function DebugOffline({ db }: { db: Firestore }) {
-  const [enableOffline, toggleEnableOffline] = useState(false);
-  const [enablingError, setEnablingError] = useState<Error | null>(null);
-  useEffect(() => {
-    if (enableOffline) {
-      disableNetwork(db)
-        .then(() => {
-          setEnablingError(null);
-        })
-        .catch((error) => {
-          console.error("Unable to disable network", error);
-          setEnablingError(error);
-        });
-    } else {
-      enableNetwork(db)
-        .then(() => {
-          setEnablingError(null);
-        })
-        .catch((error) => {
-          console.error("Unable to enable network", error);
-          setEnablingError(error);
-        });
-    }
-  }, [db, enableOffline]);
-  if (process.env.NODE_ENV !== "development") {
-    return null;
-  }
-  return (
-    <div class="hide-in-print">
-      <div class="form-check form-switch" style={{ marginTop: 100 }}>
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="switchOffline"
-          checked={enableOffline}
-          onChange={() => {
-            toggleEnableOffline((before) => !before);
-          }}
-        />
-        <label class="form-check-label" htmlFor="switchOffline">
-          Go offline <small>(useful for development and testing)</small>
-        </label>
-      </div>
-      {enablingError && (
-        <div class="alert alert-danger" role="alert">
-          {enablingError.toString()}
-        </div>
-      )}
-    </div>
-  );
-}
+// function DebugOffline({ db }: { db: Firestore }) {
+//   const [enableOffline, toggleEnableOffline] = useState(false);
+//   const [enablingError, setEnablingError] = useState<Error | null>(null);
+//   useEffect(() => {
+//     if (enableOffline) {
+//       disableNetwork(db)
+//         .then(() => {
+//           setEnablingError(null);
+//         })
+//         .catch((error) => {
+//           console.error("Unable to disable network", error);
+//           setEnablingError(error);
+//         });
+//     } else {
+//       enableNetwork(db)
+//         .then(() => {
+//           setEnablingError(null);
+//         })
+//         .catch((error) => {
+//           console.error("Unable to enable network", error);
+//           setEnablingError(error);
+//         });
+//     }
+//   }, [db, enableOffline]);
+//   if (process.env.NODE_ENV !== "development") {
+//     return null;
+//   }
+//   return (
+//     <div class="hide-in-print">
+//       <div class="form-check form-switch" style={{ marginTop: 100 }}>
+//         <input
+//           class="form-check-input"
+//           type="checkbox"
+//           id="switchOffline"
+//           checked={enableOffline}
+//           onChange={() => {
+//             toggleEnableOffline((before) => !before);
+//           }}
+//         />
+//         <label class="form-check-label" htmlFor="switchOffline">
+//           Go offline <small>(useful for development and testing)</small>
+//         </label>
+//       </div>
+//       {enablingError && (
+//         <div class="alert alert-danger" role="alert">
+//           {enablingError.toString()}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
 
 function Toasts() {
   const { toasts, closeToast } = useToasts();
