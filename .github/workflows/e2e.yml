@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "18"
           cache: "yarn"
 
       - name: Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cached-node_modules
         with:
           path: |
@@ -34,7 +34,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Cache node_modules (functions)
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cached-node_modules-functions
         with:
           path: |

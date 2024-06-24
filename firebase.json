@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "functions": {
-    "runtime": "nodejs14",
+    "runtime": "nodejs18",
     "source": "functions"
   },
   "hosting": {
