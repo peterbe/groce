@@ -57,7 +57,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
       const docRef = doc(
         db,
         `shoppinglists/${listID}/invitations`,
-        invitationID
+        invitationID,
       );
       getDoc(docRef).then(
         (doc) => {
@@ -68,8 +68,8 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
                 {
                   id: doc.id,
                 },
-                data
-              )
+                data,
+              ),
             );
             // Was it your own invitation?
             if (data.inviter_uid === user.uid) {
@@ -80,7 +80,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
                 } catch (error) {
                   console.warn(
                     "Unable to get rid of sessionStorage item",
-                    error
+                    error,
                   );
                 }
               }
@@ -92,7 +92,7 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
         (error) => {
           console.error("Invite doc error:", error);
           setInvitationError(error);
-        }
+        },
       );
     }
   }, [db, listID, invitationID, user, lists]);
@@ -114,9 +114,9 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
             {
               accepted: arrayUnion(user.uid),
               accepted_names: arrayUnion(
-                user.displayName || user.email || user.uid
+                user.displayName || user.email || user.uid,
               ),
-            }
+            },
           );
         } catch (error) {
           console.error("Error adding self to invitation", error);
@@ -138,9 +138,9 @@ const Invited: FunctionalComponent<Props> = (props: Props) => {
             {
               accepted: arrayRemove(user.uid),
               accepted_names: arrayRemove(
-                user.displayName || user.email || user.uid
+                user.displayName || user.email || user.uid,
               ),
-            }
+            },
           );
 
           // XXX update UI with something

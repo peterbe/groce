@@ -33,16 +33,16 @@ export function ListOptions({
   const [name, setName] = useState(list.name);
   const [notes, setNotes] = useState(list.notes);
   const [disableGroups, setDisableGroups] = useState(
-    !!list.config.disableGroups
+    !!list.config.disableGroups,
   );
   const [disableQuantity, setDisableQuantity] = useState(
-    !!list.config.disableQuantity
+    !!list.config.disableQuantity,
   );
   const [disableDefaultSuggestions, setDisableDefaultSuggestions] = useState(
-    !!list.config.disableDefaultSuggestions
+    !!list.config.disableDefaultSuggestions,
   );
   const [disableFireworks, setDisableFireworks] = useState(
-    !!list.config.disableFireworks
+    !!list.config.disableFireworks,
   );
   const [updateError, setUpdateError] = useState<Error | null>(null);
 

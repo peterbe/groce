@@ -62,10 +62,10 @@ async function cleanupShoppinglists() {
 
     console.log(
       `ID:${doc.id} NAME: ${data.name} AGE(days): ${ageDays.toFixed(
-        0
+        0,
       )} #RECENT_ITEMS: ${recentItems} DISPLAY_NAMES: ${
         displayNames.length > 0 ? displayNames.join(", ") : "none!"
-      }`
+      }`,
     );
     if (shouldDelete(ageDays, displayNames, recentItems)) {
       deleteListIDs.push(doc.id);
@@ -89,7 +89,7 @@ async function cleanupShoppinglists() {
 function shouldDelete(
   ageDays: number,
   displayNames: string[],
-  recentItems: number
+  recentItems: number,
 ) {
   // Remember 'ageDays' reflects when it was last modified. Adding an
   // item to a list will increment it's last modified date.

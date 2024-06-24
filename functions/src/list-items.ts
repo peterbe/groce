@@ -22,13 +22,13 @@ export const onListItemWithImageWrite = functions.firestore
     const imagesAfter = (afterData && (afterData.images as Images)) || [];
     if (JSON.stringify(imagesBefore) === JSON.stringify(imagesAfter)) {
       functions.logger.debug(
-        `'images' didn't change in shoppinglists/${listID}/items/${itemID}`
+        `'images' didn't change in shoppinglists/${listID}/items/${itemID}`,
       );
       return;
     }
     if (!afterData) {
       functions.logger.debug(
-        `No "after data" in shoppinglists/${listID}/items/${itemID}`
+        `No "after data" in shoppinglists/${listID}/items/${itemID}`,
       );
       return;
     }
@@ -40,7 +40,7 @@ export const onListItemWithImageWrite = functions.firestore
           return imagesThumbnailData.imagePath;
         }
         return imagePathToBase64Data(imagePath);
-      })
+      }),
     );
     imagesAfter.forEach((imagePath, i) => {
       imagesThumbnailData[imagePath] = imagesThumbnailDataAsArray[i];

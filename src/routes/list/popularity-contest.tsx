@@ -32,7 +32,7 @@ export function getItemsSummary(
     maxAgeSeconds = MAX_AGE_SECONDS,
     sortBy = "frequency",
     sortReverse = false,
-  }: getItemsSummaryOptions
+  }: getItemsSummaryOptions,
 ): ItemSummary[] {
   const todaySeconds = new Date().getTime() / 1000;
   const itemsSummary: ItemSummary[] = [];
@@ -40,7 +40,7 @@ export function getItemsSummary(
     // Exclude those that are too long ago and of the remaining ones,
     // reduce it down to a list of "clusters".
     const added = reduceTooClose(
-      item.added.filter((d) => d.seconds >= todaySeconds - maxAgeSeconds)
+      item.added.filter((d) => d.seconds >= todaySeconds - maxAgeSeconds),
     );
 
     if (added.length < MIN_TIMES_ADDED) {
@@ -76,7 +76,7 @@ export function getItemsSummary(
 
 function reduceTooClose(
   dates: Timestamp[],
-  minDistanceSeconds = 60 * 60
+  minDistanceSeconds = 60 * 60,
 ): Timestamp[] {
   const checked: Timestamp[] = [];
   let previous: null | Timestamp = null;
@@ -294,7 +294,7 @@ function Table({ itemsSummary }: { itemsSummary: ItemSummary[] }) {
                 close={() => {
                   setExpandedItemId("");
                 }}
-              />
+              />,
             );
           }
           return rows;

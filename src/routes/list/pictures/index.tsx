@@ -81,7 +81,7 @@ export function Pictures({
   //   }
   // }, [listPictures]);
   const [listPicturesError, setListPicturesError] = useState<Error | null>(
-    null
+    null,
   );
   const [tab, setTab] = useState<TabState>("uploads");
   useEffect(() => {
@@ -135,7 +135,7 @@ export function Pictures({
       (error) => {
         console.error("Snapshot error:", error);
         setListPicturesError(error);
-      }
+      },
     );
     return () => {
       unsubscribe();
@@ -165,7 +165,7 @@ export function Pictures({
       (error) => {
         console.error("Snapshot error:", error);
         setListPictureTextsError(error);
-      }
+      },
     );
     return () => {
       unsubscribe();
@@ -200,16 +200,16 @@ export function Pictures({
           });
           newSuggestedFoodwords.sort(
             (a, b) =>
-              b.created.toDate().getTime() - a.created.toDate().getTime()
+              b.created.toDate().getTime() - a.created.toDate().getTime(),
           );
           setSuggestedFoodwords(newSuggestedFoodwords);
         },
         (error) => {
           console.error("Snapshot error:", error);
           setSuggestedFoodwordsError(
-            error instanceof Error ? error : new Error(String(error))
+            error instanceof Error ? error : new Error(String(error)),
           );
-        }
+        },
       );
     }
     return () => {
@@ -225,7 +225,7 @@ export function Pictures({
   useEffect(() => {
     const collectionRef = collection(
       db,
-      `shoppinglists/${list.id}/wordoptions`
+      `shoppinglists/${list.id}/wordoptions`,
     );
     const unsubscribe = onSnapshot(
       query(collectionRef),
@@ -257,7 +257,7 @@ export function Pictures({
         console.error("Snapshot error:", error);
         // setListPictureTextsError(error);
         // XXX deal with this better
-      }
+      },
     );
     return () => {
       unsubscribe();
@@ -291,7 +291,7 @@ export function Pictures({
     } catch (error) {
       console.error(`Error trying to update picture notes ${list.id}:`, error);
       setSaveListPictureError(
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -304,7 +304,7 @@ export function Pictures({
     } catch (error) {
       console.error(`Error trying to delete picture ${list.id}:`, error);
       setSaveListPictureError(
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
       return;
     }
@@ -341,7 +341,7 @@ export function Pictures({
   }
 
   const [uploadedFiles, setUploadedFiles] = useState<Map<string, File>>(
-    new Map()
+    new Map(),
   );
 
   return (
@@ -460,7 +460,7 @@ export function Pictures({
             await Promise.all(
               ids.map((id) => {
                 return deleteDoc(doc(db, "suggestedfoodwords", id));
-              })
+              }),
             );
           }}
         />
@@ -513,7 +513,7 @@ function FoodwordOptions({
     try {
       await addDoc(
         collection(db, `shoppinglists/${list.id}/wordoptions`),
-        newWordOption
+        newWordOption,
       );
     } catch (error) {
       setSaveError(error as Error);
@@ -524,7 +524,7 @@ function FoodwordOptions({
     await Promise.all(
       ids.map((id) => {
         return deleteDoc(doc(db, `shoppinglists/${list.id}/wordoptions`, id));
-      })
+      }),
     );
   }
 
@@ -557,7 +557,7 @@ function FoodwordOptions({
                       } else {
                         setCheckedIds((prevState) => {
                           return prevState.filter(
-                            (id) => id !== listWordOption.id
+                            (id) => id !== listWordOption.id,
                           );
                         });
                       }
@@ -837,7 +837,9 @@ function ShowSuggestedFoodwords({
                     onChange={() => {
                       if (checkedIds.includes(suggestedFoodword.id)) {
                         setCheckedIds(
-                          checkedIds.filter((id) => id !== suggestedFoodword.id)
+                          checkedIds.filter(
+                            (id) => id !== suggestedFoodword.id,
+                          ),
                         );
                       } else {
                         setCheckedIds([...checkedIds, suggestedFoodword.id]);
@@ -880,7 +882,7 @@ function ShowSuggestedFoodwords({
             return;
           }
           const existing = new Set(
-            suggestedFoodwords?.map((s) => s.word.toLowerCase())
+            suggestedFoodwords?.map((s) => s.word.toLowerCase()),
           );
           if (existing.has(newText.trim().toLowerCase())) {
             return;
@@ -1115,8 +1117,8 @@ function ListWords({
                     isDone
                       ? "Already on list checked off"
                       : isDisabled
-                      ? "Already on your shopping list"
-                      : undefined
+                        ? "Already on your shopping list"
+                        : undefined
                   }
                   onClick={() => {
                     if (isPicked) {

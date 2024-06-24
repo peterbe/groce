@@ -28,7 +28,7 @@ export function OrganizeGroups({
   async function changeGroupText(
     group: Group,
     newText: string,
-    order: null | number
+    order: null | number,
   ) {
     // const collectionRef = db.collection(`shoppinglists/${list.id}/items`);
     const batch = writeBatch(db);
@@ -106,7 +106,7 @@ export function OrganizeGroups({
         Array.from(children).forEach((item, i) => {
           newOrder.set(
             (item as HTMLElement).dataset.text?.toLowerCase(),
-            i + 1
+            i + 1,
           );
         });
         saveNewOrders(newOrder);
@@ -117,7 +117,7 @@ export function OrganizeGroups({
   const uniqueGroups = new Map(
     items.map((item) => {
       return [item.group.text.trim(), item.group.order];
-    })
+    }),
   );
 
   const groups: Group[] = [];

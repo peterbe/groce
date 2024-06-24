@@ -64,7 +64,7 @@ export function InvitationsForm({
   useEffect(() => {
     const collectionRef = collection(
       db,
-      `shoppinglists/${list.id}/invitations`
+      `shoppinglists/${list.id}/invitations`,
     );
     const unsubscribe = onSnapshot(
       query(collectionRef),
@@ -92,7 +92,7 @@ export function InvitationsForm({
       },
       (error) => {
         console.log("Error getting invitations list", error);
-      }
+      },
     );
 
     return () => {
@@ -105,7 +105,7 @@ export function InvitationsForm({
   async function deleteInvite(invitationID: string) {
     try {
       await deleteDoc(
-        doc(db, `shoppinglists/${list.id}/invitations`, invitationID)
+        doc(db, `shoppinglists/${list.id}/invitations`, invitationID),
       );
     } catch (error) {
       setDeleteError(error instanceof Error ? error : new Error(String(error)));
@@ -118,7 +118,7 @@ export function InvitationsForm({
     future.setDate(now.getDate() + 30);
     const collectionRef = collection(
       db,
-      `shoppinglists/${list.id}/invitations`
+      `shoppinglists/${list.id}/invitations`,
     );
     await addDoc(collectionRef, {
       inviter_uid: user.uid,
@@ -148,7 +148,7 @@ export function InvitationsForm({
       doc(db, `shoppinglists/${list.id}/invitations`, invitation.id),
       {
         email: email.toLowerCase(),
-      }
+      },
     );
 
     // .then(() => {
@@ -238,12 +238,12 @@ export function InvitationsForm({
                           } catch (error) {
                             console.error(
                               "Error trying to navigator.share",
-                              error
+                              error,
                             );
                             setShareError(
                               error instanceof Error
                                 ? error
-                                : new Error(String(error))
+                                : new Error(String(error)),
                             );
                           }
                         }}

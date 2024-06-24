@@ -53,7 +53,7 @@ async function main() {
             return Object.keys(obj);
           })
           .flat(),
-      ])
+      ]),
     );
     await Promise.all(flat.map(async (uri) => await download(`/${uri}`)));
   } catch (err) {

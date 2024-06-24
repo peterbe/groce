@@ -83,7 +83,7 @@ export const downloadAndResizeAndStore = functions
         const file = await bucket.file(destinationPath).download();
         const contents = file[0];
         console.log(
-          `Downloaded ${destinationPath} (${humanFileSize(contents.length)})`
+          `Downloaded ${destinationPath} (${humanFileSize(contents.length)})`,
         );
         res.setHeader("content-type", contentType);
         res.setHeader("cache-control", CACHE_CONTROL);
@@ -152,7 +152,7 @@ export const downloadAndResizeAndStore = functions
     } catch (error) {
       console.error(error);
       console.warn(
-        `Error when trying to upload ${modifiedFile} to ${destinationPath}`
+        `Error when trying to upload ${modifiedFile} to ${destinationPath}`,
       );
       res.setHeader("content-type", "text/plain");
       res.status(500).send(errorToString(error));

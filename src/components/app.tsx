@@ -225,7 +225,7 @@ const App: FunctionalComponent = () => {
                 Timestamp.fromMillis(
                   // Just make it really really old if it doesn't have a
                   // .modified attribute.
-                  new Date().getTime() - 1000 * 60 * 60 * 24 * 90
+                  new Date().getTime() - 1000 * 60 * 60 * 24 * 90,
                 ),
             });
           });
@@ -265,7 +265,7 @@ const App: FunctionalComponent = () => {
           //   trace.stop();
           //   traceOnce = true;
           // }
-        }
+        },
       );
     }
     return () => {

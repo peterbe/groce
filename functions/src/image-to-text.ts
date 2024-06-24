@@ -46,7 +46,7 @@ export const onFileUploadToText = functions
       }
       if (!name.startsWith("list-pictures")) {
         logger.debug(
-          `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`
+          `Name (${name}) doesn't start with 'list-pictures' so no image-to-text`,
         );
         return;
       }
@@ -54,7 +54,7 @@ export const onFileUploadToText = functions
       const listID = fileName.split("-")[0];
       if (!listID) {
         logger.warn(
-          `First part of the name (${name}) doesn't appear to be a list ID`
+          `First part of the name (${name}) doesn't appear to be a list ID`,
         );
         return;
       }
@@ -64,7 +64,7 @@ export const onFileUploadToText = functions
         // thumbnails out of them. Perhaps that's a mistake.
         // https://cloud.google.com/vision/docs/supported-files#file_formats
         logger.warn(
-          `${contentType} content type is not supported for image-to-text`
+          `${contentType} content type is not supported for image-to-text`,
         );
         return;
       }
@@ -144,12 +144,12 @@ export const onFileUploadToText = functions
 
       // This forces the the global cache to always be up-to-date.
       await getAllFoodWords(locale, true);
-    })
+    }),
   );
 
 async function incrementFoodWordHitCounts(
   foodWords: string[],
-  allFoodWords: FoodWordMap
+  allFoodWords: FoodWordMap,
 ): Promise<void> {
   const batch = admin.firestore().batch();
   let countUpdates = 0;
@@ -250,7 +250,7 @@ const globalCacheAllFoodWords: Map<string, FoodWordMap> = new Map();
 
 async function getAllFoodWords(
   locale = "en-US",
-  refreshCache = false
+  refreshCache = false,
 ): Promise<FoodWordMap> {
   // Relying on a global cache in Cloud Functions isn't great, but if it
   // works just a little sometimes, it can be a little help.
@@ -269,7 +269,7 @@ async function getAllFoodWords(
   }
 
   const label = `Time to download ALL food words (refreshCache=${JSON.stringify(
-    refreshCache
+    refreshCache,
   )})`;
   console.time(label);
   const foodWordsSnapshot = await admin

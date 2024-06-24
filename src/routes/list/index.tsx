@@ -160,7 +160,7 @@ function ShoppingList({
         (error) => {
           console.error("Snapshot error:", error);
           setItemsError(error);
-        }
+        },
       );
     }
     return () => {
@@ -249,7 +249,7 @@ function ShoppingList({
     const previousItem = items.find(
       (item) =>
         item.text.toLowerCase() === textLC ||
-        stripEmojis(item.text).toLowerCase() === textLC
+        stripEmojis(item.text).toLowerCase() === textLC,
     );
 
     if (previousItem) {
@@ -275,7 +275,7 @@ function ShoppingList({
       const suggestion = ITEM_SUGGESTIONS.find(
         (itemText) =>
           itemText.toLowerCase() === textLC ||
-          stripEmojis(itemText).toLowerCase() === textLC
+          stripEmojis(itemText).toLowerCase() === textLC,
       );
       if (suggestion) {
         text = suggestion;
@@ -324,7 +324,7 @@ function ShoppingList({
     text: string,
     description: string,
     group: string,
-    quantity: number
+    quantity: number,
   ) {
     if (!db) {
       return;
@@ -340,9 +340,9 @@ function ShoppingList({
           .filter(
             (item) =>
               item.group.text &&
-              normalizeGroupText(item.group.text) === thisGroup
+              normalizeGroupText(item.group.text) === thisGroup,
           )
-          .map((item) => item.group.order)
+          .map((item) => item.group.order),
       );
     }
     const groupText = group.trim();
@@ -513,7 +513,7 @@ function ShoppingList({
   const hasOrganizableGroups = Boolean(
     !(list && list.config.disableGroups) &&
       items &&
-      items.filter((item) => !item.removed && item.group.text).length > 1
+      items.filter((item) => !item.removed && item.group.text).length > 1,
   );
 
   return (

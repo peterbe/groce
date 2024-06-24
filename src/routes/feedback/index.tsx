@@ -316,7 +316,7 @@ function Submissions({ db, user }: { db: Firestore; user: User }) {
         (error) => {
           console.error("Error getting submission snapshot", error);
           setSubmissionsError(error);
-        }
+        },
       );
     }
 

@@ -32,7 +32,7 @@ export const scheduledCleanupPictureUploads = functions.pubsub
         logger.debug(
           `${i++} id=${doc.id} deleted=${
             data.deleted ? data.deleted.toDate() : null
-          } modified=${data.modified.toDate()}`
+          } modified=${data.modified.toDate()}`,
         );
         if (!data.deleted) {
           return;
@@ -83,12 +83,12 @@ export const scheduledCleanupPictureUploads = functions.pubsub
       logger.info(`Found ${i} deleted listpictures to delete`);
 
       return null;
-    })
+    }),
   );
 
 async function deleteListPicture(
   listID: string,
-  pictureID: string
+  pictureID: string,
 ): Promise<void> {
   const collectionRef = admin
     .firestore()

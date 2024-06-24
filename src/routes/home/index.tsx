@@ -57,7 +57,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               } else {
                 console.warn("Invitation, by identifier, does not exist");
               }
-            }
+            },
           );
         }
       } catch (error) {
@@ -82,7 +82,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
       const collectionRef = collectionGroup(db, "invitations");
       const q = query(
         collectionRef,
-        where("email", "==", user.email.toLowerCase())
+        where("email", "==", user.email.toLowerCase()),
       );
       const newInvitations: Invitation[] = [];
       unsubscribe = onSnapshot(
@@ -116,7 +116,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
         },
         (error) => {
           console.error("Error getting invitations snapshot", error);
-        }
+        },
       );
     }
     return () => {
@@ -195,7 +195,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
               } catch (error) {
                 console.error(
                   "Unable to delete invitation ID from session Storage",
-                  error
+                  error,
                 );
               }
             }}
@@ -259,7 +259,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                   } catch (error) {
                     console.error("Error signing in with redirect", error);
                     setSigninError(
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
                     );
                   }
                 }}
@@ -286,7 +286,7 @@ const Home: FunctionalComponent<Props> = (props: Props) => {
                   } catch (error) {
                     console.error("Error signing in anonymously", error);
                     setSigninError(
-                      error instanceof Error ? error : new Error(String(error))
+                      error instanceof Error ? error : new Error(String(error)),
                     );
                   }
                 }}
@@ -392,7 +392,7 @@ function ShowInvitation({ invitation }: { invitation: Invitation }) {
 
 function AboutAbout() {
   const [closed] = useState(
-    Boolean(JSON.parse(sessionStorage.getItem("hide-about-about") || "false"))
+    Boolean(JSON.parse(sessionStorage.getItem("hide-about-about") || "false")),
   );
   if (closed) {
     return null;
