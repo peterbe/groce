@@ -1,6 +1,6 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { Link } from "preact-router";
+import { Link } from "preact-router/match";
 import { Auth, User } from "firebase/auth";
 
 export default function Header({
@@ -63,7 +63,7 @@ export default function Header({
             <li class="nav-item">
               <Link
                 class="nav-link"
-                activeClassName={"active"}
+                activeClassName="active"
                 href="/"
                 aria-current="page"
                 onClick={() => {
