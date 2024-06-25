@@ -5,6 +5,9 @@
 dev:
     yarn emulate
 
+dev-with-prod-data:
+    PREACT_APP_USE_EMULATOR=false yarn dev
+
 lint:
     yarn run lint
     cd functions && yarn run lint
