@@ -33,7 +33,7 @@
     "@types/sortablejs": "1.15.0",
     "bootstrap": "5.2.3",
     "copy-to-clipboard": "3.3.3",
-    "dayjs": "1.11.7",
+    "dayjs": "1.11.11",
     "firebase": "10.12.2",
     "party-js": "2.2.0",
     "preact": "^10.22.0",
