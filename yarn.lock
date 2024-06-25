@@ -11226,10 +11226,10 @@ preact-render-to-string@^6.5.5:
   resolved "https://registry.yarnpkg.com/preact-render-to-string/-/preact-render-to-string-6.5.5.tgz#831dc3b343320d2d38c23d9cea0d7530d262f948"
   integrity sha512-KiMFTKNTmT/ccE79BURR/r6XRc2I2TCTZ0MpeWqHW2XnllbeghXvwGsdAfF/MzMilUcTfODtSmMxgoRFL9TM5g==
 
-preact-router@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/preact-router/-/preact-router-4.1.0.tgz#5fb77f65746ac937c24746afef11f684ed6ed654"
-  integrity sha512-y1w2YvVpKAju9FMV+fAVR1NpH4MW5q07BZrziMZeg6F/rGJ9KvLUZtjOqsy2I8fDYiX36AM1AQTXIIK3jigBhA==
+preact-router@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/preact-router/-/preact-router-4.1.2.tgz#f44b03737b670eeaec958563582eb8c4efaa87a5"
+  integrity sha512-uICUaUFYh+XQ+6vZtQn1q+X6rSqwq+zorWOCLWPF5FAsQh3EJ+RsDQ9Ee+fjk545YWQHfUxhrBAaemfxEnMOUg==
 
 preact@^10.22.0:
   version "10.22.0"
