@@ -51,7 +51,7 @@
   "devDependencies": {
     "@playwright/test": "1.45.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
-    "@types/cheerio": "0.22.31",
+    "@types/cheerio": "0.22.35",
     "@types/webpack-env": "^1.18.5",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.62.0",
