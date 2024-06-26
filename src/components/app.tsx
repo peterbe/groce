@@ -5,9 +5,10 @@ import { useState, useEffect } from "preact/hooks";
 import { initializeApp } from "firebase/app";
 import { Auth, User, getAuth, connectAuthEmulator } from "firebase/auth";
 import {
-  getFirestore,
+  // getFirestore,
+  initializeFirestore,
   connectFirestoreEmulator,
-  enableIndexedDbPersistence,
+  // enableIndexedDbPersistence,
   Firestore,
   FirestoreError,
   collection,
@@ -17,6 +18,8 @@ import {
   query,
   where,
   Timestamp,
+  // CACHE_SIZE_UNLIMITED,
+  persistentLocalCache,
 } from "firebase/firestore";
 import {
   getStorage,
@@ -56,6 +59,13 @@ if ((module as any).hot) {
 import { List, FirestoreList, ListConfig } from "../types";
 import { firebaseConfig } from "../firebaseconfig";
 
+const settings = {
+  localCache: persistentLocalCache({}),
+  // localCache: persistentLocalCache(/*settings*/{tabManager: persistentSingleTabManager()})
+  // cacheSizeBytes: CACHE_SIZE_UNLIMITED, // Set unlimited cache size
+  // ignoreUndefinedProperties: true,      // Ignore undefined properties when saving data
+  // experimentalForceLongPolling: true    // Enable long-polling for better real-time updates in some environments
+};
 const app = initializeApp(firebaseConfig);
 
 const USE_EMULATOR = process.env.PREACT_APP_USE_EMULATOR
@@ -92,7 +102,8 @@ const App: FunctionalComponent = () => {
 
       // import("firebase/firestore")
       //   .then(() => {
-      const db = getFirestore(app);
+      // const db = getFirestore(app);
+      const db = initializeFirestore(app, settings);
 
       // Clear any offline data.
       // firebase.firestore().clearPersistence().catch(error => {
@@ -107,11 +118,11 @@ const App: FunctionalComponent = () => {
       // db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
       //   setPersistenceError(error);
       // });
-      try {
-        await enableIndexedDbPersistence(db);
-      } catch (error) {
-        setPersistenceError(error as FirestoreError);
-      }
+      // try {
+      //   await enableIndexedDbPersistence(db);
+      // } catch (error) {
+      //   setPersistenceError(error as FirestoreError);
+      // }
 
       setDB(db);
       // })
