@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import { route } from "preact-router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import smoothscroll from "smoothscroll-polyfill";
 
 import { User } from "firebase/auth";
 import {
@@ -38,13 +37,8 @@ import {
   openImageModalSignature,
 } from "../../../types";
 import { DisplayImage } from "../../../components/display-image";
-// import { useToasts } from "../../../toasts-context";
 
 dayjs.extend(relativeTime);
-
-if (typeof window !== "undefined") {
-  smoothscroll.polyfill();
-}
 
 type TabState = "uploads" | "options" | "suggested";
 
@@ -67,8 +61,6 @@ export function Pictures({
   saveHandler: (text: string) => Promise<void>;
   openImageModal: openImageModalSignature;
 }): h.JSX.Element {
-  // const { addToast } = useToasts();
-
   const [listPictures, setListPictures] = useState<ListPicture[] | null>(null);
   // useEffect(() => {
   //   if (listPictures === null) {
