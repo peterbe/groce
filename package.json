@@ -42,7 +42,7 @@
     "preact-render-to-string": "^6.5.5",
     "preact-router": "^4.1.2",
     "rough-viz": "1.0.6",
-    "sass": "1.57.1",
+    "sass": "1.77.6",
     "sass-loader": "10.1.1",
     "sortablejs": "1.15.2"
   },
