@@ -63,7 +63,7 @@
     "foreman": "3.0.1",
     "got": "12.5.3",
     "http-server": "14.1.1",
-    "husky": "^9.0.11",
+    "husky": "^9.1.4",
     "lint-staged": "^13.2.0",
     "minimalcss": "0.11.3",
     "preact-cli": "^3.5.1",
