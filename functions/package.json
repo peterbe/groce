@@ -19,7 +19,7 @@
     "firebase-functions": "^4.9.0",
     "postmark": "4.0.4",
     "prettier": "3.3.2",
-    "raw-body": "2.5.2",
+    "raw-body": "3.0.0",
     "rollbar": "2.26.4",
     "sharp": "0.33.4"
   },
