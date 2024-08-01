@@ -33,7 +33,7 @@
     "bootstrap": "5.3.3",
     "copy-to-clipboard": "3.3.3",
     "dayjs": "1.11.11",
-    "firebase": "10.12.2",
+    "firebase": "10.12.4",
     "party-js": "2.2.0",
     "preact": "^10.22.0",
     "preact-cli-plugin-env-vars": "1.2.1",
