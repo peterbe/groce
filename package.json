@@ -35,7 +35,7 @@
     "dayjs": "1.11.11",
     "firebase": "10.12.2",
     "party-js": "2.2.0",
-    "preact": "^10.22.0",
+    "preact": "^10.23.2",
     "preact-cli-plugin-env-vars": "1.2.1",
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.1.1",
@@ -47,7 +47,7 @@
     "sortablejs": "1.15.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.45.0",
+    "@playwright/test": "1.46.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@types/cheerio": "0.22.35",
     "@types/webpack-env": "^1.18.5",
@@ -64,7 +64,7 @@
     "got": "12.5.3",
     "http-server": "14.1.1",
     "husky": "^9.0.11",
-    "lint-staged": "^13.2.0",
+    "lint-staged": "^15.2.9",
     "minimalcss": "0.11.3",
     "preact-cli": "^3.5.1",
     "prettier": "^3.3.2",
