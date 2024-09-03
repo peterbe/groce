@@ -11466,10 +11466,10 @@ preact-render-to-string@^5.0.4:
   dependencies:
     pretty-format "^3.8.0"
 
-preact-render-to-string@^6.5.5:
-  version "6.5.5"
-  resolved "https://registry.yarnpkg.com/preact-render-to-string/-/preact-render-to-string-6.5.5.tgz#831dc3b343320d2d38c23d9cea0d7530d262f948"
-  integrity sha512-KiMFTKNTmT/ccE79BURR/r6XRc2I2TCTZ0MpeWqHW2XnllbeghXvwGsdAfF/MzMilUcTfODtSmMxgoRFL9TM5g==
+preact-render-to-string@^6.5.10:
+  version "6.5.10"
+  resolved "https://registry.yarnpkg.com/preact-render-to-string/-/preact-render-to-string-6.5.10.tgz#ae605bdc172865e7687bf287d2353ceb7accc9d5"
+  integrity sha512-BJdypTQaBA5UbTF9NKZS3zP93Sw33tZOxNXIfuHofqOZFoMdsquNkVebs/HkEw0in/Qbi6Ep/Anngnj+VsHeBQ==
 
 preact-router@^4.1.2:
   version "4.1.2"
