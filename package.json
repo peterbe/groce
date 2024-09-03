@@ -47,7 +47,7 @@
     "sortablejs": "1.15.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.45.0",
+    "@playwright/test": "1.46.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@types/cheerio": "0.22.35",
     "@types/webpack-env": "^1.18.5",
