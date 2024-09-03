@@ -103,7 +103,7 @@ jobs:
       - name: Run end-to-end tests
         run: yarn e2e
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Test Screenshots
